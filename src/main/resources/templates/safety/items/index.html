@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Adempimenti Sicurezza – Veely</title>
+    <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/safety.css}">
+    	<style>
+    	.header-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .header-main {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+       </style>
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+<div class="header-main">
+            <div class="header-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="page-title">Adempimenti Sicurezza</h1>
+                <p class="page-subtitle">Gestisci compliance e certificazioni di sicurezza</p>
+            </div>
+        </div>	
+			
+</th:block>
+
+<body>
+
+    <!-- Filter Section -->
+    <div class="safety-filter-section">
+        <div class="safety-filter-title">
+            <i class="bi bi-funnel"></i>
+            Filtri di ricerca
+        </div>
+        <form class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-medium">Categoria</label>
+                <select name="categoryId" class="form-select safety-form-control">
+                    <option value="" selected>Tutte le categorie</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" 
+                            th:selected="${param.categoryId != null and param.categoryId == c.id.toString()}"></option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-medium">Dipendente</label>
+                <select name="employeeId" class="form-select safety-form-control">
+                    <option value="" selected>Tutti i dipendenti</option>
+                    <option th:each="e : ${employees}" th:value="${e.id}" th:text="${e.firstName + ' ' + e.lastName}" 
+                            th:selected="${param.employeeId != null and param.employeeId == e.id.toString()}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-medium">Stato</label>
+                <select name="status" class="form-select safety-form-control">
+                    <option value="" selected>Qualsiasi stato</option>
+                    <option value="valid" th:selected="${param.status == 'valid'}">Valido</option>
+                    <option value="expired" th:selected="${param.status == 'expired'}">Scaduto</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-medium">Data inizio</label>
+                <input type="date" name="from" class="form-control safety-form-control" th:value="${param.from}" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-medium">Data fine</label>
+                <input type="date" name="to" class="form-control safety-form-control" th:value="${param.to}" />
+            </div>
+            <div class="col-12 d-flex justify-content-end pt-3">
+                <button type="submit" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-search me-2"></i>
+                    Applica Filtri
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Container -->
+    <div class="safety-table-container">
+        <div class="safety-table-header">
+            <h5><i class="bi bi-table"></i>Elenco Adempimenti (<span th:text="${#lists.size(items)}">0</span> elementi)</h5>
+            <a th:href="@{/safety/new}" class="btn btn-light ms-2"><iclass="bi bi-plus-lg me-2"></i>Nuovo Adempimento</a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table safety-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="category">Categoria</th>
+                        <th class="sortable" data-sort="description">Descrizione</th>
+                        <th class="sortable" data-sort="visitDate">Data corso</th>
+                        <th class="sortable" data-sort="periodicity">Periodicità</th>
+                        <th class="sortable" data-sort="employee">Dipendente</th>
+                        <th class="sortable" data-sort="project">Commessa</th>
+                        <th class="sortable" data-sort="dueDate">Scadenza</th>
+                        <th class="sortable" data-sort="status">Stato</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="i : ${items}" 
+                        th:classappend="${i.dueDate != null and i.dueDate.isBefore(T(java.time.LocalDate).now()) ? 'safety-priority-high' : 
+                                       (i.dueDate != null and i.dueDate.isBefore(T(java.time.LocalDate).now().plusDays(30)) ? 'safety-priority-medium' : 'safety-priority-low')}">
+                        <td>
+                            <span class="safety-category-tag" th:text="${i.category != null ? i.category.name : 'N/A'}" 
+                                  th:title="${i.category != null ? i.category.name : 'N/A'}">Categoria</span>
+                        </td>
+                        <td>
+                            <div class="fw-medium safety-text-ellipsis" th:text="${i.description}" 
+                                 th:title="${i.description}">Descrizione</div>
+                            <small class="text-muted">Adempimento sicurezza</small>
+                        </td>
+                        <td th:text="${i.visitDate != null ? #temporals.format(i.visitDate,'dd/MM/yyyy') : '-'}">-</td>
+                        <td>
+                            <span th:if="${i.periodicity != null and i.periodicity != ''}" 
+                                  class="badge bg-info text-white" 
+                                  th:text="${i.periodicity + ' anni'}">-</span>
+                            <span th:unless="${i.periodicity != null and i.periodicity != ''}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <div th:if="${i.employee != null}" class="safety-employee-info">
+                                <div class="safety-employee-avatar" 
+                                     th:text="${T(java.lang.String).valueOf(i.employee.firstName.charAt(0)) + T(java.lang.String).valueOf(i.employee.lastName.charAt(0))}">
+                                </div>
+                                <div class="safety-employee-details">
+                                    <div class="safety-employee-name" th:text="${i.employee.firstName + ' ' + i.employee.lastName}" 
+                                         th:title="${i.employee.firstName + ' ' + i.employee.lastName}">Nome</div>
+                                    <div class="safety-employee-role">Dipendente</div>
+                                </div>
+                            </div>
+                            <span th:unless="${i.employee != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <span th:if="${i.project != null}" class="safety-text-ellipsis" th:text="${i.project.name}" 
+                                  th:title="${i.project.name}">Progetto</span>
+                            <span th:unless="${i.project != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <div th:if="${i.dueDate != null}">
+                                <div class="fw-medium" th:text="${#temporals.format(i.dueDate,'dd/MM/yyyy')}">Data</div>
+                                <small th:if="${i.dueDate.isBefore(T(java.time.LocalDate).now())}" 
+                                       class="text-danger">
+                                    -<span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(i.dueDate, T(java.time.LocalDate).now())}">0</span>gg
+                                </small>
+                                <small th:if="${!i.dueDate.isBefore(T(java.time.LocalDate).now()) and i.dueDate.isBefore(T(java.time.LocalDate).now().plusDays(30))}" 
+                                       class="text-warning">
+                                    <span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), i.dueDate)}">0</span>gg
+                                </small>
+                                <small th:if="${!i.dueDate.isBefore(T(java.time.LocalDate).now().plusDays(30))}" 
+                                       class="text-success">
+                                    +<span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), i.dueDate)}">0</span>gg
+                                </small>
+                            </div>
+                            <span th:unless="${i.dueDate != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <span th:if="${i.dueDate != null}">
+                                <span th:if="${i.dueDate.isBefore(T(java.time.LocalDate).now())}" 
+                                      class="safety-status-badge safety-status-expired">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Scaduto
+                                </span>
+                                <span th:if="${!i.dueDate.isBefore(T(java.time.LocalDate).now()) and i.dueDate.isBefore(T(java.time.LocalDate).now().plusDays(30))}" 
+                                      class="safety-status-badge safety-status-warning">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    Scadenza
+                                </span>
+                                <span th:if="${!i.dueDate.isBefore(T(java.time.LocalDate).now().plusDays(30))}" 
+                                      class="safety-status-badge safety-status-valid">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Valido
+                                </span>
+                            </span>
+                            <span th:unless="${i.dueDate != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <div class="safety-action-buttons">
+                                <a th:href="@{|/safety/${i.id}/edit|}" class="safety-btn-action safety-btn-edit" title="Modifica">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{|/safety/${i.id}/delete|}" method="post" class="d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="safety-btn-action safety-btn-delete" 
+                                            onclick="return confirm('Eliminare questo adempimento?');" title="Elimina">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Empty State -->
+                    <tr th:if="${#lists.isEmpty(items)}">
+                        <td colspan="9" class="text-center py-5">
+                            <div class="safety-empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h5>Nessun adempimento trovato</h5>
+                                <p class="text-muted">Non ci sono adempimenti che corrispondono ai filtri selezionati.</p>
+                                <a th:href="@{/safety/new}" class="btn btn-primary">
+                                    <i class="bi bi-plus-lg me-2"></i>
+                                    Aggiungi il primo adempimento
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ripristino degli effetti hover con ripple sui bottoni
+            const buttons = document.querySelectorAll('.safety-btn-action');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.4);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s ease-out;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Implementazione del sorting delle colonne
+            const table = document.querySelector('.safety-table');
+            const headers = table.querySelectorAll('th.sortable');
+            let currentSort = null;
+            let currentDirection = 'asc';
+
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortBy = this.dataset.sort;
+                    
+                    // Reset degli altri headers
+                    headers.forEach(h => {
+                        h.classList.remove('sort-asc', 'sort-desc');
+                    });
+                    
+                    // Determina la direzione del sort
+                    if (currentSort === sortBy) {
+                        currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentDirection = 'asc';
+                    }
+                    
+                    currentSort = sortBy;
+                    
+                    // Applica la classe CSS per la direzione
+                    this.classList.add(currentDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                    
+                    // Esegui il sorting
+                    sortTable(sortBy, currentDirection);
+                });
+            });
+
+            function sortTable(column, direction) {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => 
+                    !row.querySelector('td[colspan]') // Esclude la riga empty state
+                );
+                
+                rows.sort((a, b) => {
+                    let aVal, bVal;
+                    
+                    switch(column) {
+                        case 'category':
+                            aVal = a.querySelector('.safety-category-tag')?.textContent.trim() || '';
+                            bVal = b.querySelector('.safety-category-tag')?.textContent.trim() || '';
+                            break;
+                        case 'description':
+                            aVal = a.querySelector('td:nth-child(2) .fw-medium')?.textContent.trim() || '';
+                            bVal = b.querySelector('td:nth-child(2) .fw-medium')?.textContent.trim() || '';
+                            break;
+                        case 'visitDate':
+                            aVal = a.querySelector('td:nth-child(3)')?.textContent.trim() || '';
+                            bVal = b.querySelector('td:nth-child(3)')?.textContent.trim() || '';
+                            aVal = parseDate(aVal);
+                            bVal = parseDate(bVal);
+                            break;
+                        case 'periodicity':
+                            aVal = a.querySelector('td:nth-child(4) .badge')?.textContent.trim() || '';
+                            bVal = b.querySelector('td:nth-child(4) .badge')?.textContent.trim() || '';
+                            // Estrai il numero dalla periodicità
+                            aVal = parseInt(aVal.match(/\d+/)?.[0]) || 0;
+                            bVal = parseInt(bVal.match(/\d+/)?.[0]) || 0;
+                            break;
+                        case 'employee':
+                            aVal = a.querySelector('.safety-employee-name')?.textContent.trim() || '';
+                            bVal = b.querySelector('.safety-employee-name')?.textContent.trim() || '';
+                            break;
+                        case 'project':
+                            aVal = a.querySelector('td:nth-child(6)')?.textContent.trim() || '';
+                            bVal = b.querySelector('td:nth-child(6)')?.textContent.trim() || '';
+                            break;
+                        case 'dueDate':
+                            aVal = a.querySelector('td:nth-child(7) .fw-medium')?.textContent.trim() || '';
+                            bVal = b.querySelector('td:nth-child(7) .fw-medium')?.textContent.trim() || '';
+                            aVal = parseDate(aVal);
+                            bVal = parseDate(bVal);
+                            break;
+                        case 'status':
+                            // Ordina per priorità: Scaduto > In Scadenza > Valido
+                            const statusOrder = { 'Scaduto': 3, 'Scadenza': 2, 'Valido': 1 };
+                            aVal = a.querySelector('.safety-status-badge')?.textContent.trim() || '';
+                            bVal = b.querySelector('.safety-status-badge')?.textContent.trim() || '';
+                            aVal = statusOrder[aVal] || 0;
+                            bVal = statusOrder[bVal] || 0;
+                            break;
+                        default:
+                            return 0;
+                    }
+                    
+                    // Gestisce i valori vuoti
+                    if (!aVal && !bVal) return 0;
+                    if (!aVal) return 1;
+                    if (!bVal) return -1;
+                    
+                    // Confronto
+                    let result = 0;
+                    if (typeof aVal === 'string' && typeof bVal === 'string') {
+                        result = aVal.localeCompare(bVal, 'it', { numeric: true });
+                    } else if (aVal instanceof Date && bVal instanceof Date) {
+                        result = aVal.getTime() - bVal.getTime();
+                    } else {
+                        result = aVal - bVal;
+                    }
+                    
+                    return direction === 'desc' ? -result : result;
+                });
+                
+                // Riordina le righe nella tabella
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            function parseDate(dateStr) {
+                if (!dateStr || dateStr === '-') return new Date(0);
+                
+                // Gestisce il formato DD/MM/YYYY
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                }
+                
+                return new Date(dateStr);
+            }
+
+            // Aggiungi CSS per l'animazione ripple
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

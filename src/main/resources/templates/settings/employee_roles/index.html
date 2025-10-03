@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Ruoli Dipendenti – Veely</title>
+    <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/employee-roles.css}">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+</th:block>
+<body>
+<main class="roles-container">
+    <!-- Page Header -->
+    <div class="roles-header">
+        <div class="header-left">
+            <h1 class="page-title">
+                <i class="bi bi-person-badge-fill"></i>
+                Ruoli Dipendenti
+            </h1>
+            <p class="page-description">Gestisci i ruoli e le responsabilità del personale</p>
+        </div>
+        <div class="header-right">
+            <div class="stats-badge">
+                <span class="stats-number" th:text="${#lists.size(roles)}">0</span>
+                <span class="stats-label">Ruoli Totali</span>
+            </div>
+            <a th:href="@{/settings/employee-roles/new}" class="btn-create-role">
+                <span class="btn-icon">
+                    <i class="bi bi-plus-lg"></i>
+                </span>
+                <span class="btn-text">Nuovo Ruolo</span>
+                <span class="btn-glow"></span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="roles-toolbar">
+        <div class="search-box">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Cerca ruolo..."
+                   id="roleSearchInput">
+        </div>
+    </div>
+
+    <!-- Roles Table Card -->
+    <div class="roles-table-card">
+        <div class="table-wrapper">
+            <table class="roles-table">
+                <thead>
+                    <tr>
+                        <th class="th-name">
+                            <span class="th-content">
+                                <i class="bi bi-tag"></i>
+                                Nome Ruolo
+                            </span>
+                        </th>
+                        <th class="th-actions" style="text-align: right; padding-right: 2rem;">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="role-row" th:each="r : ${roles}" 
+                        th:attr="data-role-id=${r.id}">
+                        <td class="td-name">
+                            <div class="role-info">
+                                <div class="role-avatar">
+                                    <i class="bi bi-briefcase-fill"></i>
+                                </div>
+                                <div class="role-details">
+                                    <span class="role-name" th:text="${r.name}">Nome Ruolo</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="td-actions">
+                            <div class="action-buttons">
+                                <a th:href="@{|/settings/employee-roles/${r.id}/edit|}" 
+                                   class="btn-action btn-edit"
+                                   title="Modifica ruolo">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{|/settings/employee-roles/${r.id}/delete|}" 
+                                      method="post" 
+                                      class="delete-form"
+                                      style="display: inline-block;">
+                                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="button" 
+                                            class="btn-action btn-delete"
+                                            onclick="confirmDelete(this)"
+                                            title="Elimina ruolo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Empty State -->
+                    <tr th:if="${#lists.isEmpty(roles)}" class="empty-state-row">
+                        <td colspan="2">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="bi bi-inbox"></i>
+                                </div>
+                                <h3 class="empty-title">Nessun ruolo trovato</h3>
+                                <p class="empty-description">
+                                    Inizia creando il primo ruolo per organizzare il tuo team
+                                </p>
+                                <a th:href="@{/settings/employee-roles/new}" 
+                                   class="btn-empty-action">
+                                    <i class="bi bi-plus-lg"></i>
+                                    Crea il primo ruolo
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-title">Conferma Eliminazione</h3>
+        <p class="modal-description">
+            Sei sicuro di voler eliminare questo ruolo? 
+            Questa azione non può essere annullata.
+        </p>
+        <div class="modal-actions">
+            <button class="btn-modal btn-cancel" onclick="closeDeleteModal()">
+                Annulla
+            </button>
+            <button class="btn-modal btn-confirm" onclick="proceedDelete()">
+                Elimina Ruolo
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deleteForm = null;
+    
+    // Search functionality
+    document.getElementById('roleSearchInput')?.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.role-row');
+        
+        rows.forEach(row => {
+            const roleName = row.querySelector('.role-name')?.textContent.toLowerCase();
+            if (roleName && roleName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Delete confirmation
+    function confirmDelete(button) {
+        deleteForm = button.closest('form');
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+    
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+        deleteForm = null;
+    }
+    
+    function proceedDelete() {
+        if (deleteForm) {
+            deleteForm.submit();
+        }
+        closeDeleteModal();
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('deleteModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>
+</body>
+</html>

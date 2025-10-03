@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/welcome_layout :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title>Gestione Dipendenti – Veely</title>
+    <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/employees-page.css}">
+    </th:block>
+</head>
+  <body>
+
+    <!-- Main content -->
+    <main class="container my-5 flex-fill">
+      <!-- Header + New -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold">Elenco Dipendenti</h2>
+        <a th:href="@{/fleet/employees/new}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i> Nuovo Dipendente
+        </a>
+      </div>
+
+      <!-- Search -->
+      <form class="row g-2 mb-4" method="get" th:action="@{/fleet/employees}">
+        <div class="col-auto">
+          <input type="text"
+                 name="keyword"
+                 th:value="${param.keyword}"
+                 class="form-control"
+                 placeholder="Cerca nome o cognome…">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-secondary">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Table -->
+      <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle sortable">
+          <thead class="table-dark">
+            <tr>
+              <th>Nome</th>
+              <th>Cognome</th>
+              <th>Email</th>
+              <th>Ruolo</th>
+              <th class="text-end">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="emp : ${employees}">
+              <td th:text="${emp.firstName}">Mario</td>
+              <td th:text="${emp.lastName}">Rossi</td>
+              <td th:text="${emp.email}">mario@esempio.com</td>
+              <td>
+                <span class="badge bg-secondary" th:text="${emp.role.displayName}">USER</span>
+              </td>
+              <td class="text-end">
+                <a th:href="@{|/fleet/employees/${emp.id}|}"
+                   class="btn btn-sm btn-info me-1" title="Dettaglio">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a th:href="@{|/fleet/employees/${emp.id}/edit|}"
+                   class="btn btn-sm btn-secondary me-1" title="Modifica">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <form th:action="@{|/fleet/employees/${emp.id}/delete|}"
+                      method="post" class="d-inline">
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit"
+                          class="btn btn-sm btn-danger"
+                          onclick="return confirm('Sei sicuro di eliminare questo dipendente?');"
+                          title="Elimina">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <nav th:if="${employees.totalPages > 1}">
+        <ul class="pagination justify-content-center mt-4">
+          <li class="page-item" th:classappend="${!employees.hasPrevious()}? 'disabled'">
+            <a class="page-link"
+               th:href="@{/fleet/employees(page=${employees.number-1}, keyword=${param.keyword})}">«</a>
+          </li>
+          <li class="page-item"
+              th:each="i : ${#numbers.sequence(0, employees.totalPages-1)}"
+              th:classappend="${i == employees.number}? 'active'">
+            <a class="page-link"
+               th:href="@{/fleet/employees(page=${i}, keyword=${param.keyword})}"
+               th:text="${i+1}">1</a>
+          </li>
+          <li class="page-item" th:classappend="${!employees.hasNext()}? 'disabled'">
+            <a class="page-link"
+               th:href="@{/fleet/employees(page=${employees.number+1}, keyword=${param.keyword})}">»</a>
+          </li>
+        </ul>
+      </nav>
+    </main>
+
+  </body>
+</html>

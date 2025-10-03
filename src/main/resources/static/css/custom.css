@@ -1,0 +1,219 @@
+@charset "UTF-8";
+/* General table improvements */
+.table {
+    --bs-table-color: #333; /* Testo più scuro per migliore leggibilità */
+    --bs-table-bg: #fff; /* Sfondo bianco */
+    --bs-table-border-color: #e0e0e0; /* Colore del bordo più chiaro */
+    --bs-table-accent-bg: rgba(0, 0, 0, 0.03); /* Accento sottile per righe alternate/hover */
+    --bs-table-striped-color: #333;
+    --bs-table-hover-color: #333;
+    --bs-table-hover-bg: #f5f5f5; /* Sfondo hover più chiaro */
+    border-collapse: separate; /* Permette border-radius sulla tabella */
+    border-spacing: 0; /* Rimuove lo spazio predefinito */
+    border-radius: 0.5rem; /* Angoli leggermente arrotondati per l'intera tabella */
+    overflow: hidden; /* Assicura che il contenuto rispetti il border-radius */
+}
+
+/* Stile specifico per l'header della tabella (table-dark) */
+.table thead.table-dark {
+    background-color: #0f2547; /* primary-900 dalla configurazione Tailwind */
+    color: #fff;
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem; /* Più padding per migliore spaziatura */
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-table-border-color);
+}
+
+/* Versione compatta della tabella */
+.table.table-sm th,
+.table.table-sm td {
+    padding: 0.3rem 0.5rem;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none; /* Rimuove il bordo inferiore per l'ultima riga */
+}
+
+/* Assicura che shadow-sm sul div genitore funzioni bene */
+.table-responsive.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; /* Ombra standard shadow-sm */
+    border-radius: 0.5rem; /* Applica border-radius al container */
+    overflow: hidden; /* Ritaglia il contenuto all'interno del container arrotondato */
+}
+
+/* Stili per i badge (es. "Sì", "No" di stato) */
+.badge {
+    padding: 0.5em 0.75em; /* Padding maggiore per i badge */
+    border-radius: 0.375rem; /* Angoli arrotondati */
+    font-weight: 600; /* Font semi-grassetto */
+    font-size: 0.85em; /* Dimensione del font leggermente maggiore */
+}
+
+/* Stili per i pulsanti di azione all'interno delle tabelle */
+.table .btn-sm {
+    padding: 0.375rem 0.75rem; /* Padding leggermente maggiore per i pulsanti sm */
+    font-size: 0.875rem; /* Dimensione del font consistente */
+    border-radius: 0.375rem; /* Corrisponde al raggio di badge/input */
+}
+
+/* Miglioramento dell'aspetto dei campi modulo */
+.form-control, .form-select {
+    border-radius: 0.375rem; /* Border-radius consistente per gli elementi del form */
+    border-color: #ced4da; /* Colore bordo predefinito Bootstrap */
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe; /* Colore focus primario Bootstrap */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Ombra focus Bootstrap */
+}
+
+/* Colori dei pulsanti basati sulla palette */
+.btn-primary {
+    background-color: #3b82f6; /* primary-500 */
+    border-color: #3b82f6;
+}
+.btn-primary:hover {
+    background-color: #2563eb; /* primary-600 */
+    border-color: #2563eb;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #5c636a;
+}
+
+.btn-info {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+.btn-info:hover {
+    background-color: #31d2f2;
+    border-color: #31d2f2;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #bb2d3b;
+}
+
+/* Stili per la paginazione */
+.pagination .page-item .page-link {
+    border-radius: 0.375rem;
+    margin: 0 0.25rem; /* Spazio tra gli elementi di paginazione */
+    border: 1px solid var(--bs-pagination-border-color);
+}
+.pagination .page-item.active .page-link {
+    background-color: #3b82f6; /* primary-500 */
+    border-color: #3b82f6;
+    color: white;
+}
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+/* Ripristina e migliora l'effetto hover per le tabelle */
+.table-hover tbody tr:hover {
+    background-color: #e9ecef; /* Un grigio chiaro per l'effetto hover */
+    color: #212529; /* Assicura che il testo rimanga leggibile sul hover */
+}
+
+/* Se utilizzi anche le tabelle a righe alternate (table-striped), assicuriamoci che l'hover funzioni bene anche lì */
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05); /* Sfondo chiaro per le righe dispari */
+}
+.table-striped > tbody > tr:nth-of-type(odd):hover {
+    background-color: #e0e0e0; /* Hover leggermente più scuro per le righe alternate */
+}
+
+/* === ANIMAZIONE DI ENTRATA sul wrapper === */
+    @keyframes zoomInLoad {
+      0%   { transform: scale(.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* === CARD con effetto lift/colore === */
+    .hover-lift-card {
+      background-color: #fff;
+      color: #fff;
+      transition: transform .3s ease, background-color .3s ease, box-shadow .3s ease;
+    }
+    .hover-lift-card:hover {
+      transform: translateY(-8px);          /* ora funziona! */
+      box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.25);
+    }
+:root{
+    --icon-1:#DC3B3B; --icon-2:#DC7C3B; --icon-3:#DCBC3B;
+    --icon-4:#BCDC3B; --icon-5:#7CDC3B; --icon-6:#3BDC3B;
+    --icon-7:#3BDC7C; --icon-8:#3BDCBC; --icon-9:#3BBCDC;
+    --icon-10:#3B7CDC; --icon-11:#3B3BDC; --icon-12:#7C3BDC;
+    --icon-13:#BC3BDC; --icon-14:#DC3BBC; --icon-15:#DC3B7C;
+    --icon-16: #ffffff;
+  }
+  [class^="text-icon-"]{display:inline-block; color:currentColor;}
+  .text-icon-1{color:var(--icon-1)}
+  .text-icon-2{color:var(--icon-2)}
+	.text-icon-3{color:var(--icon-3)}
+.text-icon-4{color:var(--icon-4)}
+.text-icon-5{color:var(--icon-5)}
+.text-icon-6{color:var(--icon-6)}
+.text-icon-7{color:var(--icon-7)}
+.text-icon-8{color:var(--icon-8)}
+.text-icon-9{color:var(--icon-9)}
+.text-icon-10{color:var(--icon-10)}
+.text-icon-11{color:var(--icon-11)}
+.text-icon-12{color:var(--icon-12)}
+.text-icon-13{color:var(--icon-13)}
+.text-icon-14{color:var(--icon-14)}
+  .text-icon-15{color:var(--icon-15)}
+  .text-icon-16{color:var(--icon-16)}
+  
+/* Stili aggiuntivi per il form Note Spesa */
+
+/* Migliora la leggibilità della tabella delle voci di spesa */
+#itemsTable .form-control, #itemsTable .form-select {
+    font-size: 0.875rem; /* Rimpicciolisce leggermente il testo nei campi */
+    padding: 0.375rem 0.75rem;
+}
+
+#itemsTable td {
+    vertical-align: middle;
+}
+
+/* Stili per i badge di stato */
+.bg-success-soft {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+.text-success {
+    color: #198754 !important;
+}
+
+.bg-secondary-soft {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+.text-secondary {
+    color: #6c757d !important;
+}
+
+/* Stile generico per le card della tabella */
+.table-card {
+    border-radius: 0.75rem;
+}
+/* Stile per le card del form */
+.form-card .card-header {
+    background-color: #f8f9fa; /* Un grigio molto chiaro per gli header */
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}

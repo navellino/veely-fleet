@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title th:text="${card.id == null ? 'Nuova Carta Carburante' : 'Modifica Carta Carburante'}">Carta Carburante</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/fuelcards-form.css}">
+    </th:block>
+</head>
+<body>
+<main class="container my-5 flex-fill">
+    
+    <!-- Enhanced Breadcrumb -->
+    <nav aria-label="breadcrumb" class="fuel-card-breadcrumb fade-in-form">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/}">
+                    <i class="bi bi-house-door me-1"></i>
+                    Home
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/fleet/fuel-cards}">
+                    <i class="bi bi-credit-card-2-front me-1"></i>
+                    Fuel Card
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="bi bi-pencil-square me-1" th:if="${card.id != null}"></i>
+                <i class="bi bi-plus-lg me-1" th:if="${card.id == null}"></i>
+                <span th:text="${card.id == null ? 'Nuova' : 'Modifica'}">Nuova</span>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Enhanced Form Container -->
+    <div class="fuel-card-form-container slide-up">
+        
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span th:text="${card.id == null ? 'Nuova Carta Carburante' : 'Modifica Carta Carburante'}">
+                    Nuova Carta Carburante
+                </span>
+            </h1>
+            <p class="form-subtitle">
+                <span th:if="${card.id == null}">
+                    Compila tutti i campi necessari per aggiungere una nuova carta carburante al sistema
+                </span>
+                <span th:if="${card.id != null}">
+                    Modifica i dettagli della carta carburante selezionata
+                </span>
+            </p>
+        </div>
+
+        <!-- Form -->
+        <form th:object="${card}"
+              th:action="${card.id == null} ? @{/fleet/fuel-cards/new} : @{/fleet/fuel-cards/{id}/edit(id=${card.id})}"
+              method="post" 
+              class="needs-validation" 
+              novalidate>
+            
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- Card Information Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="bi bi-credit-card"></i>
+                    Informazioni Carta
+                </h3>
+                
+                <div class="row g-4">
+                    <!-- Card Number -->
+                    <div class="col-md-6">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced required">
+                                <i class="bi bi-hash"></i>
+                                Numero Carta
+                            </label>
+                            <input class="form-control-enhanced card-number-input" 
+                                   th:field="*{cardNumber}" 
+                                   required 
+                                   placeholder="Es: 7102001822020000012"
+                                   maxlength="50" />
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Inserisci il numero completo della carta carburante
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Expiry Date -->
+                    <div class="col-md-3">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced">
+                                <i class="bi bi-calendar-event"></i>
+                                Data Scadenza
+                            </label>
+                            <input type="date" 
+                                   class="form-control-enhanced" 
+                                   th:field="*{expiryDate}" />
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Data di scadenza della carta
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Plafond -->
+                    <div class="col-md-3">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced">
+                                <i class="bi bi-currency-euro"></i>
+                                Plafond
+                            </label>
+                            <div class="currency-input">
+                                <input type="number" 
+                                       step="0.01" 
+                                       class="form-control-enhanced" 
+                                       th:field="*{plafond}" 
+                                       placeholder="0.00"
+                                       min="0" />
+                            </div>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Limite di spesa mensile/totale
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="row g-4">
+                    <!-- Stato Attivo/Scaduta -->
+                    <div class="col-md-3">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced">
+                                <i class="bi bi-flag"></i>
+                                Stato
+                            </label>
+                            <div>
+                                <span class="badge"
+                                      th:classappend="${card.active} ? ' bg-success' : ' bg-danger'"
+                                      th:text="${card.active} ? 'Attiva' : 'Scaduta'">Attiva</span>
+                            </div>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Stato attuale della carta
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+            </div>
+
+            <!-- Assignment Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="bi bi-people"></i>
+                    Assegnazione
+                </h3>
+                
+                <div class="row g-4">
+                    <!-- Supplier -->
+                    <div class="col-md-4">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced required">
+                                <i class="bi bi-building"></i>
+                                Fornitore
+                            </label>
+                            <select class="form-select-enhanced" th:field="*{supplier.id}" required>
+                                <option value="">-- Seleziona Fornitore --</option>
+                                <option th:each="s : ${suppliers}" 
+                                        th:value="${s.id}" 
+                                        th:text="${s.name}">
+                                    Enilive S.p.A.
+                                </option>
+                            </select>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Compagnia che ha emesso la carta
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Employee -->
+                    <div class="col-md-4">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced">
+                                <i class="bi bi-person"></i>
+                                Dipendente
+                            </label>
+                            <select class="form-select-enhanced" th:field="*{employee.id}">
+                                <option value="">-- Seleziona Dipendente (senza carta) --</option>
+                                <option th:each="e : ${employees}" 
+                                        th:value="${e.id}" 
+                                        th:text="${e.lastName + ' ' + e.firstName}">
+                                    Galati Mucciola Matteo
+                                </option>
+                            </select>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Dipendente responsabile della carta
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle -->
+                    <div class="col-md-4">
+                        <div class="form-group-enhanced">
+                            <label class="form-label-enhanced">
+                                <i class="bi bi-car-front"></i>
+                                Veicolo
+                            </label>
+                            <select class="form-select-enhanced" th:field="*{vehicle.id}">
+                                <option value="">-- Seleziona Veicolo (senza carta) --</option>
+                                <option th:each="v : ${vehicles}" 
+                                        th:value="${v.id}" 
+                                        th:text="${v.plate + (v.brand != null and v.model != null ? ' - ' + v.brand + ' ' + v.model : '')}">
+                                    GM934SV - Fiat Panda
+                                </option>
+                            </select>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle"></i>
+                                Veicolo associato alla carta
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary-enhanced">
+                    <i class="bi bi-check-lg me-1"></i>
+                    <span th:text="${card.id == null ? 'Crea Carta' : 'Aggiorna Carta'}">Crea Carta</span>
+                </button>
+                <a class="btn-secondary-enhanced" th:href="@{/fleet/fuel-cards}">
+                    <i class="bi bi-x-lg me-1"></i>
+                    Annulla
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- JavaScript for Form Enhancement -->
+<script th:inline="javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize form enhancements
+    initializeFormValidation();
+    initializeFormInteractions();
+    initializeSmartSuggestions();
+    
+    // Add AOS animations if available
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 600,
+            easing: 'ease-out',
+            once: true
+        });
+    }
+});
+
+// Form validation
+function initializeFormValidation() {
+    const form = document.querySelector('.needs-validation');
+    if (!form) return;
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+        
+        // Show loading state
+        if (form.checkValidity()) {
+            // Clear draft before showing loading (form is about to submit)
+            forceClearDraft();
+            showFormLoading();
+        }
+    }, false);
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('.form-control-enhanced, .form-select-enhanced');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+}
+
+// Validate individual field
+function validateField(field) {
+    const isValid = field.checkValidity();
+    
+    field.classList.remove('is-valid', 'is-invalid');
+    field.classList.add(isValid ? 'is-valid' : 'is-invalid');
+    
+    // Remove existing feedback
+    const existingFeedback = field.parentNode.querySelector('.invalid-feedback, .valid-feedback');
+    if (existingFeedback) {
+        existingFeedback.remove();
+    }
+    
+    // Add new feedback
+    if (!isValid) {
+        const feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${field.validationMessage}`;
+        field.parentNode.appendChild(feedback);
+    }
+}
+
+// Form interactions
+function initializeFormInteractions() {
+    // Card number formatting
+    const cardNumberInput = document.querySelector('.card-number-input');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            // Remove non-numeric characters except spaces
+            let value = e.target.value.replace(/[^\d\s]/g, '');
+            e.target.value = value;
+        });
+    }
+    
+    // Currency input formatting
+    const currencyInputs = document.querySelectorAll('input[type="number"][step="0.01"]');
+    currencyInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value)) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    });
+    
+    // Smart select enhancements
+    const selects = document.querySelectorAll('.form-select-enhanced');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Add visual feedback for selection
+            this.style.fontWeight = this.value ? '600' : '400';
+        });
+        
+        // Initial state
+        select.style.fontWeight = select.value ? '600' : '400';
+    });
+}
+
+// Show loading state
+function showFormLoading() {
+    const form = document.querySelector('.fuel-card-form-container');
+    const submitBtn = document.querySelector('.btn-primary-enhanced');
+    
+    if (form) {
+        form.classList.add('form-loading');
+    }
+    
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Salvataggio...
+        `;
+    }
+}
+
+// Handle form errors from server
+window.addEventListener('load', function() {
+    // Check for validation errors
+    const errorElements = document.querySelectorAll('.is-invalid');
+    if (errorElements.length > 0) {
+        // Focus first error field
+        errorElements[0].focus();
+        
+        // Show notification
+        showNotification('Controlla i campi evidenziati in rosso', 'error');
+    }
+});
+
+// Show notifications
+function showNotification(message, type = 'info') {
+    // Simple notification system
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#ef4444' : '#10b981'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        font-weight: 500;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const submitBtn = document.querySelector('.btn-primary-enhanced');
+        if (submitBtn && !submitBtn.disabled) {
+            submitBtn.click();
+        }
+    }
+    
+    // Escape to cancel
+    if (e.key === 'Escape') {
+        const cancelBtn = document.querySelector('.btn-secondary-enhanced');
+        if (cancelBtn) {
+            cancelBtn.click();
+        }
+    }
+});
+
+// Smart field suggestions
+function initializeSmartSuggestions() {
+    // Card number pattern detection
+    const cardNumberInput = document.querySelector('.card-number-input');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function() {
+            const value = this.value;
+            
+            // Detect card type based on pattern
+            let cardType = '';
+            if (value.startsWith('710')) {
+                cardType = 'Enilive';
+            } else if (value.startsWith('636')) {
+                cardType = 'Altri fornitori';
+            }
+            
+            // Show suggestion
+            if (cardType) {
+                const suggestion = this.parentNode.querySelector('.card-type-suggestion');
+                if (suggestion) {
+                    suggestion.textContent = `Tipo carta rilevato: ${cardType}`;
+                } else {
+                    const suggestionEl = document.createElement('div');
+                    suggestionEl.className = 'form-help card-type-suggestion';
+                    suggestionEl.innerHTML = `<i class="bi bi-lightbulb"></i> Tipo carta rilevato: ${cardType}`;
+                    this.parentNode.appendChild(suggestionEl);
+                }
+            }
+        });
+    }
+}
+</script>
+
+</body>
+</html>

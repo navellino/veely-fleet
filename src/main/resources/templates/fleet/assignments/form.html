@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title th:text="${assignment.id == null ? 'Nuova Assegnazione – Veely' : 'Modifica Assegnazione – Veely'}">Assegnazione</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/assignement-form.css}">
+    </th:block>
+</head>
+<body>
+<!-- Modern Breadcrumb -->
+<nav class="modern-breadcrumb" aria-label="breadcrumb" style="background: white; border-radius: 0.75rem; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+    <ol class="breadcrumb mb-0" style="margin: 0;">
+        <li class="breadcrumb-item">
+            <a th:href="@{/welcome}" style="color: #667eea; text-decoration: none; font-weight: 500;">
+                <i class="bi bi-house me-1"></i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a th:href="@{/assignmentList}" style="color: #667eea; text-decoration: none; font-weight: 500;">
+                <i class="bi bi-arrow-left-right me-1"></i>
+                Assegnazioni
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" style="color: #1e293b; font-weight: 500;"
+            th:text="${assignment.id == null ? 'Nuova Assegnazione' : 'Modifica Assegnazione'}">Nuova Assegnazione</li>
+    </ol>
+</nav>
+
+<!-- Modern Page Header -->
+<div class="page-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; color: white; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);">
+    <div class="header-main" style="display: flex; align-items: center; gap: 1.5rem;">
+        <div class="header-icon" style="width: 64px; height: 64px; background: rgba(255, 255, 255, 0.2); border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; backdrop-filter: blur(10px);">
+            <i th:class="${assignment.id == null ? 'bi bi-plus-circle' : 'bi bi-pencil-square'}"></i>
+        </div>
+        <div class="header-content" style="flex: 1;">
+            <h1 class="page-title" style="font-size: 1.75rem; font-weight: 600; margin: 0; line-height: 1.2;">
+                <span th:text="${assignment.id == null ? 'Nuova Assegnazione' : 'Modifica Assegnazione'}">Nuova Assegnazione</span>
+            </h1>
+            <p class="page-subtitle" style="opacity: 0.9; margin: 0.5rem 0 0 0; font-size: 0.95rem;">
+                <span th:text="${assignment.id == null ? 'Crea una nuova assegnazione veicolo-dipendente' : 'Modifica i dettagli dell assegnazione'}">
+                    Crea una nuova assegnazione veicolo-dipendente
+                </span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Form Container -->
+<div class="form-container" style="background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb; margin-bottom: 2rem;">
+    <form th:object="${assignment}"
+          th:action="${assignment.id == null} ? @{/fleet/assignments/new} : @{/fleet/assignments/{id}/edit(id=${assignment.id})}"
+          method="post" enctype="multipart/form-data" class="row g-4" id="assignmentForm">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        
+        <!-- Informazioni Base -->
+        <div class="col-12">
+            <h3 class="form-section-title" style="font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
+                <i class="bi bi-info-circle me-2"></i>Informazioni Assegnazione
+            </h3>
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                <i class="bi bi-person me-1"></i>Rapporto di lavoro *
+            </label>
+            <select class="form-select" th:field="*{employment.id}" required 
+                    style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+                <option value="">Seleziona rapporto di lavoro...</option>
+                <option th:each="e : ${employments}" th:value="${e.id}" 
+                        th:text="${e.matricola + ' - ' + e.employee.lastName + ' ' + e.employee.firstName}"></option>
+            </select>
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                <i class="bi bi-car-front me-1"></i>
+                Veicolo *
+            </label>
+            <select class="form-select" th:field="*{vehicle.id}" required
+                    style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+                <option value="">Seleziona veicolo...</option>
+                <option th:each="v : ${vehicles}" th:value="${v.id}" 
+                        th:text="${v.brand + ' ' + v.model + ' - ' + v.plate}"></option>
+            </select>
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                <i class="bi bi-calendar-event me-1"></i>
+                Data inizio *
+            </label>
+            <input type="date" class="form-control" th:field="*{startDate}" required
+                   style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+        </div>
+        
+        <div class="col-md-6">
+            <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                <i class="bi bi-calendar-x me-1"></i>
+                Data fine
+            </label>
+            <input type="date" class="form-control" th:field="*{endDate}"
+                   style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+        </div>
+        
+         <div class="col-md-6">
+            <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                <i class="bi bi-geo-alt me-1"></i>Cantiere di accollo
+            </label>
+             <select class="form-select" th:field="*{accolloProject.id}"
+                    style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+                <option value="">Seleziona commessa...</option>
+                <option th:each="p : ${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+            </select>
+        </div>
+        <th:block th:if="${assignment.id == null}">
+            <!-- Sezione Documenti (solo creazione) -->
+            <div class="col-12" style="margin-top: 2rem;">
+                <h3 class="form-section-title" style="font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
+                    <i class="bi bi-file-earmark-arrow-up me-2"></i>
+                    Documento Allegato (Opzionale)
+                </h3>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                    <i class="bi bi-file-earmark me-1"></i>
+                    Documento
+                </label>
+                <input type="file" name="file" class="form-control"
+                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                       style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                    <i class="bi bi-tag me-1"></i>
+                    Tipo Documento
+                </label>
+                <select name="docType" class="form-select"
+                        style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;">
+                    <option value="">Seleziona tipo...</option>
+                    <option th:each="dt : ${docTypes}" th:value="${dt}" th:text="${dt.displayName}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                    <i class="bi bi-calendar-check me-1"></i>
+                    Data rilascio
+                </label>
+                <input type="date" name="issueDate" class="form-control"
+                       style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                    <i class="bi bi-calendar-x me-1"></i>
+                    Data scadenza
+                </label>
+                <input type="date" name="expiryDate" class="form-control"
+                       style="border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 0.875rem 1rem;" />
+            </div>
+        </th:block>
+        
+    </form>
+</div>
+<!-- Action Buttons -->
+<div class="action-buttons" style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <a class="btn" th:href="@{/assignmentList}"
+           style="padding: 0.75rem 1.5rem; border-radius: 0.625rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+            <i class="bi bi-list-ul"></i>
+            Torna alla Lista
+        </a>
+    </div>
+    
+    <div class="d-flex gap-3">
+        <button type="submit" form="assignmentForm" 
+                style="padding: 0.75rem 1.5rem; border-radius: 0.625rem; font-weight: 600; border: 2px solid transparent; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; cursor: pointer;">
+            <i th:class="${assignment.id == null ? 'bi bi-plus-lg' : 'bi bi-check-lg'}"></i>
+            <span th:text="${assignment.id == null ? 'Crea Assegnazione' : 'Aggiorna Assegnazione'}">Crea Assegnazione</span>
+        </button>
+        
+        <a th:if="${assignment.id != null}" th:href="@{/fleet/assignments/new}"
+           style="padding: 0.75rem 1.5rem; border-radius: 0.625rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+            <i class="bi bi-plus-lg"></i>
+            Nuova
+        </a>
+        
+        <a th:href="@{/assignmentList}"
+           style="padding: 0.75rem 1.5rem; border-radius: 0.625rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: white; color: #64748b; border: 2px solid #e2e8f0;">
+            <i class="bi bi-x-lg"></i>
+            Annulla
+        </a>
+    </div>
+</div>
+
+<!-- Documents Section (only in edit mode) -->
+<div th:if="${assignment.id != null}" class="documents-section"
+     style="background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+    <h3 class="form-section-title" style="font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e2e8f0;">
+        <i class="bi bi-file-earmark-text me-2"></i>
+        Documenti Allegati
+    </h3>
+    
+    <form th:action="@{/fleet/assignments/{id}/docs(id=${assignment.id})}" method="post" enctype="multipart/form-data"
+          class="row g-3 align-items-end mb-4">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="col-md-4">
+            <input type="file" name="file" class="form-control" required />
+        </div>
+        <div class="col-md-3">
+            <select name="type" class="form-select" required>
+                <option value="">Seleziona tipo...</option>
+                <option th:each="dt : ${docTypes}" th:value="${dt}" th:text="${dt.displayName}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="issueDate" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="expiryDate" class="form-control" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-upload"></i>
+            </button>
+        </div>
+    </form>
+        
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead style="background: #f8fafc;">
+                <tr>
+                    <th style="font-weight: 600; color: #374151; padding: 1rem 1.25rem;">Tipo</th>
+                    <th style="font-weight: 600; color: #374151; padding: 1rem 1.25rem;">File</th>
+                    <th style="font-weight: 600; color: #374151; padding: 1rem 1.25rem;">Data Emissione</th>
+                    <th style="font-weight: 600; color: #374151; padding: 1rem 1.25rem;">Data Scadenza</th>
+                    <th style="font-weight: 600; color: #374151; padding: 1rem 1.25rem; text-align: center;">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="doc : ${documents}" style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 1rem 1.25rem; vertical-align: middle;">
+                        <span style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500;"
+                              th:text="${doc.type.displayName}">Tipo</span>
+                    </td>
+                    <td style="padding: 1rem 1.25rem; vertical-align: middle;">
+                        <div style="font-weight: 500; color: #111827;"
+                             th:text="${doc.path.substring(doc.path.lastIndexOf('/')+1)}">File</div>
+                        <small style="color: #6b7280;">Documento allegato</small>
+                    </td>
+                    <td style="padding: 1rem 1.25rem; vertical-align: middle;"
+                        th:text="${doc.issueDate != null ? #temporals.format(doc.issueDate,'dd/MM/yyyy') : '-'}">-</td>
+                    <td style="padding: 1rem 1.25rem; vertical-align: middle;"
+                        th:text="${doc.expiryDate != null ? #temporals.format(doc.expiryDate,'dd/MM/yyyy') : '-'}">-</td>
+                    <td style="padding: 1rem 1.25rem; vertical-align: middle; text-align: center;">
+                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <a th:href="@{/fleet/assignments/{asgId}/docs/{fn}(asgId=${assignment.id},fn=${doc.path.substring(doc.path.lastIndexOf('/')+1)})}" 
+                               style="width: 32px; height: 32px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;"
+                               title="Download">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            <a th:href="@{/fleet/assignments/{asgId}/docs/{docId}/delete(asgId=${assignment.id},docId=${doc.id})}" 
+                               style="width: 32px; height: 32px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; text-decoration: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;"
+                               onclick="return confirm('Eliminare il documento?');"
+                               title="Elimina">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(documents)}">
+                    <td colspan="5" style="text-align: center; padding: 3rem 2rem; color: #64748b;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+                            <h5>Nessun documento caricato</h5>
+                            <p>Non sono ancora stati caricati documenti per questa assegnazione.</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Imposta l'ID del form per i pulsanti esterni
+        const submitBtn = document.querySelector('button[type="submit"][form="assignmentForm"]');
+        if (submitBtn && form) {
+        	form.addEventListener('submit', function() {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Salvando...';
+                submitBtn.disabled = true;
+                // Reset dopo 3 secondi se il form non si invia
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            });
+        } 
+        console.log('✅ Form assegnazioni inizializzato');
+    });
+</script>
+</body>
+</html>

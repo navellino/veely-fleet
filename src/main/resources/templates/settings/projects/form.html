@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title th:text="${project.id == null ? 'Nuova Commessa' : 'Modifica Commessa'} + ' — Veely'">Commessa — Veely</title>
+    
+    <!-- CSS Block - Simplified external stylesheets -->
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/project-form.css}">
+    </th:block>
+</head>
+
+<!-- Navigation Bar Fragment - Clean and accessible -->
+<th:block th:fragment="navbar">
+    <!-- Page header with breadcrumbs and actions -->
+    <div class="d-flex align-items-center">
+       <h3> <i class="bi bi-file-earmark-text text-primary me-2"></i></h3>
+        <div class="flex-grow-1">
+            <h3 class="mb-1" th:text="${project.id == null ? 'Nuova Commessa' : 'Modifica Commessa '+ project.name}">Commessa</h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/settings/projects}" class="text-decoration-none">Commesse</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page" 
+                        th:text="${project.id == null ? 'Nuova' : 'Modifica'}">Nuova</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Action buttons - Improved accessibility -->
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" th:href="@{/settings/projects}" role="button">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+            <span>Torna alla Lista</span>
+        </a>
+        <button type="submit" form="projectForm" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+            <span th:text="${project.id == null ? 'Crea Commessa' : 'Salva Modifiche'}">Salva</span>
+        </button>
+        <a class="btn btn-secondary" th:href="@{/settings/projects}" role="button">
+            <i class="bi bi-x-lg me-1" aria-hidden="true"></i>
+            <span>Annulla</span>
+        </a>
+    </div>
+</th:block>
+
+<body>
+<main class="container-fluid project-form-container py-4">
+    
+    <!-- Alert Messages Section - Improved accessibility -->
+    <div id="alertsContainer" role="alert" aria-live="polite">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>
+            <span th:text="${successMessage}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+            <span th:text="${errorMessage}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio"></button>
+        </div>
+    </div>
+    
+    <!-- Tab Navigation - Enhanced with Bootstrap classes -->
+    <ul class="nav nav-tabs nav-fill mb-4" id="projectTabs" role="tablist" aria-label="Sezioni commessa">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="general-tab" 
+                    data-bs-toggle="tab" data-bs-target="#generalTab" 
+                    type="button" role="tab" aria-controls="generalTab" aria-selected="true">
+                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                Informazioni Generali
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="status-tab" 
+                    data-bs-toggle="tab" data-bs-target="#statusTab" 
+                    type="button" role="tab" aria-controls="statusTab" aria-selected="false">
+                <i class="bi bi-bar-chart me-1" aria-hidden="true"></i>
+                Stato Commessa
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+           <button class="nav-link fw-semibold" id="documents-tab"
+                    data-bs-toggle="tab" data-bs-target="#documentsTab"
+                    type="button" role="tab" aria-controls="documentsTab" aria-selected="false">
+                <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>
+                Documenti
+            </button>
+        </li>
+         <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="insurances-tab"
+                    data-bs-toggle="tab" data-bs-target="#insurancesTab"
+                    type="button" role="tab" aria-controls="insurancesTab" aria-selected="false">
+                <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+                Polizze
+            </button>
+        </li>
+    </ul>
+   
+    <!-- Main Form - Simplified structure -->
+    <form id="projectForm" th:object="${project}" method="post" novalidate
+          th:action="${project.id == null} ? @{/settings/projects/new} : @{/settings/projects/{id}/edit(id=${project.id})}">
+        
+        <!-- CSRF Token -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        
+        <!-- Tab Content Container -->
+        <div class="tab-content" id="projectTabsContent">
+        
+            <!-- TAB 1: GENERAL INFORMATION -->
+            <div id="generalTab" class="tab-pane fade show active" role="tabpanel" 
+                 aria-labelledby="general-tab" tabindex="0">
+                
+                <!-- Basic Information Card -->
+                <div class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2 text-primary" aria-hidden="true"></i>
+                            Informazioni Generali
+                        </h5>
+                        <p class="text-muted mb-0 small">Dati identificativi della commessa</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="projectCode" class="form-label required">Codice Commessa</label>
+                                <input type="text" class="form-control" id="projectCode" th:field="*{code}" 
+                                       required aria-describedby="codeHelp" placeholder="es. PRJ-2024-001" />
+                                <div id="codeHelp" class="form-text">Codice univoco identificativo della commessa</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="projectName" class="form-label required">Nome Commessa</label>
+                                <input type="text" class="form-control" id="projectName" th:field="*{name}" 
+                                       required aria-describedby="nameHelp" placeholder="es. Realizzazione nuovo sistema..." />
+                                <div id="nameHelp" class="form-text">Denominazione completa del progetto</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="projectCig" class="form-label">CIG</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-tag" aria-hidden="true"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="projectCig" th:field="*{cig}" 
+                                           aria-describedby="cigHelp" placeholder="Codice Identificativo Gara" />
+                                </div>
+                                <div id="cigHelp" class="form-text">Codice Identificativo Gara (opzionale)</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="projectCup" class="form-label">CUP</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-tag" aria-hidden="true"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="projectCup" th:field="*{cup}" 
+                                           aria-describedby="cupHelp" placeholder="Codice Unico Progetto" />
+                                </div>
+                                <div id="cupHelp" class="form-text">Codice Unico di Progetto (opzionale)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Details Card -->
+                <div class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-check me-2 text-primary" aria-hidden="true"></i>
+                            Dettagli Progetto
+                        </h5>
+                        <p class="text-muted mb-0 small">Responsabile, tempistiche e stato del progetto</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="projectManager" class="form-label">Responsabile Progetto</label>
+                            <select class="form-select" id="projectManager" th:field="*{manager.id}" 
+                                    aria-describedby="managerHelp">
+                                <option value="">Seleziona un responsabile...</option>
+                                <option th:each="employee : ${employees}" 
+                                        th:value="${employee.id}" 
+                                        th:text="${employee.fullName}">Nome Cognome</option>
+                            </select>
+                            <div id="managerHelp" class="form-text">Responsabile principale del progetto</div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="startDate" class="form-label required">Data Inizio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-calendar-plus" aria-hidden="true"></i>
+                                    </span>
+                                    <input type="date" class="form-control" id="startDate" th:field="*{startDate}" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="endDate" class="form-label required">Data Fine</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-calendar-minus" aria-hidden="true"></i>
+                                    </span>
+                                    <input type="date" class="form-control" id="endDate" th:field="*{endDate}" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="projectStatus" class="form-label">Stato Progetto</label>
+                                <select class="form-select" id="projectStatus" th:field="*{status}">
+                                    <option th:each="status : ${statuses}" 
+                                            th:value="${status}" 
+                                            th:text="${status}">Stato</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Section Card -->
+                <div class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-geo-alt me-2 text-primary" aria-hidden="true"></i>
+                            Localizzazione Progetto
+                        </h5>
+                        <p class="text-muted mb-0 small">Indirizzo e ubicazione della commessa</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Location Selector Component -->
+                        <location-selector
+                                country-binding="address.countryCode"
+                                name-region="address.regionCode"
+                                name-province="address.provinceCode"
+                                name-city="address.cityCode"
+                                name-postal="address.postalCode"
+                                name-street="address.street"
+                                th:data-selected-country="${project.address != null ? project.address.countryCode : null}"
+                                th:data-selected-region="${project.address != null ? project.address.regionCode : null}"
+                                th:data-selected-province="${project.address != null ? project.address.provinceCode : null}"
+                                th:data-selected-city="${project.address != null ? project.address.cityCode : null}"
+                                th:data-selected-postal="${project.address != null ? project.address.postalCode : null}"
+                                th:data-selected-street="${project.address != null ? project.address.street : null}">
+                        </location-selector>
+                    </div>
+                </div>
+
+                <!-- Contacts Management Card -->
+                <div class="form-section card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="bi bi-people me-2 text-primary" aria-hidden="true"></i>
+                                Contatti Utili
+                            </h5>
+                            <p class="text-muted mb-0 small">Persone di riferimento per il progetto</p>
+                        </div>
+                        <button type="button" class="btn btn-success btn-add-item" id="addContactBtn" 
+                                aria-label="Aggiungi nuovo contatto">
+                            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+                            Aggiungi Contatto
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Contacts Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="contactsTable" 
+                                   aria-label="Tabella contatti progetto">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Nome</th>
+                                        <th scope="col">Cognome</th>
+                                        <th scope="col">Ruolo</th>
+                                        <th scope="col">Telefono</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">PEC</th>
+                                        <th scope="col" class="text-center" style="width: 80px;">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Existing Contacts -->
+                                    <tr th:each="contact, stat : *{contacts}" class="fade-in-up">
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].firstName}" 
+                                                   placeholder="Nome" aria-label="Nome contatto" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].lastName}" 
+                                                   placeholder="Cognome" aria-label="Cognome contatto" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].role}" 
+                                                   placeholder="Ruolo" aria-label="Ruolo contatto" />
+                                        </td>
+                                        <td>
+                                            <input type="tel" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].phone}" 
+                                                   placeholder="+39 xxx xxx xxxx" aria-label="Telefono contatto" />
+                                        </td>
+                                        <td>
+                                            <input type="email" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].email}" 
+                                                   placeholder="email@esempio.com" aria-label="Email contatto" />
+                                        </td>
+                                        <td>
+                                            <input type="email" class="form-control form-control-sm" 
+                                                   th:field="*{contacts[__${stat.index}__].pec}" 
+                                                   placeholder="pec@esempio.com" aria-label="PEC contatto" />
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-item btn-remove-contact" 
+                                                    title="Rimuovi contatto" aria-label="Rimuovi questo contatto">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Empty State Row -->
+                                    <tr th:if="${#lists.isEmpty(contacts)}" class="empty-state-row">
+                                        <td colspan="7" class="text-center py-4 text-muted">
+                                            <i class="bi bi-person-plus-fill me-2" aria-hidden="true"></i>
+                                            Nessun contatto presente. Clicca "Aggiungi Contatto" per iniziare.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <!-- End General Tab -->
+
+            <!-- TAB 2: PROJECT STATUS -->
+            <div id="statusTab" class="tab-pane fade" role="tabpanel" 
+                 aria-labelledby="status-tab" tabindex="0">
+                
+                <!-- Work Description Card -->
+                <div class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clipboard-data me-2 text-primary" aria-hidden="true"></i>
+                            Dettagli Commessa
+                        </h5>
+                        <p class="text-muted mb-0 small">Descrizione e valore economico del progetto</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="workDescription" class="form-label">Oggetto dei Lavori</label>
+                            <textarea class="form-control" id="workDescription" th:field="*{workDescription}" 
+                                      rows="4" maxlength="2000" aria-describedby="workDescHelp"
+                                      placeholder="Descrizione dettagliata dei lavori da eseguire..."></textarea>
+                            <div id="workDescHelp" class="form-text">Descrizione completa dell'oggetto della commessa</div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="projectValue" class="form-label">Valore Commessa (€)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" class="form-control" id="projectValue" th:field="*{value}" 
+                                           step="0.01" min="0" placeholder="0,00" aria-describedby="valueHelp" />
+                                </div>
+                                <div id="valueHelp" class="form-text">Valore totale della commessa</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="advanceAmount" class="form-label">Anticipazione Ricevuta (€)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" class="form-control" id="advanceAmount" th:field="*{advanceAmount}" 
+                                           step="0.01" min="0" placeholder="0,00" aria-describedby="advanceHelp" />
+                                </div>
+                                <div id="advanceHelp" class="form-text">Importo di anticipazione ricevuto</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoicing Management Card -->
+                <div class="form-section card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="bi bi-receipt me-2 text-primary" aria-hidden="true"></i>
+                                Fatturazione
+                            </h5>
+                            <p class="text-muted mb-0 small">Gestione fatture emesse per il progetto</p>
+                        </div>
+                        <button type="button" class="btn btn-success btn-add-item" id="addInvoiceBtn" 
+                                aria-label="Aggiungi nuova fattura">
+                            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+                            Aggiungi Fattura
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Invoices Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="invoicesTable" 
+                                   aria-label="Tabella fatture progetto">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Numero</th>
+                                        <th scope="col">Data Emissione</th>
+                                        <th scope="col">Descrizione</th>
+                                        <th scope="col">Importo (€)</th>
+                                        <th scope="col" class="text-center" style="width: 80px;">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Existing Invoices -->
+                                    <tr th:each="invoice, stat : *{invoices}" class="fade-in-up">
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:field="*{invoices[__${stat.index}__].number}" 
+                                                   placeholder="Numero fattura" aria-label="Numero fattura" />
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control form-control-sm" 
+                                                   th:field="*{invoices[__${stat.index}__].date}" 
+                                                   aria-label="Data emissione fattura" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   th:field="*{invoices[__${stat.index}__].description}" 
+                                                   placeholder="Descrizione" aria-label="Descrizione fattura" />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm invoice-amount" 
+                                                   th:field="*{invoices[__${stat.index}__].amount}" 
+                                                   step="0.01" min="0" placeholder="0,00" 
+                                                   aria-label="Importo fattura" />
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-item btn-remove-invoice" 
+                                                    title="Rimuovi fattura" aria-label="Rimuovi questa fattura">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Empty State Row -->
+                                    <tr th:if="${#lists.isEmpty(invoices)}" class="empty-state-row">
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <i class="bi bi-receipt me-2" aria-hidden="true"></i>
+                                            Nessuna fattura presente. Clicca "Aggiungi Fattura" per iniziare.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar Section -->
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold text-muted">Avanzamento Fatturazione</span>
+                            <span id="progressPercent" class="badge bg-primary fs-6">0%</span>
+                        </div>
+                        <div class="progress progress-enhanced" role="progressbar" 
+                             aria-label="Progresso fatturazione" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="form-text mt-1">
+                            Percentuale calcolata su: fatture emesse / valore commessa
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <!-- End Status Tab -->
+
+            <!-- TAB 3: DOCUMENTS -->
+            <div id="documentsTab" class="tab-pane fade" role="tabpanel" 
+                 aria-labelledby="documents-tab" tabindex="0">
+                
+                <!-- Document Upload Section (for existing projects) -->
+                <div th:if="${project.id != null}" class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-cloud-upload me-2 text-primary" aria-hidden="true"></i>
+                            Carica Documento
+                        </h5>
+                        <p class="text-muted mb-0 small">Aggiungi nuovi documenti al progetto</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upload Form -->
+                        <form class="upload-zone border rounded p-4 bg-light" 
+                              th:action="@{/settings/projects/{id}/docs(id=${project.id})}" 
+                              method="post" enctype="multipart/form-data">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                    <label for="documentFile" class="form-label fw-semibold">File</label>
+                                    <input type="file" class="form-control" id="documentFile" name="file" 
+                                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" 
+                                           aria-describedby="fileHelp" />
+                                    <div id="fileHelp" class="form-text">PDF, DOC, XLS, IMG supportati (max 10MB)</div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="documentType" class="form-label fw-semibold">Tipo Documento</label>
+                                    <select class="form-select" id="documentType" name="type">
+                                        <option value="">Seleziona tipo...</option>
+                                        <option th:each="docType : ${docTypes}" 
+                                                th:value="${docType}" 
+                                                th:text="${docType.displayName}">Tipo</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <label for="issueDate" class="form-label fw-semibold">Data Emissione</label>
+                                    <input type="date" class="form-control" id="issueDate" name="issueDate" />
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <label for="expiryDate" class="form-label fw-semibold">Data Scadenza</label>
+                                    <input type="date" class="form-control" id="expiryDate" name="expiryDate" />
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-cloud-upload me-1" aria-hidden="true"></i>
+                                        Carica
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Documents List Card -->
+                <div class="form-section card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-files me-2 text-primary" aria-hidden="true"></i>
+                            Documenti Allegati
+                        </h5>
+                        <p class="text-muted mb-0 small">
+                            <span th:if="${project.id != null}">Documenti associati alla commessa</span>
+                            <span th:if="${project.id == null}">Disponibile dopo il salvataggio della commessa</span>
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Documents Table (for existing projects with documents) -->
+                        <div th:if="${project.id != null and not #lists.isEmpty(documents)}" class="table-responsive">
+                            <table class="table table-hover mb-0" aria-label="Tabella documenti progetto">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Tipo</th>
+                                        <th scope="col">Nome File</th>
+                                        <th scope="col">Data Emissione</th>
+                                        <th scope="col">Data Scadenza</th>
+                                        <th scope="col" class="text-center" style="width: 120px;">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="document : ${documents}" class="fade-in-up">
+                                        <td>
+                                            <span class="badge document-type-badge" 
+                                                  th:text="${document.type.displayName}">Tipo</span>
+                                        </td>
+                                        <td>
+                                            <span class="document-filename" 
+                                                  th:text="${document.path.substring(document.path.lastIndexOf('/')+1)}">filename.pdf</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted" 
+                                                  th:text="${document.issueDate} ? ${#temporals.format(document.issueDate, 'dd/MM/yyyy')} : '-'">01/01/2024</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted" 
+                                                  th:text="${document.expiryDate} ? ${#temporals.format(document.expiryDate, 'dd/MM/yyyy')} : '-'">31/12/2024</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm" role="group" aria-label="Azioni documento">
+                                                <a th:href="@{/settings/projects/{id}/docs/{fn}(id=${project.id},fn=${document.path.substring(document.path.lastIndexOf('/')+1)})}" 
+                                                   class="btn btn-outline-primary btn-sm" 
+                                                   title="Scarica documento" aria-label="Scarica documento">
+                                                    <i class="bi bi-download" aria-hidden="true"></i>
+                                                </a>
+                                                <a th:href="@{/settings/projects/{id}/docs/{docId}/delete(id=${project.id},docId=${document.id})}" 
+                                                   class="btn btn-outline-danger btn-sm" 
+                                                   title="Elimina documento" aria-label="Elimina documento"
+                                                   onclick="return confirm('Sei sicuro di voler eliminare questo documento? L\'operazione non può essere annullata.');">
+                                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State for Documents -->
+                        <div th:if="${project.id != null and #lists.isEmpty(documents)}" 
+                             class="text-center py-5">
+                            <i class="bi bi-file-earmark-plus text-muted mb-3" style="font-size: 3rem;" aria-hidden="true"></i>
+                            <h4 class="text-muted">Nessun documento presente</h4>
+                            <p class="text-muted mb-0">Carica il primo documento utilizzando il form sopra</p>
+                        </div>
+                        
+                        <!-- Message for new projects -->
+                        <div th:if="${project.id == null}" class="text-center py-5">
+                            <i class="bi bi-info-circle text-primary mb-3" style="font-size: 3rem;" aria-hidden="true"></i>
+                            <h4 class="text-primary">Gestione Documenti</h4>
+                            <p class="text-muted mb-0">Salva la commessa per abilitare il caricamento dei documenti</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <!-- End Documents Tab -->
+            
+             <!-- TAB 4: INSURANCES -->
+            <div id="insurancesTab" class="tab-pane fade" role="tabpanel"
+                 aria-labelledby="insurances-tab" tabindex="0">
+
+                <div class="form-section card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-check me-2 text-primary" aria-hidden="true"></i>
+                                Polizze Assicurative
+                            </h5>
+                            <p class="text-muted mb-0 small">Visualizza le polizze associate a questa commessa</p>
+                        </div>
+                        <a th:href="@{/settings/policies}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>
+                            Gestisci polizze
+                        </a>
+                    </div>
+                     <div class="card-body">
+                        <div th:if="${policies == null || policies.isEmpty()}" class="text-center text-muted py-4">
+                            <i class="bi bi-shield-slash mb-2" style="font-size: 2rem;" aria-hidden="true"></i>
+                            <p class="mb-0">Nessuna polizza associata. Puoi aggiungerne una dal modulo polizze.</p>
+                        </div>
+                        <div th:if="${policies != null && !policies.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                    	<th scope="col">Numero</th>
+                                        <th scope="col">Tipo</th>
+                                        <th scope="col">Fornitore</th>
+                                        <th scope="col">Decorrenza</th>
+                                        <th scope="col">Scadenza</th>
+                                        <th scope="col">Pagamento</th>
+                                        <th scope="col">Note</th>
+                                        <th scope="col" class="text-end">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="policy : ${policies}">
+                                        <td class="fw-semibold" th:text="${policy.policyNumber}">POL123</td>
+                                        <td th:text="${policy.policyType}">RC</td>
+                                        <td>
+                                            <div th:text="${policy.supplier != null ? policy.supplier.name : '—'}">—</div>
+                                            <div class="small text-muted" th:if="${policy.supplierReferent != null}" th:text="${policy.supplierReferent.name}"></div>
+                                        </td>
+                                        <td th:text="${policy.startDate != null ? #temporals.format(policy.startDate, 'dd/MM/yyyy') : '—'}"></td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${policy.expiryDate == null ? ' text-bg-secondary' :
+                                                        (policy.expiryDate.isBefore(T(java.time.LocalDate).now()) ? ' text-bg-danger' :
+                                                        (policy.expiryDate.isBefore(T(java.time.LocalDate).now().plusDays(30)) ? ' text-bg-warning' : ' text-bg-success'))}">
+                                                <span th:text="${policy.expiryDate != null ? #temporals.format(policy.expiryDate, 'dd/MM/yyyy') : 'N.D.'}"></span>
+                                            </span>
+                                        </td>
+                                        <td th:text="${policy.paymentDate != null ? #temporals.format(policy.paymentDate, 'dd/MM/yyyy') : '—'}"></td>
+                                        <td>
+                                            <span class="text-truncate d-inline-block" style="max-width: 200px;"
+                                                  th:text="${policy.notes != null ? policy.notes : '—'}"></span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a class="btn btn-outline-primary btn-sm" th:href="@{|/settings/policies/${policy.id}/edit|}">
+                                                <i class="bi bi-pencil me-1"></i>Apri
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- End Insurances Tab -->
+			</div>
+
+
+                   
+</main> <!-- End Main Container -->
+
+ <!-- JavaScript Files - Modular approach -->
+ <script type="module" th:src="@{/js/location-selector.js}"></script>
+ <script th:src="@{/js/project-form.js}"></script>
+
+<!-- Additional JavaScript for missing managers -->
+<script>
+/**
+ * VALIDATION MANAGER
+ * Handles form validation with Bootstrap classes and custom rules
+ */
+class ValidationManager {
+    constructor(parentForm) {
+        this.parentForm = parentForm;
+        this.form = parentForm.form;
+        this.init();
+    }
+    
+    init() {
+        this.setupFieldValidation();
+        this.setupRealTimeValidation();
+    }
+    
+    /**
+     * Setup validation for required fields and custom rules
+     */
+    setupFieldValidation() {
+        const requiredFields = this.form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', () => this.validateField(field));
+            field.addEventListener('input', () => {
+                if (field.classList.contains('is-invalid')) {
+                    this.validateField(field);
+                }
+            });
+        });
+    }
+    
+    /**
+     * Setup real-time validation for specific field types
+     */
+    setupRealTimeValidation() {
+        // Date range validation
+        const startDate = this.form.querySelector('#startDate');
+        const endDate = this.form.querySelector('#endDate');
+        
+        if (startDate && endDate) {
+            [startDate, endDate].forEach(field => {
+                field.addEventListener('change', () => this.validateDateRange(startDate, endDate));
+            });
+        }
+        
+        // Email validation
+        const emailFields = this.form.querySelectorAll('input[type="email"]');
+        emailFields.forEach(field => {
+            field.addEventListener('input', debounce(() => this.validateEmail(field), 500));
+        });
+    }
+    
+    /**
+     * Validate individual field
+     */
+    validateField(field) {
+        const value = field.value.trim();
+        
+        // Clear previous validation
+        this.clearFieldValidation(field);
+        
+        // Required field validation
+        if (field.hasAttribute('required') && !value) {
+            this.setFieldError(field, 'Questo campo è obbligatorio');
+            return false;
+        }
+        
+        // Type-specific validation
+        if (value && field.type === 'email' && !this.isValidEmail(value)) {
+            this.setFieldError(field, 'Inserisci un indirizzo email valido');
+            return false;
+        }
+        
+        // Success state
+        if (value) {
+            this.setFieldSuccess(field);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Validate date range
+     */
+    validateDateRange(startField, endField) {
+        if (!startField.value || !endField.value) return;
+        
+        const startDate = new Date(startField.value);
+        const endDate = new Date(endField.value);
+        
+        if (startDate >= endDate) {
+            this.setFieldError(endField, 'La data fine deve essere successiva alla data inizio');
+            return false;
+        }
+        
+        this.clearFieldValidation(endField);
+        this.setFieldSuccess(endField);
+        return true;
+    }
+    
+    /**
+     * Validate email format
+     */
+    validateEmail(field) {
+        const value = field.value.trim();
+        if (!value) return;
+        
+        if (!this.isValidEmail(value)) {
+            this.setFieldError(field, 'Formato email non valido');
+            return false;
+        }
+        
+        this.setFieldSuccess(field);
+        return true;
+    }
+    
+    /**
+     * Validate entire form
+     */
+    validateAll() {
+        const requiredFields = this.form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!this.validateField(field)) {
+                isValid = false;
+            }
+        });
+        
+        return isValid;
+    }
+    
+    /**
+     * Validate specific tab content
+     */
+    validateTab(tabPane) {
+        const fields = tabPane.querySelectorAll('[required]');
+        let isValid = true;
+        
+        fields.forEach(field => {
+            if (!this.validateField(field)) {
+                isValid = false;
+            }
+        });
+        
+        return isValid;
+    }
+    
+    /**
+     * Utility methods
+     */
+    isValidEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+    
+    clearFieldValidation(field) {
+        field.classList.remove('is-invalid', 'is-valid');
+        const feedback = field.parentNode.querySelector('.invalid-feedback');
+        if (feedback) feedback.remove();
+    }
+    
+    setFieldError(field, message) {
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        
+        const feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = message;
+        field.parentNode.appendChild(feedback);
+    }
+    
+    setFieldSuccess(field) {
+        field.classList.add('is-valid');
+        field.classList.remove('is-invalid');
+    }
+}
+
+/**
+ * PROGRESS TRACKER
+ * Handles the progress bar for project completion
+ */
+class ProgressTracker {
+    constructor(parentForm) {
+        this.parentForm = parentForm;
+        this.progressBar = document.getElementById('progressBar');
+        this.progressPercent = document.getElementById('progressPercent');
+        this.projectValueInput = document.getElementById('projectValue');
+        
+        if (this.progressBar && this.progressPercent) {
+            this.init();
+        }
+    }
+    
+    init() {
+        this.updateProgress();
+        
+        // Listen for value changes
+        if (this.projectValueInput) {
+            this.projectValueInput.addEventListener('input', () => this.updateProgress());
+        }
+    }
+    
+    /**
+     * Update progress bar based on invoices vs project value
+     */
+    updateProgress() {
+        const projectValue = parseFloat(this.projectValueInput?.value) || 0;
+        const invoiceAmounts = document.querySelectorAll('.invoice-amount');
+        
+        let totalInvoiced = 0;
+        invoiceAmounts.forEach(input => {
+            totalInvoiced += parseFloat(input.value) || 0;
+        });
+        
+        const percentage = projectValue > 0 ? Math.min(100, (totalInvoiced / projectValue) * 100) : 0;
+        
+        // Update progress bar
+        this.progressBar.style.width = percentage + '%';
+        this.progressBar.setAttribute('aria-valuenow', percentage);
+        this.progressPercent.textContent = percentage.toFixed(0) + '%';
+        
+        // Update color based on percentage
+        this.updateProgressColor(percentage);
+    }
+    
+    /**
+     * Update progress bar color based on completion percentage
+     */
+    updateProgressColor(percentage) {
+        this.progressBar.className = 'progress-bar';
+        
+        if (percentage >= 100) {
+            this.progressBar.classList.add('bg-success');
+        } else if (percentage >= 75) {
+            this.progressBar.classList.add('bg-info');
+        } else if (percentage >= 50) {
+            this.progressBar.classList.add('bg-warning');
+        } else {
+            this.progressBar.classList.add('bg-danger');
+        }
+    }
+}
+
+/**
+ * DOCUMENTS MANAGER
+ * Handles document upload and management
+ */
+class DocumentsManager {
+    constructor(parentForm) {
+        this.parentForm = parentForm;
+        this.uploadForms = document.querySelectorAll('form[enctype="multipart/form-data"]');
+        this.init();
+    }
+    
+    init() {
+        this.setupUploadForms();
+        this.setupDragAndDrop();
+    }
+    
+    /**
+     * Setup upload form enhancements
+     */
+    setupUploadForms() {
+        this.uploadForms.forEach(form => {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            form.addEventListener('submit', () => {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                    Caricamento...
+                `;
+            });
+            
+            // File input change handler
+            const fileInput = form.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    this.handleFileSelection(e.target);
+                });
+            }
+        });
+    }
+    
+    /**
+     * Setup drag and drop functionality
+     */
+    setupDragAndDrop() {
+        const uploadZones = document.querySelectorAll('.upload-zone');
+        
+        uploadZones.forEach(zone => {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, this.preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.add('dragover'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                zone.addEventListener(eventName, () => zone.classList.remove('dragover'), false);
+            });
+            
+            zone.addEventListener('drop', (e) => this.handleDrop(e, zone), false);
+        });
+    }
+    
+    /**
+     * Handle file selection
+     */
+    handleFileSelection(fileInput) {
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const helpText = fileInput.parentNode.querySelector('.form-text');
+            
+            if (helpText) {
+                helpText.innerHTML = `<i class="bi bi-check-circle text-success me-1"></i>File selezionato: ${file.name}`;
+            }
+        }
+    }
+    
+    /**
+     * Handle drag and drop
+     */
+    handleDrop(e, zone) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        const fileInput = zone.querySelector('input[type="file"]');
+        if (fileInput && files.length > 0) {
+            fileInput.files = files;
+            this.handleFileSelection(fileInput);
+        }
+    }
+    
+    /**
+     * Prevent default drag behaviors
+     */
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}
+
+// Extend the main ProjectForm class with the missing managers
+if (window.projectForm && window.projectForm.isInitialized) {
+    // If already initialized, add missing managers
+    if (!window.projectForm.validationManager) {
+        window.projectForm.validationManager = new ValidationManager(window.projectForm);
+    }
+    if (!window.projectForm.progressTracker) {
+        window.projectForm.progressTracker = new ProgressTracker(window.projectForm);
+    }
+    if (!window.projectForm.documentsManager) {
+        window.projectForm.documentsManager = new DocumentsManager(window.projectForm);
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+  <title>Impostazioni — Veely</title>
+  <th:block th:fragment="cssblock">
+    <link rel="stylesheet" th:href="@{/css/settings.css}">
+  </th:block>
+</head>
+
+<th:block th:fragment="navbar">
+  <!-- Page Header with improved structure -->
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1 class="page-title">Impostazioni</h1>
+        <p class="page-subtitle">Configura anagrafiche e preferenze dell'applicazione</p>
+      </div>
+    </div>
+  </div>
+</th:block>
+
+<body>
+<main class="page-content">
+  <!-- Settings Cards Grid using Bootstrap -->
+  <div class="container-fluid px-0">
+    
+    <!-- HR Management Section -->
+    <section class="settings-section mb-5" data-aos="fade-up" data-aos-delay="50">
+      <div class="section-header mb-4">
+        <h2 class="section-title">
+          <i class="bi bi-people-fill text-primary me-2"></i>
+          Gestione Risorse Umane
+        </h2>
+        <p class="section-subtitle">Configurazioni per dipendenti e organizzazione</p>
+      </div>
+      
+      <div class="row g-4">
+        <!-- Employee Roles Card -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="100">
+          <div class="settings-card h-100" data-category="hr">
+            <a th:href="@{/settings/employee-roles}" 
+               class="settings-link" 
+               aria-label="Gestisci ruoli dipendenti">
+              <div class="card-icon danger">
+                <i class="bi bi-person-video2" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Ruolo Dipendenti</h3>
+                <p class="card-description">Gestisci i ruoli e i permessi del personale</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+         <!-- Safety Categories -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="500">
+          <div class="settings-card h-100" data-category="admin">
+            <a th:href="@{/settings/safety-categories}" 
+               class="settings-link"
+               aria-label="Gestisci categorie safety">
+              <div class="card-icon success">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Categorie Safety</h3>
+                <p class="card-description">Classificazioni DPI e procedure sicurezza</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Union Cards -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="200">
+          <div class="settings-card h-100" data-category="hr">
+            <a th:href="@{/settings/unions}" 
+               class="settings-link"
+               aria-label="Gestisci sigle sindacali">
+              <div class="card-icon warning">
+                <i class="bi bi-people-fill" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Sigle Sindacali</h3>
+                <p class="card-description">Gestisci le organizzazioni sindacali</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fleet Management Section -->
+    <section class="settings-section mb-5" data-aos="fade-up" data-aos-delay="250">
+      <div class="section-header mb-4">
+        <h2 class="section-title">
+          <i class="bi bi-car-front-fill text-primary me-2"></i>
+          Gestione Flotta
+        </h2>
+        <p class="section-subtitle">Configurazioni per veicoli e servizi</p>
+      </div>
+      
+      <div class="row g-4">
+        <!-- Fuel Cards -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="settings-card h-100" data-category="fleet">
+            <a th:href="@{/fleet/fuel-cards}" 
+               class="settings-link"
+               aria-label="Gestisci carte carburante">
+              <div class="card-icon primary">
+                <i class="bi bi-fuel-pump-fill" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Carte Carburante</h3>
+                <p class="card-description">Gestione carte e limiti di rifornimento</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Suppliers -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="350">
+          <div class="settings-card h-100" data-category="fleet">
+            <a th:href="@{/fleet/suppliers}" 
+               class="settings-link"
+               aria-label="Gestisci fornitori">
+              <div class="card-icon primary">
+                <i class="bi bi-truck" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Fornitori</h3>
+                <p class="card-description">Gestisci fornitori e contratti di servizio</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Administration Section -->
+    <section class="settings-section mb-5" data-aos="fade-up" data-aos-delay="400">
+      <div class="section-header mb-4">
+        <h2 class="section-title">
+          <i class="bi bi-gear-fill text-primary me-2"></i>
+          Amministrazione
+        </h2>
+        <p class="section-subtitle">Configurazioni sistema e categorizzazioni</p>
+      </div>
+      
+      <div class="row g-4">
+        <!-- Task Types -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="450">
+          <div class="settings-card h-100" data-category="admin">
+            <a th:href="@{/settings/task-types}" 
+               class="settings-link"
+               aria-label="Gestisci tipi task">
+              <div class="card-icon primary">
+                <i class="bi bi-list-task" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Tipi Task</h3>
+                <p class="card-description">Categorie e priorità delle attività</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+       
+
+        <!-- Company Info -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="550">
+          <div class="settings-card h-100" data-category="admin">
+            <a th:href="@{/settings/company}" 
+               class="settings-link"
+               aria-label="Gestisci informazioni azienda">
+              <div class="card-icon success">
+                <i class="bi bi-building" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Company Info</h3>
+                <p class="card-description">Dati aziendali e configurazioni branding</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Administrative Document Types -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="600">
+          <div class="settings-card h-100" data-category="admin">
+            <a th:href="@{/settings/admin-document-types}" 
+               class="settings-link"
+               aria-label="Gestisci tipi documenti amministrativi">
+              <div class="card-icon primary">
+                <i class="bi bi-tags" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Tipi Doc. Amministrativi</h3>
+                <p class="card-description">Gestisci le categorie documentali</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Public Authorities -->
+        <div class="col-12 col-md-6 col-xl-4" data-aos="fade-up" data-aos-delay="650">
+          <div class="settings-card h-100" data-category="admin">
+            <a th:href="@{/settings/public-authorities}" 
+               class="settings-link"
+               aria-label="Gestisci enti pubblici">
+              <div class="card-icon primary">
+                <i class="bi bi-building" aria-hidden="true"></i>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">Enti Pubblici</h3>
+                <p class="card-description">Gestisci enti e autorità di riferimento</p>
+              </div>
+              <div class="card-arrow">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Load AOS Library for animations -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<!-- Load custom settings JavaScript -->
+<script th:src="@{/js/settings.js}"></script>
+</body>
+</html>

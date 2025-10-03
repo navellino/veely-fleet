@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+
+<head>
+    <title>Gestione Dipendenti – Veely</title>
+    <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/employees-page.css}">
+    </th:block>
+</head>
+
+<th:block th:fragment="navbar">
+
+	 <!-- Modern Page Header (come quello dei veicoli) -->
+    
+        <div class="header-main">
+            <div class="header-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="page-title">Gestione Dipendenti</h1>
+                <p class="page-subtitle">Monitora e gestisci tutti i dipendenti della tua azienda</p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <div class="stat-value" th:text="${employees.getTotalElements() ?: 0}">0</div>
+                <div class="stat-label">Totale Dipendenti</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-value text-success" th:text="${activeEmployeesCount ?: 0}">0</div>
+                <div class="stat-label">Attivi</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-value text-warning" th:text="${inactiveEmployeesCount ?: 0}">0</div>
+                <div class="stat-label">Non Attivi</div>
+            </div>
+        </div>
+
+	
+</th:block>
+
+<body>
+   
+<main class="container-fluid my-4 flex-fill">
+    <!-- Advanced Filter Bar -->
+    <div class="employees-filter-section" style="margin-bottom: 1.5rem;">
+        <div class="filter-card">
+            <div class="filter-header">
+                <div class="filter-title">
+                    <i class="bi bi-funnel me-2"></i>
+                    Filtri Avanzati
+                </div>
+                <button class="filter-toggle-btn" id="filterToggle">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="filter-content" id="filterContent" style="display: none;">
+                <form method="get" th:action="@{/fleet/employees/manage}">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="bi bi-search me-1"></i>
+                                Ricerca Globale
+                            </label>
+                            <div class="search-input-container">
+                                <input type="text" class="form-control search-input" 
+                                       name="search"
+                                       placeholder="Cerca per nome, cognome, email, codice fiscale..." 
+                                       id="searchInput">
+                                <i class="bi bi-search search-icon"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="bi bi-circle-fill me-1"></i>
+                                Stato Rapporto
+                            </label>
+                            <select class="form-select filter-select" name="status" id="statusFilter">
+                                <option value="">Tutti gli stati</option>
+                                <option value="active">🟢 Attivo</option>
+                                <option value="inactive">🔴 Non Attivo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                <i class="bi bi-briefcase me-1"></i>
+                                Qualifica
+                            </label>
+                            <select class="form-select filter-select" name="qualification" id="qualificationFilter">
+                                <option value="">Tutte le qualifiche</option>
+                                <option value="impiegato">👔 Impiegato</option>
+                                <option value="operaio">🔧 Operaio</option>
+                                <option value="altro">📋 Altro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <a href="/fleet/employees/manage" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>
+                                Reset
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>
+                                Applica
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions-bar" style="margin-bottom: 1.5rem;">
+        <div class="actions-left">
+            <div class="results-info">
+                <span class="results-count" id="resultsCount" th:text="${employees.getTotalElements()} + ' dipendenti trovati'">0 dipendenti trovati</span>
+            </div>
+        </div>
+        
+        <div class="actions-right">
+            <button class="btn btn-outline-primary" onclick="exportEmployees()"><i class="bi bi-download me-1"></i>Esporta</button>
+            <a class="btn btn-success" th:href="@{/safety}"><i class="bi bi-shield-check me-2"></i>Safety</a>
+            <a class="btn btn-primary btn-add-employee" th:href="@{/fleet/employees/new}"><i class="bi bi-person-plus me-1"></i>Nuovo Dipendente</a>
+        </div>
+    </div>
+    
+    <!-- Modern Table -->
+    <div class="modern-table-card">
+        <div class="table-responsive">
+            <table class="table employees-table sortable" id="employeesTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="name">
+                            <div class="th-content">
+                                <span>Dipendente</span>
+                                <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="fiscalCode">
+                            <div class="th-content">
+                                <span>Codice Fiscale</span>
+                                <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="qualification">
+                            <div class="th-content">
+                                <span>Qualifica</span>
+                                <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="status">
+                            <div class="th-content">
+                                <span>Rapporto di lavoro</span>
+                                <i class="bi bi-arrow-down-up sort-icon"></i>
+                            </div>
+                        </th>
+                        <th>Contatti</th>
+                        <th class="actions-column">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                            <tr class="table-row" th:each="emp : ${employees.content}">
+                        <td>
+                            <div class="employee-cell">
+                                <!-- Avatar del dipendente -->
+                                <div class="employee-avatar" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden;">
+                                    <img th:src="${profilePhotos[emp.id] != null ? '/fleet/employees/' + emp.id + '/docs/' + profilePhotos[emp.id].path.substring(profilePhotos[emp.id].path.lastIndexOf('/') + 1) : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzk5OTk5OSIgdmlld0JveD0iMCAwIDE2IDE2Ij48cGF0aCBkPSJNMyAxNHMtMSAwLTEtMSAxLTQgNi00IDYgMyA2IDQtMSAxLTEgMUgzem01LTZhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2eiIvPjwvc3ZnPg=='}"
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         th:alt="'Foto ' + ${emp.lastName} + ' ' + ${emp.firstName}" />
+                                </div>
+                                <div class="employee-info">
+                                    <div class="employee-name" th:text="${emp.lastName + ' ' + emp.firstName}">Nome Cognome</div>
+                                    <small class="employee-email" th:text="${emp.email}">email@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fiscal-code-info">
+                                <div class="fiscal-code-text" th:text="${emp.fiscalCode}">CODICE FISCALE</div>
+                            </div>
+                        </td>
+                       <td th:with="employment=${activeEmployments[emp.id]}">
+                            <span class="qualification-badge"
+                                 th:text="${employment != null and !#strings.isEmpty(employment.jobTitle) ? employment.jobTitle : '-'}">Qualifica</span>
+                        </td>
+                        <td>
+                            <span class="status-badge-sm"
+                                  th:with="status=${employmentStatuses[emp.id]}"
+                                  th:classappend="${status != null ? 'status-' + #strings.replace(status.name().toLowerCase(), '_', '-') : 'status-inactive'}"
+                                  th:text="${status != null ? status.displayName : 'Non attivo'}">Stato</span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <div class="phone-text" th:if="${emp.phone}" th:text="${emp.phone}">Telefono</div>
+                                <div class="mobile-text" th:if="${emp.mobile}" th:text="${emp.mobile}">Mobile</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn action-view" 
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#employeeDetailModal"
+                                        th:data-firstname="${emp.firstName}"
+                                        th:data-lastname="${emp.lastName}"
+                                        th:data-email="${emp.email}"
+                                        th:data-phone="${emp.phone}"
+                                        th:data-mobile="${emp.mobile}"
+                                        th:data-photo="${profilePhotos[emp.id] != null ? '/fleet/employees/' + emp.id + '/docs/' + profilePhotos[emp.id].path.substring(profilePhotos[emp.id].path.lastIndexOf('/') + 1) : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzk5OTk5OSIgdmlld0JveD0iMCAwIDE2IDE2Ij48cGF0aCBkPSJNMyAxNHMtMSAwLTEtMSAxLTQgNi00IDYgMyA2IDQtMSAxLTEgMUgzem01LTZhMyAzIDAgMSAwIDAtNiAzIDMgMCAwIDAgMCA2eiIvPjwvc3ZnPg=='}"
+                                        title="Visualizza dettagli">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <a th:href="@{|/fleet/employees/${emp.id}/edit|}" 
+                                   class="action-btn action-edit" 
+                                   title="Modifica dipendente">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="action-btn action-delete" 
+                                        th:data-employee-id="${emp.id}"
+                                        th:data-employee-name="${emp.firstName + ' ' + emp.lastName}"
+                                        onclick="deleteEmployee(this.dataset.employeeId, this.dataset.employeeName)"
+                                        title="Elimina dipendente">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer" th:if="${employees.totalElements > 0}"
+             th:with="start=${employees.number * employees.size + 1}, end=${employees.number * employees.size + employees.numberOfElements}">
+            <div class="pagination-summary"
+                 th:text="${'Mostrando ' + start + '-' + end + ' di ' + employees.totalElements + ' dipendenti'}">
+                Mostrando 1-20 di 40 dipendenti
+            </div>
+            <nav class="table-pagination" th:if="${employees.totalPages > 1}" aria-label="Paginazione dipendenti">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${!employees.hasPrevious()} ? 'disabled'">
+                        <a class="page-link" th:href="@{/fleet/employees/manage(page=${employees.number - 1}, size=${employees.size})}" aria-label="Pagina precedente">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, employees.totalPages - 1)}"
+                        th:classappend="${i == employees.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/fleet/employees/manage(page=${i}, size=${employees.size})}"
+                           th:text="${i + 1}"
+                           th:aria-current="${i == employees.number} ? 'page' : null">
+                            1
+                        </a>
+                    </li>
+                    <li class="page-item" th:classappend="${!employees.hasNext()} ? 'disabled'">
+                        <a class="page-link" th:href="@{/fleet/employees/manage(page=${employees.number + 1}, size=${employees.size})}" aria-label="Pagina successiva">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+
+<!-- Employee Detail Modal -->
+<div class="modal fade" id="employeeDetailModal" tabindex="-1" aria-labelledby="employeeDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="employeeDetailLabel">Dettaglio Dipendente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pb-4">
+                <img id="empModalPhoto" class="rounded-circle shadow-sm mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Foto profilo"/>
+                <h3 id="empModalName" class="fw-bold mb-1"></h3>
+                <p id="empModalEmail" class="text-muted"></p>
+                <hr class="my-4">
+                <ul class="list-unstyled text-start mx-auto" style="max-width:300px;">
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="bi bi-telephone-fill text-secondary me-3 fs-5"></i>
+                        <span id="empModalPhone"></span>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="bi bi-phone-fill text-secondary me-3 fs-5"></i>
+                        <span id="empModalMobile"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteEmployeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Conferma Eliminazione
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare il dipendente <strong id="employeeToDelete"></strong>?</p>
+                <p class="text-muted mb-0">Questa azione non può essere annullata e rimuoverà tutti i dati associati.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <form id="deleteEmployeeForm" method="post" class="d-inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Elimina Definitivamente
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/employee-detail-modal.js}"></script>
+
+<script>
+    // Modern JavaScript for enhanced functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('👥 Inizializzazione pagina dipendenti...');
+        initializeEmployeesPage();
+    });
+
+    function initializeEmployeesPage() {
+        // Filter functionality  
+        setupFilters();
+        
+     // Initial results count
+        applyFilters();
+        
+        console.log('✅ Pagina dipendenti inizializzata');
+    }
+
+    function setupFilters() {
+        const filterToggle = document.getElementById('filterToggle');
+        const filterContent = document.getElementById('filterContent');
+        const filterForm = document.querySelector('#filterContent form');
+        const searchInput = document.getElementById('searchInput');
+        const statusSelect = document.getElementById('statusFilter');
+        const qualificationSelect = document.getElementById('qualificationFilter');
+
+        // Filter toggle
+        filterToggle?.addEventListener('click', function() {
+            const isHidden = filterContent.style.display === 'none';
+            filterContent.style.display = isHidden ? 'block' : 'none';
+            const icon = this.querySelector('i');
+            icon.className = isHidden ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+            
+            console.log('🔍 Filtri', isHidden ? 'aperti' : 'chiusi');
+        });
+        
+     // Apply filters on form submit
+        filterForm?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            applyFilters();
+        });
+
+        // Live filtering on inputs change
+        searchInput?.addEventListener('input', applyFilters);
+        statusSelect?.addEventListener('change', applyFilters);
+        qualificationSelect?.addEventListener('change', applyFilters);
+    }
+
+    function applyFilters() {
+        const searchValue = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        const statusValue = document.getElementById('statusFilter')?.value;
+        const qualificationValue = document.getElementById('qualificationFilter')?.value;
+
+        const rows = document.querySelectorAll('#employeesTable tbody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.querySelector('.employee-name')?.textContent.toLowerCase() || '';
+            const email = row.querySelector('.employee-email')?.textContent.toLowerCase() || '';
+            const fiscal = row.querySelector('.fiscal-code-text')?.textContent.toLowerCase() || '';
+            const statusText = row.querySelector('.status-badge-sm')?.textContent.toLowerCase() || '';
+            const qualificationText = row.querySelector('.qualification-badge')?.textContent.toLowerCase() || '';
+
+            const matchesSearch = !searchValue ||
+                name.includes(searchValue) ||
+                email.includes(searchValue) ||
+                fiscal.includes(searchValue);
+            const matchesStatus = !statusValue ||
+                (statusValue === 'active' && statusText === 'attivo') ||
+                (statusValue === 'inactive' && statusText !== 'attivo');
+            const matchesQualification = !qualificationValue ||
+                qualificationText.includes(qualificationValue);
+
+            const visible = matchesSearch && matchesStatus && matchesQualification;
+            row.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+        const resultsCount = document.getElementById('resultsCount');
+        if (resultsCount) {
+        	resultsCount.textContent = `${visibleCount} dipendenti trovati`;
+            console.log('📊 Conteggio risultati aggiornato:', visibleCount);
+        }
+    }
+
+    function deleteEmployee(id, name) {
+        document.getElementById('employeeToDelete').textContent = name;
+        document.getElementById('deleteEmployeeForm').action = `/fleet/employees/${id}/delete`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
+        modal.show();
+        
+        console.log('🗑️ Richiesta eliminazione per:', name);
+    }
+
+    function exportEmployees() {
+    	window.location.href = '/fleet/employees/export';
+        console.log('📤 Export dipendenti avviato');
+    }
+</script>
+</body>
+</html>

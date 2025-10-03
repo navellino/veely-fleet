@@ -1,0 +1,47 @@
+Veely – Licenza Proprietaria v1.0
+Copyright (c) 2025 Nicola Avellino. Tutti i diritti riservati.
+
+1. Definizioni
+“Software” indica il codice sorgente, la documentazione e ogni file di questo repository.
+“Tu/Utente” indica chi accede al Software.
+
+2. Concessione limitata
+Il Titolare concede all’Utente una licenza personale, non esclusiva, non trasferibile e revocabile
+a visualizzare e clonare il Software al solo scopo di valutazione personale su GitHub e su
+macchine locali di test. Nessun altro diritto è concesso.
+
+3. Divieti
+Senza un accordo scritto del Titolare è vietato: (a) usare il Software in produzione;
+(b) distribuirlo, pubblicarlo o renderlo disponibile a terzi; (c) modificarlo, crearne opere derivate,
+fonderlo con altro software, ribrandizzarlo; (d) offrirlo, in tutto o in parte, come servizio
+(SaaS/hosting); (e) sublicenziare, affittare, vendere o cedere diritti sul Software; (f) eseguire
+reverse engineering salvo quanto inderogabile per legge; (g) svolgere benchmark o
+confronti pubblici che rivelino dettagli tecnici non ancora divulgati dal Titolare.
+
+4. Proprietà
+Il Software è di esclusiva proprietà di Nicola Avellino. Tutti i diritti non espressamente concessi
+restano riservati.
+
+5. Eccezione operativa GitHub
+Sono consentite le sole operazioni tecniche necessarie al funzionamento di GitHub
+(es. fork/clone su GitHub) limitatamente allo scopo di cui all’art. 2. Qualsiasi uso fuori da
+GitHub o oltre l’ambito di valutazione è vietato senza licenza commerciale.
+
+6. Durata e risoluzione
+La licenza decorre dall’accesso al Software e termina automaticamente in caso di violazione.
+Alla risoluzione l’Utente deve cessare ogni uso e cancellare copie e derivati.
+
+7. Assenza di garanzie
+Il Software è fornito “così com’è”, senza garanzie di alcun tipo, espresse o implicite,
+inclusa la commerciabilità, l’idoneità a uno scopo particolare e l’assenza di violazioni.
+
+8. Limitazione di responsabilità
+Nei limiti massimi di legge, il Titolare non risponde di danni diretti, indiretti, speciali, incidentali,
+consequenziali o punitivi, né di perdita di profitti, dati o avviamento, derivanti dall’uso del Software.
+
+9. Legge applicabile e foro
+Si applica la legge italiana. Foro esclusivo competente: Catania, Italia.
+
+10. Licenze commerciali
+Per ottenere una licenza commerciale che consenta uso in produzione, modifiche, distribuzione
+o SaaS, contattare: navellino@gmail.com

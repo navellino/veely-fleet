@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Planner Prenotazioni Veicoli – Veely</title>
+    <th:block th:fragment="cssblock">
+        <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/vehicle-booking.css}">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+    <div class="booking-page-header">
+        <div class="header-main">
+            <div class="header-icon">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="page-title">Planner Prenotazioni</h1>
+                <p class="page-subtitle">Gestisci le prenotazioni delle auto non assegnate e monitora la disponibilità</p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <span class="stat-label">Veicoli disponibili</span>
+                <span class="stat-value" th:text="${vehicleCount}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Prenotazioni attive</span>
+                <span class="stat-value" th:text="${activeBookings}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Oggi</span>
+                <span class="stat-value" th:text="${bookingsToday}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Prossimi 7 giorni</span>
+                <span class="stat-value" th:text="${bookingsNextSevenDays}">0</span>
+            </div>
+        </div>
+    </div>
+</th:block>
+<body>
+<main class="container-fluid py-4 flex-fill" id="bookingPlannerApp"
+      th:data-initial-vehicle-id="${initialVehicleId}" th:data-has-vehicles="${!vehicles.empty}">
+
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h2 class="section-title">Auto disponibili</h2>
+                    <p class="text-muted small mb-0">Seleziona un veicolo per visualizzare il calendario prenotazioni</p>
+                </div>
+                <div class="card-body pt-3">
+                    <div class="vehicle-search mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="vehicleSearchInput"
+                                   placeholder="Cerca per targa o modello">
+                        </div>
+                    </div>
+                    <div class="vehicle-list" id="vehicleList">
+                        <div th:if="${vehicles.empty}" class="empty-vehicle-state">
+                            <i class="bi bi-car-front"></i>
+                            <p class="mb-1">Nessuna auto disponibile</p>
+                            <p class="text-muted small">Tutte le vetture risultano attualmente assegnate.</p>
+                        </div>
+                        <div th:each="vehicle, iter : ${vehicles}"
+                             class="vehicle-item"
+                             th:classappend="${iter.index == 0} ? ' active' : ''"
+                             th:data-vehicle-id="${vehicle.id}"
+                             th:data-vehicle-label="${vehicle.plate + ' – ' + #strings.defaultString(vehicle.brand, '') + ' ' + #strings.defaultString(vehicle.model, '')}"
+                             th:data-vehicle-plate="${vehicle.plate}">
+                            <div class="vehicle-plate" th:text="${vehicle.plate}">AA000AA</div>
+                            <div class="vehicle-info">
+                                <div class="vehicle-model"
+                                     th:text="${#strings.defaultString(vehicle.brand, '') + ' ' + #strings.defaultString(vehicle.model, '')}">Marca Modello</div>
+                                <div class="vehicle-year text-muted" th:text="${vehicle.year}">2024</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title mb-1">Calendario prenotazioni</h2>
+                        <p class="text-muted mb-0" id="selectedVehicleLabel"
+                           th:text="${firstVehicle == null ? 'Nessun veicolo selezionato' : (firstVehicle.plate + ' – ' + #strings.defaultString(firstVehicle.brand, '') + ' ' + #strings.defaultString(firstVehicle.model, ''))}">
+                            Veicolo selezionato
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary" id="refreshCalendarBtn" type="button">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Aggiorna
+                        </button>
+                        <button class="btn btn-primary" id="openBookingModalBtn" type="button" data-bs-toggle="modal"
+                                data-bs-target="#bookingModal"
+                                th:disabled="${vehicles.empty}">
+                            <i class="bi bi-plus-lg me-1"></i>Nuova prenotazione
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="plannerAlert" class="alert alert-warning d-none"></div>
+                    <div id="availabilityBadge" class="availability-badge"></div>
+                    <div id="bookingCalendar" class="booking-calendar"></div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white border-0">
+                    <h2 class="section-title mb-0">Prossime prenotazioni</h2>
+                </div>
+                <div class="card-body" id="upcomingBookingsList">
+                    <p class="text-muted mb-0">Seleziona un veicolo per visualizzare le prenotazioni pianificate.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Modal nuova/modifica prenotazione -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingModalLabel">Nuova prenotazione</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger d-none" id="bookingFormAlert"></div>
+                <form id="bookingForm">
+                    <input type="hidden" id="bookingId">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="bookingTitle" class="form-label">Titolo / motivo</label>
+                            <input type="text" class="form-control" id="bookingTitle" maxlength="120"
+                                   placeholder="Es. Trasferta cantiere Milano">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bookingRequester" class="form-label">Richiedente</label>
+                            <input type="text" class="form-control" id="bookingRequester" maxlength="120"
+                                   placeholder="Nome e Cognome">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bookingContact" class="form-label">Contatto</label>
+                            <input type="text" class="form-control" id="bookingContact" maxlength="255"
+                                   placeholder="Email o telefono">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bookingStatus" class="form-label">Stato prenotazione</label>
+                            <select class="form-select" id="bookingStatus">
+                                <option value="PLANNED" selected>Pianificata</option>
+                                <option value="CONFIRMED">Confermata</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bookingStart" class="form-label">Data e ora inizio</label>
+                            <input type="datetime-local" class="form-control" id="bookingStart" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="bookingEnd" class="form-label">Data e ora fine</label>
+                            <input type="datetime-local" class="form-control" id="bookingEnd" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="bookingNotes" class="form-label">Note operative</label>
+                            <textarea class="form-control" id="bookingNotes" rows="3" maxlength="1000"
+                                      placeholder="Informazioni aggiuntive o indicazioni per l'utilizzo del veicolo"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-primary" id="saveBookingBtn">Salva prenotazione</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal dettaglio prenotazione -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-labelledby="bookingDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingDetailLabel">Dettagli prenotazione</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Titolo</dt>
+                    <dd class="col-sm-8" id="detailTitle">—</dd>
+                    <dt class="col-sm-4">Richiedente</dt>
+                    <dd class="col-sm-8" id="detailRequester">—</dd>
+                    <dt class="col-sm-4">Periodo</dt>
+                    <dd class="col-sm-8" id="detailPeriod">—</dd>
+                    <dt class="col-sm-4">Contatto</dt>
+                    <dd class="col-sm-8" id="detailContact">—</dd>
+                    <dt class="col-sm-4">Stato</dt>
+                    <dd class="col-sm-8"><span class="badge" id="detailStatus">—</span></dd>
+                    <dt class="col-sm-4">Note</dt>
+                    <dd class="col-sm-8" id="detailNotes">—</dd>
+                </dl>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-outline-danger" id="deleteBookingBtn">
+                    <i class="bi bi-trash me-1"></i>Elimina prenotazione
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script>
+<script th:inline="javascript">
+    const VEHICLE_BOOKING_I18N = {
+        noVehicleSelected: 'Seleziona un veicolo dalla lista per visualizzare il calendario.',
+        noBookings: 'Nessuna prenotazione pianificata.',
+        availabilityNow: 'Disponibile attualmente.',
+        availableUntil: 'Disponibile fino al {date}.',
+        busyUntil: 'Prenotato fino al {date}.',
+        deleteConfirm: 'Confermi l\'eliminazione della prenotazione?'
+    };
+</script>
+<script th:src="@{/js/vehicle-booking.js}"></script>
+</body>
+</html>

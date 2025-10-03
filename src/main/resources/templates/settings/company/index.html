@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Configurazioni Aziendali – Veely</title>
+    <th:block th:fragment="cssblock">
+    	<style>
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .settings-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        .settings-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .config-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .config-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .config-card.active {
+            border-color: #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+        }
+        
+        .config-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .config-card-body {
+            padding: 1.5rem;
+        }
+        
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem;
+        }
+        
+        .active-badge {
+            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .inactive-badge {
+            background: #6c757d;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 0.95rem;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-outline-custom {
+            border: 1px solid #667eea;
+            color: #667eea;
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-outline-custom:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-success-custom {
+            background: #198754;
+            border: 1px solid #198754;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-success-custom:hover {
+            background: #157347;
+            border-color: #146c43;
+            color: white;
+        }
+        
+        .btn-danger-custom {
+            background: #dc3545;
+            border: 1px solid #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger-custom:hover {
+            background: #bb2d3b;
+            border-color: #b02a37;
+            color: white;
+        }
+    </style>
+    </th:block>
+</head>
+
+<th:block th:fragment="navbar">
+	 <!-- Header -->
+	
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1>
+                    <i class="bi bi-building me-2"></i>
+                    Configurazioni Aziendali
+                </h1>
+                <p>Gestisci le informazioni della tua azienda per documenti e comunicazioni</p>
+            </div>
+        </div>
+        <a th:href="@{/settings/company/new}" class="btn btn-primary-custom">
+            <i class="bi bi-plus-lg"></i>
+            Nuova Configurazione
+        </a>
+
+</th:block>
+
+<body>
+
+<main class="container-fluid my-4 flex-fill">
+    
+   
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${!hasCompanyInfo}" class="config-card">
+        <div class="config-card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h4>Nessuna configurazione aziendale</h4>
+                <p>Crea la prima configurazione per personalizzare documenti e comunicazioni</p>
+                <a th:href="@{/settings/company/new}" class="btn btn-primary-custom">
+                    <i class="bi bi-plus-lg me-2"></i>
+                    Crea Prima Configurazione
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Configurations -->
+    <div th:each="company : ${companies}" class="config-card" th:classappend="${company.isActive} ? 'active' : ''">
+        <div class="config-card-header">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Logo -->
+                <div th:if="${company.hasLogo()}">
+                    <img th:src="@{|/settings/company/files/${company.logoPath}|}" 
+                         alt="Logo" class="company-logo">
+                </div>
+                <div th:unless="${company.hasLogo()}" class="company-logo d-flex align-items-center justify-content-center">
+                    <i class="bi bi-building text-muted"></i>
+                </div>
+                
+                <!-- Company Info -->
+                <div class="flex-grow-1">
+                    <h5 class="mb-1" th:text="${company.displayName}">Nome Azienda</h5>
+                    <p class="mb-0 text-muted" th:text="${company.businessDescription}">Descrizione attività</p>
+                </div>
+                
+                <!-- Status Badge -->
+                <div>
+                    <span th:if="${company.isActive}" class="active-badge">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Attiva
+                    </span>
+                    <span th:unless="${company.isActive}" class="inactive-badge">
+                        <i class="bi bi-circle me-1"></i>
+                        Inattiva
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-card-body">
+            <!-- Information Grid -->
+            <div class="info-grid">
+                <div class="info-item" th:if="${company.vatNumber}">
+                    <span class="info-label">Partita IVA</span>
+                    <span class="info-value" th:text="${company.vatNumber}">IT12345678901</span>
+                </div>
+                
+                <div class="info-item" th:if="${company.fullLegalAddress}">
+                    <span class="info-label">Sede Legale</span>
+                    <span class="info-value" th:text="${company.fullLegalAddress}">Via Roma, 123 - 20100 Milano</span>
+                </div>
+                
+                <div class="info-item" th:if="${company.primaryEmail}">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" th:text="${company.primaryEmail}">info@azienda.it</span>
+                </div>
+                
+                <div class="info-item" th:if="${company.primaryPhone}">
+                    <span class="info-label">Telefono</span>
+                    <span class="info-value" th:text="${company.primaryPhone}">+39 02 1234567</span>
+                </div>
+                
+                <div class="info-item" th:if="${company.website}">
+                    <span class="info-label">Sito Web</span>
+                    <span class="info-value">
+                        <a th:href="${company.website}" target="_blank" th:text="${company.website}" class="text-decoration-none">
+                            www.azienda.it
+                        </a>
+                    </span>
+                </div>
+                
+                <div class="info-item" th:if="${company.lastUpdated}">
+                    <span class="info-label">Ultimo Aggiornamento</span>
+                    <span class="info-value" th:text="${#temporals.format(company.lastUpdated, 'dd/MM/yyyy')}">01/01/2025</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons mt-3 pt-3 border-top">
+                <a th:href="@{|/settings/company/${company.id}/edit|}" class="btn btn-outline-custom">
+                    <i class="bi bi-pencil"></i>
+                    Modifica
+                </a>
+                
+                <a th:href="@{|/settings/company/${company.id}/preview|}" class="btn btn-outline-custom">
+                    <i class="bi bi-eye"></i>
+                    Anteprima
+                </a>
+                
+                <form th:if="${!company.isActive}" style="display: inline;">
+                    <button type="submit" 
+                            th:formaction="@{|/settings/company/${company.id}/activate|}" 
+                            th:formmethod="post"
+                            class="btn btn-success-custom"
+                            onclick="return confirm('Attivare questa configurazione aziendale?');">
+                        <i class="bi bi-check-circle"></i>
+                        Attiva
+                    </button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </form>
+                
+                <form style="display: inline;">
+                    <button type="submit" 
+                            th:formaction="@{|/settings/company/${company.id}/delete|}" 
+                            th:formmethod="post"
+                            class="btn btn-danger-custom"
+                            onclick="return confirm('Sei sicuro di voler eliminare questa configurazione? Questa azione non può essere annullata.');">
+                        <i class="bi bi-trash"></i>
+                        Elimina
+                    </button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div th:if="${hasCompanyInfo}" class="row mt-4">
+        <div class="col-md-4">
+            <div class="config-card">
+                <div class="config-card-body text-center">
+                    <div class="display-6 text-primary">
+                        <span th:text="${#lists.size(companies)}">0</span>
+                    </div>
+                    <div class="text-muted">Configurazioni Totali</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="config-card">
+                <div class="config-card-body text-center">
+                    <div class="display-6 text-success">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="text-muted">Configurazione Attiva</div>
+                    <div class="small mt-1" th:if="${primaryCompany}">
+                        <span th:text="${primaryCompany.displayName}">Nome Azienda</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="config-card">
+                <div class="config-card-body text-center">
+                    <div class="display-6 text-info">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <div class="text-muted">Gestione Avanzata</div>
+                    <div class="small mt-1">
+                        <a th:href="@{/settings}" class="text-decoration-none">Vai alle Impostazioni</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+</body>
+</html>

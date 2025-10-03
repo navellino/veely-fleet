@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<!--
+ Administrative Document Form - Enhanced Version
+ 
+ Purpose: Modern administrative document creation/editing form with improved UX/UI
+ Features:
+ - Clean separation of concerns (HTML structure, CSS styling, JS behavior)
+ - Enhanced accessibility with proper ARIA labels and semantic markup
+ - Better form organization with logical sections
+ - Modern visual design consistent with contract form patterns
+ - Progressive enhancement approach
+ - Mobile-responsive design
+ 
+ Dependencies: Bootstrap 5.3+, admin_document_form.css, admin_document_form.js
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title th:text="${document.id == null ? 'Nuovo Documento Amministrativo' : 'Modifica Documento Amministrativo'}">
+        Documento Amministrativo — Veely
+    </title>
+    
+    <!-- Custom CSS for admin document form -->
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/settings.css}">
+        <link rel="stylesheet" th:href="@{/css/admin_document_form.css}">
+    </th:block>
+</head>
+
+<!-- Enhanced navbar with better accessibility and visual hierarchy -->
+<th:block th:fragment="navbar">
+    <!-- Enhanced Page Header -->
+    <header class="page-header-enhanced">
+        <div class="row align-items-center">
+            <!-- Title and Description -->
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="page-icon">
+                        <i class="bi bi-folder2-open text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                    <div>
+                        <h1 class="page-title-enhanced mb-1" id="main-heading"
+                            th:text="${document.id == null ? 'Nuovo Documento Amministrativo' : 'Modifica Documento Amministrativo'}">
+                            Modifica Documento Amministrativo
+                        </h1>
+                        <p class="page-subtitle-enhanced mb-0" 
+                           th:text="${document.id == null ? 
+                                    'Compila tutti i campi necessari per creare un nuovo documento' : 
+                                    'Modifica le informazioni del documento esistente'}">
+                            Modifica le informazioni del documento esistente
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Quick Info Tags -->
+                <div class="quick-info-tags" th:if="${document.id != null}">
+                    <span class="info-tag" th:if="${document.type}">
+                        <i class="bi bi-tag"></i>
+                        <span th:text="${document.type.name}">Tipo Documento</span>
+                    </span>
+                    <span class="info-tag" th:if="${document.authority}">
+                        <i class="bi bi-building"></i>
+                        <span th:text="${document.authority.name}">Ente</span>
+                    </span>
+                    <span class="info-tag" th:if="${document.expiryDate}">
+                        <i class="bi bi-calendar-event"></i>
+                        Scade: <span th:text="${#temporals.format(document.expiryDate, 'dd/MM/yyyy')}">31/12/2024</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-4">
+                <div class="header-actions-enhanced">
+                    <!-- Back Button -->
+                    <a th:href="@{/admin/administrative-documents}" 
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Torna all'Elenco
+                    </a>
+                    
+                    <!-- Additional Actions for existing documents -->
+                    <div th:if="${document.id != null}" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-info dropdown-toggle" 
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                            Azioni
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="window.print()">
+                                    <i class="bi bi-printer me-2"></i>Stampa Documento
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" 
+                                   th:href="@{/admin/administrative-documents/{id}/delete(id=${document.id})}"
+                                   onclick="return confirm('Sei sicuro di voler eliminare questo documento?')">
+                                    <i class="bi bi-trash me-2"></i>Elimina Documento
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Enhanced breadcrumb with better visual hierarchy -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/welcome}" class="breadcrumb-link">
+                    <i class="bi bi-house-door" aria-hidden="true"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/admin/administrative-documents}" class="breadcrumb-link">
+                    <i class="bi bi-folder2-open" aria-hidden="true"></i>
+                    Documenti Amministrativi
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="fw-medium" th:text="${document.id == null ? 'Nuovo Documento' : 'Modifica Documento'}">
+                    Modifica Documento
+                </span>
+            </li>
+        </ol>
+    </nav>
+</th:block>
+
+<body>
+<main class="container my-5 flex-fill" role="main" aria-labelledby="main-heading">
+    <!-- Main Form Container with enhanced structure -->
+    <div class="admin-document-form-container">
+        <form th:object="${document}"
+              th:action="${document.id} != null ? @{|/admin/administrative-documents/${document.id}/edit|} : @{/admin/administrative-documents/new}"
+              method="post" 
+              class="admin-document-form needs-validation"
+              id="main-form"
+              novalidate
+              aria-label="Modulo gestione documento amministrativo">
+            
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- SECTION 1: Basic Information -->
+            <section class="form-section" id="section-basic-info" aria-labelledby="basic-info-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="basic-info-title">Informazioni Base</h2>
+                        <p class="form-section-subtitle">Dati identificativi del documento amministrativo</p>
+                    </div>
+                </header>
+                
+                <div class="row g-3">
+                    <!-- Document Type Selection -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="documentType" class="form-label required">
+                                Tipo Documento
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Seleziona la tipologia del documento amministrativo"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <select id="documentType" 
+                                    name="type.id"
+                                    class="form-select" 
+                                    th:field="*{type.id}" 
+                                    required
+                                    aria-describedby="documentType-help">
+                                <option value="">Seleziona tipo documento...</option>
+                                <option th:each="t : ${types}" 
+                                        th:value="${t.id}" 
+                                        th:text="${t.name}">
+                                    Tipo Documento
+                                </option>
+                            </select>
+                            <div id="documentType-help" class="visually-hidden">
+                                Campo obbligatorio. Seleziona la tipologia del documento amministrativo.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Number -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="documentNumber" class="form-label">
+                                Riferimento Documento
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Numero identificativo del documento (opzionale)"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="text" 
+                                   id="documentNumber" 
+                                   name="documentNumber"
+                                   class="form-control" 
+                                   th:field="*{documentNumber}"
+                                   placeholder="es. DOC-2024-001"
+                                   maxlength="100"
+                                   aria-describedby="documentNumber-help" />
+                            <div id="documentNumber-help" class="visually-hidden">
+                                Numero identificativo del documento. Campo opzionale, massimo 100 caratteri.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Authority -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="authority" class="form-label">
+                                Ente Emittente
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Ente o autorità che ha emesso il documento"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <select id="authority" 
+                                    name="authority.id"
+                                    class="form-select" 
+                                    th:field="*{authority.id}"
+                                    aria-describedby="authority-help">
+                                <option value="">Seleziona ente...</option>
+                                <option th:each="a : ${authorities}" 
+                                        th:value="${a.id}" 
+                                        th:text="${a.name}">
+                                    Ente
+                                </option>
+                            </select>
+                            <div id="authority-help" class="visually-hidden">
+                                Ente o autorità che ha emesso il documento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Responsible Person -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="responsible" class="form-label">
+                                Responsabile
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Persona responsabile per questo documento"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <select id="responsible" 
+                                    name="responsible.id"
+                                    class="form-select" 
+                                    th:field="*{responsible.id}"
+                                    aria-describedby="responsible-help">
+                                <option value="">Seleziona responsabile...</option>
+                                <option th:each="e : ${employees}" 
+                                        th:value="${e.id}" 
+                                        th:text="${e.firstName + ' ' + e.lastName}">
+                                    Dipendente
+                                </option>
+                            </select>
+                            <div id="responsible-help" class="visually-hidden">
+                                Persona responsabile per questo documento.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Dates and Terms -->
+            <section class="form-section" id="section-dates-terms" aria-labelledby="dates-terms-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="dates-terms-title">Date e Scadenze</h2>
+                        <p class="form-section-subtitle">Informazioni temporali e promemoria</p>
+                    </div>
+                </header>
+                
+                <div class="row g-3">
+                    <!-- Issue Date -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="issueDate" class="form-label">
+                                Data Emissione
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Data di emissione del documento"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="date" 
+                                   id="issueDate" 
+                                   name="issueDate"
+                                   class="form-control" 
+                                   th:field="*{issueDate}"
+                                   aria-describedby="issueDate-help" />
+                            <div id="issueDate-help" class="visually-hidden">
+                                Data di emissione del documento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Date -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="expiryDate" class="form-label">
+                                Data Scadenza
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Data di scadenza del documento"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="date" 
+                                   id="expiryDate" 
+                                   name="expiryDate"
+                                   class="form-control" 
+                                   th:field="*{expiryDate}"
+                                   aria-describedby="expiryDate-help" />
+                            <div id="expiryDate-help" class="visually-hidden">
+                                Data di scadenza del documento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notice Days -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="noticeDays" class="form-label">
+                                Giorni di Preavviso
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Numero di giorni prima della scadenza per ricevere un promemoria"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="number" 
+                                   id="noticeDays" 
+                                   name="noticeDays"
+                                   class="form-control" 
+                                   th:field="*{noticeDays}"
+                                   min="0"
+                                   max="365"
+                                   placeholder="es. 30"
+                                   aria-describedby="noticeDays-help" />
+                            <div id="noticeDays-help" class="visually-hidden">
+                                Numero di giorni prima della scadenza per ricevere un promemoria. Valore tra 0 e 365.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Last Reminder Date -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="lastReminderDate" class="form-label">
+                                Ultimo Promemoria
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Data dell'ultimo promemoria inviato"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="date" 
+                                   id="lastReminderDate" 
+                                   name="lastReminderDate"
+                                   class="form-control" 
+                                   th:field="*{lastReminderDate}"
+                                   aria-describedby="lastReminderDate-help" />
+                            <div id="lastReminderDate-help" class="visually-hidden">
+                                Data dell'ultimo promemoria inviato.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Check Date -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nextCheckDate" class="form-label">
+                                Prossimo Controllo
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Data del prossimo controllo programmato"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <input type="date" 
+                                   id="nextCheckDate" 
+                                   name="nextCheckDate"
+                                   class="form-control" 
+                                   th:field="*{nextCheckDate}"
+                                   aria-describedby="nextCheckDate-help" />
+                            <div id="nextCheckDate-help" class="visually-hidden">
+                                Data del prossimo controllo programmato.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="notes" class="form-label">
+                                Note Aggiuntive
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Note e commenti aggiuntivi sul documento"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <textarea id="notes" 
+                                      name="notes"
+                                      class="form-control" 
+                                      th:field="*{notes}"
+                                      rows="3"
+                                      placeholder="Inserisci eventuali note o commenti..."
+                                      maxlength="1000"
+                                      aria-describedby="notes-help"></textarea>
+                            <div id="notes-help" class="visually-hidden">
+                                Note e commenti aggiuntivi sul documento. Massimo 1000 caratteri.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Form Actions with enhanced accessibility -->
+            <footer class="form-actions">
+                <div class="form-actions-left">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        I campi contrassegnati con <span class="text-required">*</span> sono obbligatori
+                    </small>
+                </div>
+                <div class="form-actions-right">
+                    <a class="btn btn-form-secondary" 
+                       th:href="@{/admin/administrative-documents}"
+                       role="button"
+                       aria-label="Annulla e torna all'elenco documenti">
+                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+                        Annulla
+                    </a>
+                    <button type="submit" 
+                            class="btn btn-form-primary"
+                            data-original-text="${document.id == null ? 'Crea Documento' : 'Aggiorna Documento'}"
+                            aria-describedby="submit-help">
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>
+                        <span th:text="${document.id == null ? 'Crea Documento' : 'Aggiorna Documento'}">Crea Documento</span>
+                    </button>
+                    <div id="submit-help" class="visually-hidden">
+                        Premi Ctrl+Invio come scorciatoia per salvare il documento.
+                    </div>
+                </div>
+            </footer>
+        </form>
+    </div>
+
+    <!-- Documents Section - Enhanced for existing documents with proper accessibility -->
+    <aside th:if="${document.id != null}" 
+           class="documents-section" 
+           role="region" 
+           aria-labelledby="documents-title">
+        <header class="documents-header">
+            <h3 class="documents-title" id="documents-title">
+                <i class="bi bi-folder" aria-hidden="true"></i>
+                Documenti Allegati
+            </h3>
+            <span class="document-count-badge" 
+                  th:text="${#lists.size(documents)} + ' file'"
+                  aria-label="${#lists.size(documents)} + ' documenti allegati'">0 file</span>
+        </header>
+
+        <!-- Enhanced file upload form with accessibility -->
+        <form th:action="@{|/admin/administrative-documents/${document.id}/docs|}" 
+              method="post" 
+              enctype="multipart/form-data" 
+              class="upload-form row g-3"
+              aria-label="Caricamento nuovo documento">
+            
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="type" value="OTHER" />
+            
+            <!-- Issue Date -->
+            <div class="col-md-3">
+                <label for="docIssueDate" class="form-label">Data Emissione</label>
+                <input type="date" 
+                       id="docIssueDate" 
+                       name="issueDate"
+                       class="form-control"
+                       aria-describedby="docIssueDate-help" />
+                <div id="docIssueDate-help" class="visually-hidden">
+                    Data di emissione del documento da caricare.
+                </div>
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="col-md-3">
+                <label for="docExpiryDate" class="form-label">Data Scadenza</label>
+                <input type="date" 
+                       id="docExpiryDate" 
+                       name="expiryDate"
+                       class="form-control"
+                       aria-describedby="docExpiryDate-help" />
+                <div id="docExpiryDate-help" class="visually-hidden">
+                    Data di scadenza del documento da caricare.
+                </div>
+            </div>
+
+            <!-- File Input with enhanced accessibility -->
+            <div class="col-md-4">
+                <label for="file" class="form-label">
+                    Seleziona Documento
+                    <small class="text-muted">(PDF, DOC, IMG - max 10MB)</small>
+                </label>
+                <input type="file" 
+                       id="file" 
+                       name="file" 
+                       class="form-control" 
+                       accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.msg"
+                       required
+                       aria-describedby="file-help" />
+                <div id="file-help" class="visually-hidden">
+                    Campo obbligatorio. Seleziona un file da caricare. Formati supportati: PDF, DOC, DOCX, JPG, PNG, WEBP, MSG. Dimensione massima: 10MB.
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" 
+                        class="upload-btn"
+                        aria-describedby="upload-button-help">
+                    <i class="bi bi-upload" aria-hidden="true"></i>
+                    Carica
+                </button>
+                <div id="upload-button-help" class="visually-hidden">
+                    Carica il documento selezionato con le informazioni inserite.
+                </div>
+            </div>
+        </form>
+
+        <!-- Documents Table - Enhanced with accessibility -->
+        <div th:if="${not #lists.isEmpty(documents)}" 
+             class="documents-table"
+             role="region"
+             aria-label="Tabella documenti allegati">
+            <table class="table table-sm" 
+                   role="table"
+                   aria-label="Elenco documenti caricati">
+                <thead>
+                    <tr>
+                        <th scope="col" id="col-filename">
+                            <i class="bi bi-file-text me-1" aria-hidden="true"></i>
+                            Nome File
+                        </th>
+                        <th scope="col" id="col-actions" class="text-end">
+                            Azioni
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${documents}" class="document-row">
+                        <td headers="col-filename">
+                            <a th:href="@{|/admin/administrative-documents/${document.id}/docs/${doc.path.substring(doc.path.lastIndexOf('/')+1)}|}"
+                               class="document-link"
+                               th:title="'Scarica: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}"
+                               th:aria-label="'Scarica documento: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}">
+                                <i class="bi bi-download" aria-hidden="true"></i>
+                                <span th:text="${doc.path.substring(doc.path.lastIndexOf('/')+1)}">document.pdf</span>
+                            </a>
+                        </td>
+                        <td headers="col-actions">
+                            <div class="document-actions">
+                                <a th:href="@{|/admin/administrative-documents/${document.id}/docs/${doc.path.substring(doc.path.lastIndexOf('/')+1)}|}"
+                                   class="document-action-btn download"
+                                   th:title="'Scarica: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}"
+                                   th:aria-label="'Scarica documento: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}">
+                                    <i class="bi bi-download" aria-hidden="true"></i>
+                                </a>
+                                <a th:href="@{|/admin/administrative-documents/${document.id}/docs/${doc.id}/delete|}"
+                                   class="document-action-btn delete"
+                                   th:title="'Elimina: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}"
+                                   th:aria-label="'Elimina documento: ' + ${doc.path.substring(doc.path.lastIndexOf('/')+1)}"
+                                   onclick="return confirm('Sei sicuro di voler eliminare questo documento?')">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty documents state with proper accessibility -->
+        <div th:if="${#lists.isEmpty(documents)}" 
+             class="empty-documents-state"
+             role="status"
+             aria-live="polite">
+            <i class="empty-documents-icon bi bi-inbox" aria-hidden="true"></i>
+            <p class="empty-documents-text">Nessun documento caricato</p>
+        </div>
+    </aside>
+</main>
+
+<!-- JavaScript Integration - Load after DOM structure is ready -->
+<script th:src="@{/js/admin_document_form.js}" defer></script>
+
+<!-- Inline script for immediate initialization if needed -->
+<script>
+    // Ensure form enhancements work even if main script fails to load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Basic fallback functionality
+        const form = document.querySelector('.admin-document-form');
+        if (form && !window.AdminDocumentForm) {
+            console.warn('AdminDocumentForm script not loaded, using basic functionality');
+            
+            // Basic form validation fallback
+            form.addEventListener('submit', function(e) {
+                const requiredFields = form.querySelectorAll('[required]');
+                let hasErrors = false;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        hasErrors = true;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (hasErrors) {
+                    e.preventDefault();
+                    alert('Compilare tutti i campi obbligatori prima di continuare.');
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

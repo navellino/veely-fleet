@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+       th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title th:text="${item.id == null ? 'Nuovo Adempimento' : 'Modifica Adempimento'}">Adempimento</title>
+     <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/safety-form.css}">
+    	<style>
+	    	.header-icon {
+	            width: 64px;
+	            height: 64px;
+	            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+	            border-radius: var(--radius-xl);
+	            display: flex;
+	            align-items: center;
+	            justify-content: center;
+	            color: white;
+	            font-size: 2rem;
+	            flex-shrink: 0;
+	        }
+	        .header-main {
+	            display: flex;
+	            align-items: center;
+	            gap: 1.5rem;
+	        }
+        </style>
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+	<div class="header-main">
+			<div class="header-icon">
+				<i th:class="${item.id == null ? 'bi bi-plus-circle' : 'bi bi-pencil-square'}"></i>
+			</div>
+		<h1 class="page-title">
+			<span th:text="${item.id == null ? 'Nuovo Adempimento' : 'Modifica Adempimento'}">Nuovo Adempimento</span>
+		</h1>
+		<p class="page-subtitle"><span th:text="${item.id == null ? 'Aggiungi un nuovo adempimento di sicurezza' : 'Modifica i dettagli dell adempimento'}">
+				Aggiungi un nuovo adempimento di sicurezza </span>
+		</p>
+	</div>
+	<nav class="modern-breadcrumb" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/safety}">
+                    <i class="bi bi-shield-check me-1"></i>Adempimenti</a></li>
+            <li class="breadcrumb-item active" aria-current="page" 
+                th:text="${item.id == null ? 'Nuovo' : 'Modifica'}">Nuovo</li>
+        </ol>
+    </nav>
+</th:block>
+<body>
+<main class="main-container">
+    <!-- Breadcrumb -->
+    
+
+    <!-- Page Header
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-start">
+            
+        </div>
+    </div>
+ -->
+    <!-- Form Container -->
+    <div class="form-container">
+        <form th:object="${item}"
+              th:action="${item.id == null} ? @{/safety/new} : @{/safety/{id}/edit(id=${item.id})}"
+              method="post" id="complianceForm">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Informazioni Base
+                </h3>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Categoria *</label>
+                        <div class="input-group-modern">
+                            <select class="form-select" th:field="*{category.id}" required>
+                                <option value="">Seleziona categoria...</option>
+                                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#categoryModal" title="Aggiungi nuova categoria">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Descrizione *</label>
+                        <input class="form-control" th:field="*{description}" 
+                               placeholder="Es: Corso sicurezza generale..."  />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="bi bi-person-badge"></i>
+                    Assegnazione
+                </h3>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Dipendente</label>
+                        <select class="form-select" th:field="*{employee.id}">
+                            <option value="">Seleziona dipendente...</option>
+                            <option th:each="e : ${employees}" th:value="${e.id}" 
+                                    th:text="${e.lastName + ' ' + e.firstName}"></option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Commessa</label>
+                        <select class="form-select" th:field="*{project.id}">
+                            <option value="">Seleziona commessa...</option>
+                            <option th:each="p : ${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timing Section -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="bi bi-calendar-event"></i>
+                    Date e Periodicità
+                </h3>
+                
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Data visita/corso</label>
+                        <input type="date" class="form-control" th:field="*{visitDate}" />
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Periodicità (anni)</label>
+                        <input type="number" class="form-control" th:field="*{periodicity}" 
+                               min="1" max="10" placeholder="Es: 1" />
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Data scadenza *</label>
+                        <input type="date" class="form-control" th:field="*{dueDate}" required />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <div>
+            <a class="btn-modern btn-list-modern" th:href="@{/safety}">
+                <i class="bi bi-list-ul"></i>
+                Torna alla Lista
+            </a>
+        </div>
+        
+        <div class="d-flex gap-3">
+            <button type="submit" form="complianceForm" class="btn-modern btn-primary-modern" id="submitBtn">
+                <i th:class="${item.id == null ? 'bi bi-plus-lg' : 'bi bi-check-lg'}"></i>
+                <span th:text="${item.id == null ? 'Crea Adempimento' : 'Aggiorna Adempimento'}">Crea Adempimento</span>
+            </button>
+            
+            <a th:if="${item.id != null}" class="btn-modern btn-success-modern" th:href="@{/safety/new}">
+                <i class="bi bi-plus-lg"></i>
+                Nuovo
+            </a>
+            
+            <a class="btn-modern btn-outline-modern" th:href="@{/safety}">
+                <i class="bi bi-x-lg"></i>
+                Annulla
+            </a>
+        </div>
+    </div>
+
+    <!-- Documents Section (only in edit mode) -->
+    <div th:if="${item.id != null}" class="documents-section">
+        <h3 class="form-section-title">
+            <i class="bi bi-file-earmark-arrow-up"></i>
+            Documenti Allegati
+        </h3>
+        
+        <!-- Upload Form -->
+        <div class="upload-area">
+            <form class="upload-form" th:action="@{/safety/{id}/docs(id=${item.id})}" 
+                  method="post" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">File *</label>
+                        <input type="file" name="file" class="form-control" required
+                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" />
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">Data emissione</label>
+                        <input type="date" name="issueDate" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">Data scadenza</label>
+                        <input type="date" name="expiryDate" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo documento *</label>
+                        <select name="type" class="form-select" required>
+                            <option value="">Seleziona tipo...</option>
+                            <option th:each="dt : ${docTypes}" th:value="${dt}" th:text="${dt.displayName}"></option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn-upload w-100" title="Carica documento">
+                            <i class="bi bi-upload"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Documents Table -->
+        <div class="documents-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>File</th>
+                        <th>Data Emissione</th>
+                        <th>Data Scadenza</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${documents}">
+                        <td>
+                            <span class="doc-type-badge" th:text="${doc.type.displayName}">Tipo</span>
+                        </td>
+                        <td>
+                            <div class="fw-medium" th:text="${doc.path.substring(doc.path.lastIndexOf('/') + 1)}">File</div>
+                            <small class="text-muted">Documento allegato</small>
+                        </td>
+                        <td th:text="${doc.issueDate != null ? #temporals.format(doc.issueDate,'dd/MM/yyyy') : '-'}">-</td>
+                        <td th:text="${doc.expiryDate != null ? #temporals.format(doc.expiryDate,'dd/MM/yyyy') : '-'}">-</td>
+                        <td class="text-center">
+                            <div class="doc-actions">
+                                <a th:href="@{/safety/{id}/docs/{fn}(id=${item.id},fn=${doc.path.substring(doc.path.lastIndexOf('/')+1)})}" 
+                                   class="btn-doc-action btn-download" title="Download">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                <button class="btn-doc-action btn-delete-doc" 
+                                        onclick="return confirm('Eliminare il documento?');"
+                                        th:onclick="'window.location.href=\'' + @{/safety/{itemId}/docs/{docId}/delete(itemId=${item.id},docId=${doc.id})} + '\';'"
+                                        title="Elimina">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(documents)}">
+                        <td colspan="5">
+                            <div class="empty-state-docs">
+                                <i class="bi bi-inbox"></i>
+                                <h5>Nessun documento caricato</h5>
+                                <p class="text-muted">Carica il primo documento utilizzando il form sopra.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Nuova Categoria -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="categoryForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Nuova Categoria
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome Categoria *</label>
+                        <input type="text" name="name" class="form-control" 
+                               placeholder="Es: Formazione Sicurezza" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-modern btn-primary-modern">
+                        <i class="bi bi-check-lg"></i>
+                        Salva Categoria
+                    </button>
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i>
+                        Annulla
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Category form handling
+        const categoryForm = document.getElementById('categoryForm');
+        categoryForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Loading state
+            submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Salvando...';
+            submitBtn.classList.add('btn-loading');
+            
+            try {
+                const name = categoryForm.querySelector('input[name="name"]').value;
+                const csrf = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+                
+                const headers = { 'Content-Type': 'application/json' };
+                if (csrf) headers[csrfHeader] = csrf;
+                
+                const resp = await fetch('/api/safety-categories', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ name })
+                });
+                
+                if (resp.ok) {
+                    const cat = await resp.json();
+                    const select = document.querySelector('select[name="category.id"]');
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    select.appendChild(opt);
+                    select.value = cat.id;
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+                    modal.hide();
+                    categoryForm.reset();
+                    
+                    // Success feedback
+                    showNotification('Categoria creata con successo!', 'success');
+                } else {
+                    throw new Error('Errore nella creazione della categoria');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Errore nella creazione della categoria', 'error');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('btn-loading');
+            }
+        });
+
+        // Form validation and submit handling
+        const complianceForm = document.getElementById('complianceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        complianceForm.addEventListener('submit', function(e) {
+            // Add loading state to submit button
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Salvando...';
+            submitBtn.classList.add('btn-loading');
+            
+            // Reset after 3 seconds if form doesn't redirect
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('btn-loading');
+            }, 3000);
+        });
+
+        // Auto-calculate due date based on visit date and periodicity
+        const visitDateInput = document.querySelector('input[name="visitDate"]');
+        const periodicityInput = document.querySelector('input[name="periodicity"]');
+        const dueDateInput = document.querySelector('input[name="dueDate"]');
+        
+        function calculateDueDate() {
+            const visitDate = visitDateInput.value;
+            const periodicity = periodicityInput.value;
+            
+            if (visitDate && periodicity) {
+                const visit = new Date(visitDate);
+                const due = new Date(visit);
+                due.setFullYear(due.getFullYear() + parseInt(periodicity));
+                
+                const formattedDate = due.toISOString().split('T')[0];
+                dueDateInput.value = formattedDate;
+                
+                // Visual feedback
+                dueDateInput.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)';
+                setTimeout(() => {
+                    dueDateInput.style.background = '';
+                }, 2000);
+            }
+        }
+        
+        visitDateInput?.addEventListener('change', calculateDueDate);
+        periodicityInput?.addEventListener('input', calculateDueDate);
+
+        // File upload drag & drop enhancement
+        const fileInput = document.querySelector('input[type="file"]');
+        const uploadArea = document.querySelector('.upload-area');
+        
+        if (fileInput && uploadArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight(e) {
+                uploadArea.style.borderColor = '#667eea';
+                uploadArea.style.background = 'linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)';
+            }
+            
+            function unhighlight(e) {
+                uploadArea.style.borderColor = '#cbd5e1';
+                uploadArea.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            }
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    showNotification('File selezionato: ' + files[0].name, 'info');
+                }
+            }
+        }
+
+        // Enhanced form validation
+        const requiredInputs = document.querySelectorAll('[required]');
+        requiredInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = '#ef4444';
+                    this.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+                } else {
+                    this.style.borderColor = '#10b981';
+                    this.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.1)';
+                    setTimeout(() => {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    }, 2000);
+                }
+            });
+        });
+    });
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            border: none;
+        `;
+        
+        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-${icon} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+S to save
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            document.getElementById('submitBtn').click();
+        }
+        
+        // Escape to cancel
+        if (e.key === 'Escape') {
+            const activeModal = document.querySelector('.modal.show');
+            if (activeModal) {
+                const modal = bootstrap.Modal.getInstance(activeModal);
+                modal.hide();
+            } else {
+                window.location.href = '/safety';
+            }
+        }
+    });
+</script>
+</body>
+</html>

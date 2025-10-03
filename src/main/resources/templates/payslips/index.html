@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Invio Documenti — Veely</title>
+    <!-- CSS Block: External stylesheets for payslips page -->
+    <th:block th:fragment="cssblock">
+        <!-- AOS (Animate On Scroll) library for smooth animations -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+        <!-- Page-specific styles for payslips management -->
+        <link rel="stylesheet" th:href="@{/css/payslips.css}">
+    </th:block>
+</head>
+
+<!-- Navigation Bar Fragment: Page header and filtering -->
+<th:block th:fragment="navbar">
+    <!-- Page Header Section -->
+    <div data-aos="fade-down">
+        <div>
+            <h1>
+                <i class="bi bi-envelope-at text-primary" aria-hidden="true"></i>
+                <span class="page-title">Invio Documenti HR</span>
+            </h1>
+            <p class="page-subtitle">
+                Carica, consulta e invia via email cedolini e certificazioni uniche ai dipendenti.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <section class="page-header" data-aos="fade-down" data-aos-delay="100">
+        <div class="header-actions">
+            <form method="get" th:action="@{/payslips}" class="filter-form" role="search">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label for="month" class="form-label">Mese di riferimento (Cedolini)</label>
+                        <input type="month"
+                               id="month"
+                               name="month"
+                               class="form-control"
+                               th:value="${selectedMonthValue}"
+                               required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="year" class="form-label">Anno di rif. (CU)</label>
+                        <select id="year"
+                                name="year"
+                                class="form-select">
+                            <option th:each="yearOption : ${availableYears}"
+                                    th:value="${yearOption}"
+                                    th:text="${yearOption}"
+                                    th:selected="${yearOption.equals(selectedYear)}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label invisible">Filtra</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-filter me-1" aria-hidden="true"></i>
+                            Filtra
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</th:block>
+
+<body>
+
+    <!-- Tab navigation -->
+    <ul class="nav nav-tabs nav-fill mb-4" id="documentTabs" role="tablist" data-aos="fade-up">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="payslips-tab-button" data-bs-toggle="tab" data-bs-target="#payslips-tab" type="button" role="tab" aria-controls="payslips-tab" aria-selected="true">
+                <i class="bi bi-envelope-at me-2"></i>Cedolini Paga
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="certifications-tab-button" data-bs-toggle="tab" data-bs-target="#certifications-tab" type="button" role="tab" aria-controls="certifications-tab" aria-selected="false">
+                <i class="bi bi-file-earmark-text me-2"></i>Certificazioni Uniche
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="documentTabsContent">
+
+        <!-- #################################### -->
+        <!-- ###### PAYSLIPS TAB CONTENT ###### -->
+        <!-- #################################### -->
+        <div class="tab-pane fade show active" id="payslips-tab" role="tabpanel" aria-labelledby="payslips-tab-button">
+            <div class="content-grid" data-aos="fade-up" data-aos-delay="100">
+                <!-- Upload Section Card -->
+                <div class="card upload-card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="bi bi-upload me-2"></i>Carica cedolini</h2>
+                        <p class="card-subtitle">Seleziona i file PDF del mese. Il nome file deve contenere il codice fiscale.</p>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/payslips/upload}" method="post" enctype="multipart/form-data" class="upload-form" novalidate>
+                            <th:block th:insert="~{fragments/layoutNavBar :: csrf}"></th:block>
+                            <input type="hidden" name="currentYear" th:value="${selectedYearValue}">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                	<label for="referenceMonth" class="form-label">
+                                	<i class="bi bi-calendar3 me-1"></i> Mese</label>
+                                	<input type="month" id="referenceMonth" name="referenceMonth" class="form-control" required th:value="${selectedMonthValue}">
+                                	 <small class="text-white">.</small>
+                                </div>
+                                <div class="col-md-6"><label for="files" class="form-label"><i class="bi bi-file-earmark-pdf me-1"></i> File cedolini</label><input type="file" id="files" name="files" class="form-control" multiple accept="application/pdf"><small class="text-muted">Puoi caricare più file contemporaneamente.</small></div>
+                                <div class="col-md-3 text-end"><button type="submit" class="btn btn-success w-100"><i class="bi bi-upload me-1"></i> Carica</button>
+                                <small class="text-white">.</small>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="mt-3" th:if="${uploadResult != null}"><div class="alert" th:classappend="${uploadResult.errors.isEmpty()} ? 'alert-success' : 'alert-warning'" role="alert"><strong><i class="bi me-2" th:classappend="${uploadResult.errors.isEmpty()} ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i><span th:text="|${uploadResult.stored} cedolini caricati|"></span></strong><div th:if="${uploadResult.unmatched > 0}" class="mt-2"><small class="text-muted"><i class="bi bi-info-circle me-1"></i><span th:text="|${uploadResult.unmatched} file senza corrispondenza|"></span></small></div><ul class="mb-0 mt-2 small" th:if="${!uploadResult.unmatchedCodes.isEmpty()}"><li th:each="c : ${uploadResult.unmatchedCodes}" th:text="${c}"></li></ul><ul class="mb-0 mt-2 small" th:if="${!uploadResult.errors.isEmpty()}"><li th:each="e : ${uploadResult.errors}" th:text="${e}" class="text-danger"></li></ul></div></div>
+                    </div>
+                </div>
+
+                <!-- Send Email Section Card -->
+                <div class="card send-card" th:if="${payslips != null}">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="bi bi-send me-2"></i> Invio massivo via email</h2>
+                        <p class="card-subtitle">Seleziona i cedolini da inoltrare via email ai dipendenti.</p>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/payslips/send}" method="post" id="sendForm" novalidate>
+                            <th:block th:insert="~{fragments/layoutNavBar :: csrf}"></th:block>
+                            <input type="hidden" name="referenceMonth" th:value="${selectedMonthValue}"><input type="hidden" name="currentYear" th:value="${selectedYearValue}">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6"><label for="subject" class="form-label"><i class="bi bi-envelope me-1"></i> Oggetto</label><input type="text" id="subject" name="subject" class="form-control" th:value="${lastSubject}" required></div>
+                                <div class="col-md-6"><label for="body" class="form-label"><i class="bi bi-chat-text me-1"></i> Messaggio</label><textarea id="body" name="body" class="form-control" rows="3" th:text="${lastBody}" required></textarea></div>
+                            </div>
+                            <div class="mt-3 mb-4" th:if="${sendResult != null}"><div class="alert" th:classappend="${sendResult.errors.isEmpty()} ? 'alert-success' : 'alert-warning'" role="alert"><strong><i class="bi me-2" th:classappend="${sendResult.errors.isEmpty()} ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i><span th:text="|${sendResult.sent} inviati|"></span><span th:if="${sendResult.skipped > 0}" class="ms-2 text-muted">• <span th:text="|${sendResult.skipped} non inviati|"></span></span></strong><ul class="mb-0 mt-2 small" th:if="${!sendResult.skippedMessages.isEmpty()}"><li th:each="m : ${sendResult.skippedMessages}" th:text="${m}" class="text-muted"></li></ul><ul class="mb-0 mt-2 small" th:if="${!sendResult.errors.isEmpty()}"><li th:each="e : ${sendResult.errors}" th:text="${e}" class="text-danger"></li></ul></div></div>
+                            
+                            <!-- RESTORED: Full table structure for Payslips -->
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 45px;"><div class="form-check"><input type="checkbox" id="selectAll" class="form-check-input"></div></th>
+                                            <th scope="col">Dipendente</th>
+                                            <th scope="col">Codice Fiscale</th>
+                                            <th scope="col">Stato</th>
+                                            <th scope="col" class="d-none d-md-table-cell">Caricato il</th>
+                                            <th scope="col" class="d-none d-lg-table-cell">Ultimo invio</th>
+                                            <th scope="col" class="text-end">Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:if="${payslips.isEmpty()}"><td colspan="7" class="text-center py-5"><div class="empty-state"><h3>Nessun cedolino</h3><p>Non ci sono cedolini per il mese selezionato.</p></div></td></tr>
+                                        <tr th:each="p : ${payslips}">
+                                            <td><div class="form-check"><input type="checkbox" name="payslipIds" class="form-check-input payslip-checkbox" th:value="${p.id}" th:disabled="${p.employee == null}"></div></td>
+                                            <td>
+                                                <div th:text="${p.displayName}" class="fw-semibold"></div>
+                                                <small th:if="${p.employee == null}" class="text-danger d-block"><i class="bi bi-exclamation-triangle me-1"></i> Non associato</small>
+                                                <small th:unless="${p.employee == null}" class="text-muted d-block" th:text="${p.employee.email}"></small>
+                                            </td>
+                                            <td><code class="text-dark" th:text="${p.fiscalCode}"></code></td>
+                                            <td><span class="status-badge" th:classappend="${p.status.name()}" th:text="${p.status.label}"></span></td>
+                                            <td class="d-none d-md-table-cell"><span th:text="${#temporals.format(p.uploadedAt, 'dd/MM/yy HH:mm')}"></span></td>
+                                            <td class="d-none d-lg-table-cell"><span th:text="${p.sentAt != null ? #temporals.format(p.sentAt, 'dd/MM/yy HH:mm') : '-'}"></span></td>
+                                            <td class="text-end">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a th:href="@{|/payslips/${p.id}/download|}" class="btn btn-outline-secondary" title="Scarica"><i class="bi bi-download"></i></a>
+                                                    <button type="submit" class="btn btn-outline-danger" title="Elimina" th:formaction="@{|/payslips/${p.id}/delete|}" formmethod="post" data-confirm-message="Eliminare questo cedolino?"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+                                <span class="selection-counter text-muted small" style="display: none;">0 selezionati</span>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="submit" class="btn btn-outline-danger" th:formaction="@{/payslips/delete-selected}" formmethod="post" data-selection-required disabled data-confirm-message="Eliminare i cedolini selezionati?"><i class="bi bi-trash me-1"></i> Elimina</button>
+                                    <button type="submit" class="btn btn-primary" data-selection-required disabled><i class="bi bi-send me-1"></i> Invia</button>
+                                    <a class="btn btn-outline-secondary" th:href="@{|/payslips/export?month=${selectedMonthValue}|}"><i class="bi bi-printer me-1"></i>Stampa riepilogo invii</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ############################################## -->
+        <!-- ###### UNIQUE CERTIFICATIONS TAB CONTENT ###### -->
+        <!-- ############################################## -->
+        <div class="tab-pane fade" id="certifications-tab" role="tabpanel" aria-labelledby="certifications-tab-button">
+            <div class="content-grid" data-aos="fade-up" data-aos-delay="100">
+                <div class="card upload-card">
+                     <div class="card-header">
+                        <h2 class="card-title"><i class="bi bi-upload me-2"></i> Carica Certificazioni Uniche</h2>
+                        <p class="card-subtitle">Seleziona i file PDF dell'anno. Il nome file deve contenere il codice fiscale.</p>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/payslips/certifications/upload}" method="post" enctype="multipart/form-data" class="upload-form" novalidate>
+                            <th:block th:insert="~{fragments/layoutNavBar :: csrf}"></th:block>
+                            <input type="hidden" name="currentMonth" th:value="${selectedMonthValue}">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3"><label for="referenceYear" class="form-label"><i class="bi bi-calendar4-event me-1"></i> Anno</label><input type="number" id="referenceYear" name="referenceYear" class="form-control" min="2000" th:value="${selectedYearValue}" required><small class="text-white">.</small></div>
+                                <div class="col-md-6"><label for="certificationFiles" class="form-label"><i class="bi bi-file-earmark-pdf me-1"></i> File CU</label><input type="file" id="certificationFiles" name="files" class="form-control" multiple accept="application/pdf"><small class="text-muted">Puoi caricare più file contemporaneamente.</small></div>
+                                <div class="col-md-3 text-end"><button type="submit" class="btn btn-success w-100"><i class="bi bi-upload me-1"></i> Carica</button><small class="text-white">.</small></div>
+                            </div>
+                        </form>
+                        <div class="mt-3" th:if="${certificationUploadResult != null}"><div class="alert" th:classappend="${certificationUploadResult.errors.isEmpty()} ? 'alert-success' : 'alert-warning'" role="alert"><strong><i class="bi me-2" th:classappend="${certificationUploadResult.errors.isEmpty()} ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i><span th:text="|${certificationUploadResult.stored} CU caricate|"></span></strong><div th:if="${certificationUploadResult.unmatched > 0}" class="mt-2"><small class="text-muted"><i class="bi bi-info-circle me-1"></i><span th:text="|${certificationUploadResult.unmatched} file senza corrispondenza|"></span></small></div><ul class="mb-0 mt-2 small" th:if="${!certificationUploadResult.unmatchedCodes.isEmpty()}"><li th:each="c : ${certificationUploadResult.unmatchedCodes}" th:text="${c}"></li></ul><ul class="mb-0 mt-2 small" th:if="${!certificationUploadResult.errors.isEmpty()}"><li th:each="e : ${certificationUploadResult.errors}" th:text="${e}" class="text-danger"></li></ul></div></div>
+                    </div>
+                </div>
+                <div class="card send-card" th:if="${certifications != null}">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="bi bi-send me-2"></i> Invio massivo via email</h2>
+                        <p class="card-subtitle">Seleziona le Certificazioni Uniche da inoltrare via email.</p>
+                    </div>
+                    <div class="card-body">
+                         <form th:action="@{/payslips/certifications/send}" method="post" id="certificationSendForm" novalidate>
+                            <th:block th:insert="~{fragments/layoutNavBar :: csrf}"></th:block>
+                            <input type="hidden" name="referenceYear" th:value="${selectedYearValue}"><input type="hidden" name="currentMonth" th:value="${selectedMonthValue}">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6"><label for="certificationSubject" class="form-label"><i class="bi bi-envelope me-1"></i> Oggetto</label><input type="text" id="certificationSubject" name="subject" class="form-control" th:value="${lastCertificationSubject}" required></div>
+                                <div class="col-md-6"><label for="certificationBody" class="form-label"><i class="bi bi-chat-text me-1"></i> Messaggio</label><textarea id="certificationBody" name="body" class="form-control" rows="3" th:text="${lastCertificationBody}" required></textarea></div>
+                            </div>
+                            <div class="mt-3 mb-4" th:if="${certificationSendResult != null}"><div class="alert" th:classappend="${certificationSendResult.errors.isEmpty()} ? 'alert-success' : 'alert-warning'" role="alert"><strong><i class="bi me-2" th:classappend="${certificationSendResult.errors.isEmpty()} ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i><span th:text="|${certificationSendResult.sent} inviate|"></span><span th:if="${certificationSendResult.skipped > 0}" class="ms-2 text-muted">• <span th:text="|${certificationSendResult.skipped} non inviate|"></span></span></strong><ul class="mb-0 mt-2 small" th:if="${!certificationSendResult.skippedMessages.isEmpty()}"><li th:each="m : ${certificationSendResult.skippedMessages}" th:text="${m}" class="text-muted"></li></ul><ul class="mb-0 mt-2 small" th:if="${!certificationSendResult.errors.isEmpty()}"><li th:each="e : ${certificationSendResult.errors}" th:text="${e}" class="text-danger"></li></ul></div></div>
+                            
+                            <!-- RESTORED: Full table structure for Certifications -->
+                            <div class="table-responsive">
+                                 <table class="table table-hover align-middle">
+                                     <thead>
+                                         <tr>
+                                             <th scope="col" style="width: 45px;"><div class="form-check"><input type="checkbox" id="certificationSelectAll" class="form-check-input"></div></th>
+                                             <th scope="col">Dipendente</th>
+                                             <th scope="col">Codice Fiscale</th>
+                                             <th scope="col">Stato</th>
+                                             <th scope="col" class="d-none d-md-table-cell">Caricato il</th>
+                                             <th scope="col" class="d-none d-lg-table-cell">Ultimo invio</th>
+                                             <th scope="col" class="text-end">Azioni</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         <tr th:if="${certifications.isEmpty()}"><td colspan="7" class="text-center py-5"><div class="empty-state"><h3>Nessuna CU trovata</h3><p>Non ci sono CU per l'anno selezionato.</p></div></td></tr>
+                                         <tr th:each="c : ${certifications}">
+                                             <td><div class="form-check"><input type="checkbox" name="certificationIds" class="form-check-input certification-checkbox" th:value="${c.id}" th:disabled="${c.employee == null}"></div></td>
+                                             <td>
+                                                 <div th:text="${c.displayName}" class="fw-semibold"></div>
+                                                 <small th:if="${c.employee == null}" class="text-danger d-block"><i class="bi bi-exclamation-triangle me-1"></i> Non associato</small>
+                                                 <small th:unless="${c.employee == null}" class="text-muted d-block" th:text="${c.employee.email}"></small>
+                                             </td>
+                                             <td><code class="text-dark" th:text="${c.fiscalCode}"></code></td>
+                                             <td><span class="status-badge" th:classappend="${c.status.name()}" th:text="${c.status.label}"></span></td>
+                                             <td class="d-none d-md-table-cell"><span th:text="${#temporals.format(c.uploadedAt, 'dd/MM/yy HH:mm')}"></span></td>
+                                             <td class="d-none d-lg-table-cell"><span th:text="${c.sentAt != null ? #temporals.format(c.sentAt, 'dd/MM/yy HH:mm') : '-'}"></span></td>
+                                             <td class="text-end">
+                                                 <div class="btn-group btn-group-sm">
+                                                     <a th:href="@{|/payslips/certifications/${c.id}/download|}" class="btn btn-outline-secondary" title="Scarica"><i class="bi bi-download"></i></a>
+                                                     <button type="submit" class="btn btn-outline-danger" title="Elimina" th:formaction="@{|/payslips/certifications/${c.id}/delete|}" formmethod="post" data-confirm-message="Eliminare questa CU?"><i class="bi bi-trash"></i></button>
+                                                 </div>
+                                             </td>
+                                         </tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+                                <span class="certification-selection-counter text-muted small" style="display: none;">0 selezionate</span>
+                                 <div class="d-flex gap-2 flex-wrap justify-content-end">
+                                     <button type="submit" class="btn btn-outline-danger" th:formaction="@{/payslips/certifications/delete-selected}" formmethod="post" data-selection-required disabled data-confirm-message="Eliminare le CU selezionate?"><i class="bi bi-trash me-1"></i> Elimina</button>
+                                     <button type="submit" class="btn btn-primary" data-selection-required disabled><i class="bi bi-send me-1"></i> Invia</button>
+                                 </div>
+                             </div>
+                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Success/Delete Messages -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div th:if="${deleteMessage}" class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex"><div class="toast-body" th:text="${deleteMessage}"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+        </div>
+        <div th:if="${certificationDeleteMessage}" class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex"><div class="toast-body" th:text="${certificationDeleteMessage}"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script th:src="@{/js/payslips.js}"></script>
+    <script th:src="@{/js/unique_certifications.js}"></script>
+</body>
+</html>

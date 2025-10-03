@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Nota Spese – Veely</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/expense-form.css}">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+
+<!-- Header -->
+    <div class="form-header">
+        <h1 th:text="${report.id == null ? 'Nuova Nota Spese' : 'Modifica Nota Spese'}">Nuova Nota Spese</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/fleet/expense-reports}" class="text-decoration-none">
+                        <i class="bi bi-wallet-fill me-1"></i>
+                        Note Spese
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${report.id == null ? 'Nuova' : 'Modifica'}">Nuova</li>
+            </ol>
+        </nav>
+    </div>
+
+ <!-- Enhanced Action Bar with improved button layout -->
+    <div class="action-bar d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
+        <!-- Left side - Secondary actions -->
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary d-flex align-items-center" th:href="@{/fleet/expense-reports}">
+                <i class="bi bi-arrow-left me-2"></i> 
+                <span class="d-none d-md-inline">Torna alla Lista</span>
+                <span class="d-md-none">Lista</span>
+            </a>
+        </div>
+        
+        <!-- Right side - Primary actions with proper hierarchy -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Export PDF (conditional) -->
+            <a th:if="${report.id != null}" 
+               class="btn btn-outline-primary d-flex align-items-center" 
+               th:href="@{|/fleet/expense-reports/${report.id}/export|}"
+               title="Esporta in formato PDF">
+                <i class="bi bi-file-earmark-pdf me-2"></i> 
+                <span class="d-none d-lg-inline">Esporta PDF</span>
+                <span class="d-lg-none">PDF</span>
+            </a>
+            
+            <!-- Visual separator -->
+            <div class="vr d-none d-sm-block mx-2" style="height: 2.5rem; width: 1px; background-color: #dee2e6; opacity: 0.5;"></div>
+            
+            <!-- Main action group -->
+            <div class="btn-group" role="group">
+                <!-- Cancel button -->
+                <a class="btn btn-outline-secondary d-flex align-items-center px-3" 
+                   th:href="@{/fleet/expense-reports}"
+                   title="Annulla le modifiche">
+                    <i class="bi bi-x-lg me-2"></i> 
+                    <span class="d-none d-sm-inline">Annulla</span>
+                </a>
+                
+                <!-- Save button - Primary action -->
+                <button type="submit" 
+                        form="mainForm" 
+                        class="btn btn-primary d-flex align-items-center px-4 fw-semibold"
+                        title="Salva la nota spese"
+                        style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);">
+                    <i class="bi bi-check-lg me-2"></i> 
+                    <span th:text="${report.id == null ? 'Crea Nota Spese' : 'Salva Modifiche'}">Salva</span>
+                </button>
+            </div>
+            
+            <!-- Approve button (conditional, separate) -->
+            <button th:if="${report.id != null && report.expenseStatus != null && report.expenseStatus.name() != 'APPROVED'}" 
+                    form="approveForm" 
+                    type="submit" 
+                    class="btn btn-success d-flex align-items-center px-3 ms-2"
+                    title="Approva definitivamente la nota spese"
+                    onclick="return confirm('Sei sicuro di voler approvare definitivamente questa nota spese?');"
+                    style="background: linear-gradient(135deg, #198754 0%, #157347 100%); box-shadow: 0 2px 4px rgba(25, 135, 84, 0.25);">
+                <i class="bi bi-check2-circle me-2"></i> 
+                <span class="d-none d-xl-inline">Approva</span>
+            </button>
+        </div>
+    </div>
+
+</th:block>
+<body class="bg-light">
+
+<main class="container-fluid my-4 flex-fill">
+
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Main Form -->
+    <form id="mainForm" th:object="${report}"
+          th:action="${report.id == null} ? @{/fleet/expense-reports/new} : @{/fleet/expense-reports/{id}/edit(id=${report.id})}"
+          method="post" class="needs-validation" novalidate>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                
+                <!-- Main Information Card -->
+                <div class="modern-card">
+                    <div class="modern-card-header">
+                        <h5>
+                            <i class="bi bi-info-circle"></i>
+                            Informazioni Principali
+                        </h5>
+                    </div>
+                    <div class="modern-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="expenseReportNum" class="form-label">Numero Nota</label>
+                                <input class="form-control" th:field="*{expenseReportNum}" id="expenseReportNum" th:attr="data-base=${baseReportNum}"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Data Creazione</label>
+                                <input type="date" class="form-control" th:field="*{creationDate}" />
+                                <div class="text-danger" th:if="${#fields.hasErrors('creationDate')}" th:errors="*{creationDate}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="employeeSelect" class="form-label">Dipendente *</label>
+                                <select class="form-select" th:field="*{employee.id}" id="employeeSelect" required>
+                                    <option value="">Seleziona dipendente...</option>
+                                    <option th:each="e : ${employees}" th:value="${e.id}"
+                                            th:text="${e.firstName + ' ' + e.lastName}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="purpose" class="form-label">Scopo della Nota Spese *</label>
+                                <input type="text" class="form-control" id="purpose" th:field="*{puorpose}" 
+                                       placeholder="Es. Trasferta cliente a Roma, Fiera di settore" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Periodo dal</label>
+                                <input type="date" class="form-control" id="startDate" th:field="*{startDate}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">Periodo al</label>
+                                <input type="date" class="form-control" id="endDate" th:field="*{endDate}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Items Card -->
+                <div class="modern-card">
+                    <div class="modern-card-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h5>
+                                <i class="bi bi-list-ul"></i>
+                                Voci di Spesa
+                            </h5>
+                            <button type="button" class="btn btn-add-row" onclick="addRow()">
+                                <i class="bi bi-plus-lg me-1"></i> Aggiungi Riga
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modern-card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 items-table" id="itemsTable">
+                                <thead>
+                                <tr>
+                                    <th style="width: 12%;">Data</th>
+                                    <th style="width: 35%;">Descrizione & Note</th>
+                                    <th style="width: 12%;">Importo (€)</th>
+                                    <th style="width: 18%;">Fornitore</th>
+                                    <th style="width: 13%;" class="text-center">Allegati</th>
+                                    <th style="width: 10%;" class="text-center">Azioni</th>
+                                </tr>
+                                </thead>
+                                <tbody id="itemsBody">
+                                <th:block th:each="it, iter : ${items}">
+                                    <tr>
+                                        <td>
+                                            <input type="date" class="form-control form-control-sm" name="itemDate" th:value="${it.date}"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm mb-1" name="itemDesc" 
+                                                   th:value="${it.description}" placeholder="Descrizione spesa"/>
+                                            <input type="text" class="form-control form-control-sm" name="itemNote"
+                                                   th:value="${it.note}" placeholder="Note aggiuntive"/>
+                                            <input type="hidden" name="itemInvoice" th:value="${it.invoiceNumber}" />
+                                            <input type="hidden" name="itemId" th:value="${it.id}" />
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" class="form-control form-control-sm item-amount" 
+                                                   name="itemAmount" th:value="${it.amount}" placeholder="0,00"/>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="itemSupplierId">
+                                                <option value="">Nessun fornitore</option>
+                                                <option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}" 
+                                                        th:selected="${it.supplier != null && it.supplier.id == s.id}"></option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <button th:if="${report.id != null}" type="button" class="btn attachment-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#attachmentsModal"
+                                                    th:data-item-id="${it.id}" th:data-item-desc="${it.description}">
+                                                <i class="bi bi-paperclip"></i>
+                                                <span class="attachment-count" th:text="${#lists.size(itemDocs[it.id])}">0</span>
+                                            </button>
+                                            <div th:if="${report.id == null}" class="alert-info-custom small">
+                                                Salva per allegare
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-remove-row btn-sm" onclick="removeRow(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                
+                <!-- Administrative Details Card -->
+                <div class="modern-card">
+                    <div class="modern-card-header">
+                        <h5>
+                            <i class="bi bi-gear"></i>
+                            Dettagli Amministrativi
+                        </h5>
+                    </div>
+                    <div class="modern-card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Stato</label>
+                                <select class="form-select" th:field="*{expenseStatus}">
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"></option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Commessa / Progetto</label>
+                                <select class="form-select" th:field="*{project.id}">
+                                    <option value="">Nessuna commessa</option>
+                                    <option th:each="p : ${projects}" th:value="${p.id}" th:text="${p.name}"></option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Metodo di Pagamento Rimborso</label>
+                                <select class="form-select" th:field="*{paymentMethodCode}">
+                                    <option th:each="p : ${paymentMethods}" th:value="${p}" th:text="${p.displayName}"></option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Data Approvazione Finale</label>
+                                <div class="d-flex gap-2">
+                                    <input type="date" class="form-control" th:field="*{finalApprovalDate}" />
+                                    <button th:if="${report.id != null && report.expenseStatus.name() != 'APPROVED'}" 
+                                            form="approveForm" type="submit" class="btn btn-success-custom">
+                                        <i class="bi bi-check2-circle me-1"></i> Approva
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="modern-card summary-card">
+                    <div class="modern-card-header">
+                        <h5>
+                            <i class="bi bi-calculator"></i>
+                            Riepilogo Totali
+                        </h5>
+                    </div>
+                    <div class="modern-card-body">
+                        <div class="summary-row">
+                            <span class="summary-label">Totale Nota Spese:</span>
+                            <span class="summary-value" id="totalDisplay">€ 0,00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Totale Rimborsabile:</span>
+                            <span class="summary-value" id="reimbursableDisplay">€ 0,00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Totale Non Rimborsabile:</span>
+                            <span class="summary-value" id="nonReimbursableDisplay">€ 0,00</span>
+                        </div>
+                        
+                        <!-- Hidden fields for form submission -->
+                        <input type="hidden" th:field="*{expenseReportTotal}" id="expenseReportTotal" />
+                        <div class="mt-3">
+                            <label for="reimbursableTotal" class="form-label">Importo Rimborsabile (€)</label>
+                            <input class="form-control" th:field="*{reimbursableTotal}" id="reimbursableTotal" 
+                                   type="number" step="0.01" placeholder="0,00"/>
+                        </div>
+                        <input type="hidden" th:field="*{nonReimbursableTotal}" id="nonReimbursableTotal" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Hidden Forms -->
+    <form id="approveForm" th:if="${report.id != null}" th:action="@{|/fleet/expense-reports/${report.id}/approve|}" method="post" class="d-none">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    </form>
+
+    <!-- Row Template -->
+    <template id="rowTemplate">
+        <tr>
+            <td><input type="date" class="form-control form-control-sm" name="itemDate"/></td>
+            <td>
+                <input type="text" class="form-control form-control-sm mb-1" name="itemDesc" placeholder="Descrizione spesa"/>
+                <input type="text" class="form-control form-control-sm" name="itemNote" placeholder="Note aggiuntive"/>
+                <input type="hidden" name="itemInvoice" value="" />
+                <input type="hidden" name="itemId" value="" />
+            </td>
+            <td><input type="number" step="0.01" class="form-control form-control-sm item-amount" name="itemAmount" placeholder="0,00"/></td>
+            <td>
+                <select class="form-select form-select-sm" name="itemSupplierId">
+                    <option value="">Nessun fornitore</option>
+                    <option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}"></option>
+                </select>
+            </td>
+            <td class="text-center">
+                <div class="alert-info-custom small">Salva per allegare</div>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-remove-row btn-sm" onclick="removeRow(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    </template>
+    
+    <!-- Attachments Modal - COMPLETE VERSION -->
+    <div class="modal fade" id="attachmentsModal" tabindex="-1" aria-labelledby="attachmentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="attachmentsModalLabel">
+                        <i class="bi bi-paperclip me-2"></i>
+                        Allegati per: <span id="modalItemDescription"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="mb-3">
+                        <i class="bi bi-files me-2"></i>
+                        Documenti Esistenti
+                    </h6>
+                    <ul class="list-group mb-4" id="existingDocsList"></ul>
+                    
+                    <h6 class="mb-3">
+                        <i class="bi bi-cloud-upload me-2"></i>
+                        Aggiungi Nuovo Documento
+                    </h6>
+                    <form id="docUploadForm" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="reportId" th:value="${report.id}" />
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label">File</label>
+                                <input type="file" name="file" class="form-control" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo Documento</label>
+                                <select name="type" class="form-select">
+                                    <option th:each="dt : ${docTypes}" th:value="${dt}" th:text="${dt.displayName}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button type="submit" class="btn btn-success-custom">
+                                    <i class="bi bi-upload me-2"></i> Carica
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Complete JavaScript from original file -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+const reportId = /*[[${report.id}]]*/ null;
+const allItemDocs = /*[[${itemDocs}]]*/ {};
+const docTypes = /*[[${docTypes}]]*/ [];
+const csrfToken = /*[[${_csrf.token}]]*/ '';
+const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('it-IT', {
+        style: 'currency',
+        currency: 'EUR'
+    }).format(amount);
+}
+
+function addRow() {
+    const tbody = document.getElementById('itemsBody');
+    const tpl = document.getElementById('rowTemplate');
+    const clone = tpl.content.cloneNode(true);
+    tbody.appendChild(clone);
+    attachAmountListeners();
+}
+
+function removeRow(btn) {
+    btn.closest('tr').remove();
+    updateTotals();
+}
+
+function updateTotals() {
+    let total = 0;
+    document.querySelectorAll('.item-amount').forEach(input => {
+        const value = parseFloat(input.value);
+        if (!isNaN(value)) {
+            total += value;
+        }
+    });
+    
+    // Update hidden field for form submission
+    const totalField = document.getElementById('expenseReportTotal');
+    totalField.value = total.toFixed(2);
+    
+    // Update display
+    document.getElementById('totalDisplay').textContent = formatCurrency(total);
+    
+    updateNonReimbursable();
+}
+
+function updateNonReimbursable() {
+    const total = parseFloat(document.getElementById('expenseReportTotal').value || '0');
+    const reimb = parseFloat(document.getElementById('reimbursableTotal').value || '0');
+    const nonReimb = total - reimb;
+    
+    // Update hidden field
+    const nonReimbField = document.getElementById('nonReimbursableTotal');
+    nonReimbField.value = nonReimb.toFixed(2);
+    
+    // Update displays
+    document.getElementById('reimbursableDisplay').textContent = formatCurrency(reimb);
+    document.getElementById('nonReimbursableDisplay').textContent = formatCurrency(nonReimb);
+}
+
+function attachAmountListeners() {
+    document.querySelectorAll('.item-amount').forEach(input => {
+        input.removeEventListener('input', updateTotals);
+        input.addEventListener('input', updateTotals);
+    });
+}
+
+function updateReportNum() {
+    const select = document.getElementById('employeeSelect');
+    const input = document.getElementById('expenseReportNum');
+    if (!select || !input) return;
+
+    let base = input.dataset.base || '';
+    if (!base) {
+        const m = (input.value || '').match(/^(\d+\/\d+\/)/);
+        if (m) base = m[1];
+    }
+    if (!base) return;
+
+    const option = select.options[select.selectedIndex];
+    const text = option ? option.text.trim() : '';
+    const parts = text.split(' ');
+    const first = parts.shift() || '';
+    const last = parts.join(' ') || '';
+    const initials = (last.charAt(0) || '').toUpperCase() + (first.charAt(0) || '').toUpperCase();
+    input.value = base + initials;
+}
+
+// Gestione Modale Allegati - COMPLETE
+const attachmentsModal = document.getElementById('attachmentsModal');
+if (attachmentsModal) {
+    attachmentsModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const itemId = button.getAttribute('data-item-id');
+        const itemDesc = button.getAttribute('data-item-desc');
+        
+        document.getElementById('modalItemDescription').textContent = itemDesc || 'Voce non specificata';
+        
+        const uploadForm = document.getElementById('docUploadForm');
+        uploadForm.action = `/fleet/expense-reports/items/${itemId}/docs`;
+
+        const docsList = document.getElementById('existingDocsList');
+        docsList.innerHTML = '';
+        
+        const docs = allItemDocs[itemId] || [];
+        if (docs.length === 0) {
+            docsList.innerHTML = '<li class="list-group-item text-muted">Nessun documento presente.</li>';
+        } else {
+            docs.forEach(doc => {
+                const fileName = doc.path.substring(doc.path.lastIndexOf('/') + 1);
+                const deleteUrl = `/fleet/expense-reports/items/${itemId}/docs/${doc.id}/delete`;
+                const downloadUrl = `/fleet/expense-reports/docs/${doc.id}`;
+
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-file-earmark me-2 text-primary"></i>
+                        <a href="${downloadUrl}" class="text-decoration-none">${fileName}</a>
+                    </div>
+                    <a href="${deleteUrl}" class="btn btn-sm btn-outline-danger" 
+                       onclick="return confirm('Sei sicuro di voler eliminare questo documento?');"
+                       title="Elimina documento">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                `;
+                docsList.appendChild(li);
+            });
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Listener per i totali
+    const reimbursableField = document.getElementById('reimbursableTotal');
+    if(reimbursableField) {
+        reimbursableField.addEventListener('input', updateNonReimbursable);
+    }
+    
+    attachAmountListeners();
+    updateTotals(); // Calcola i totali al caricamento della pagina
+
+    // Listener per il numero di nota
+    const employeeSelect = document.getElementById('employeeSelect');
+    if(employeeSelect) {
+        employeeSelect.addEventListener('change', updateReportNum);
+    }
+    
+    // Non chiamare updateReportNum() al caricamento se il report esiste già 
+    if (!reportId) {
+        updateReportNum();
+    }
+    
+    // Validazione form
+    const form = document.getElementById('mainForm');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+
+/*]]>*/
+</script>
+
+<!-- Additional CSS for enhanced action bar -->
+<style>
+.action-bar .btn-group .btn:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.action-bar .btn-group .btn:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.action-bar .btn:hover {
+    transform: translateY(-1px);
+    transition: all 0.15s ease-in-out;
+}
+
+.action-bar .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4) !important;
+}
+
+.action-bar .btn-success:hover {
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4) !important;
+}
+
+@media (max-width: 768px) {
+    .action-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .action-bar > div {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .vr {
+        display: none !important;
+    }
+}
+</style>
+
+</body>
+</html>

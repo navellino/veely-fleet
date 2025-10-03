@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Elenco Fornitori – Veely</title>
+    <th:block th:fragment="cssblock">
+		<link rel="stylesheet" th:href="@{/css/supplier.css}">
+	<style>
+
+	</style>
+</th:block>
+</head>
+<th:block th:fragment="navbar">
+	 <!-- Modern Page Header (come quello dei veicoli) -->
+        
+</th:block>
+<body>
+    <main class="suppliers-page-container my-5 flex-fill">
+    <div class="suppliers-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="suppliers-title">
+                <i class="bi bi-people-fill"></i>
+                Gestione Fornitori
+            </h2>
+            <p class="text-muted mb-0">Monitora e gestisci tutti i fornitori</p>
+        
+        </div>
+		<a th:href="@{/fleet/suppliers/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nuovo Fornitore
+        </a>
+    </div>
+
+        <div class="suppliers-table-container">
+        <div class="suppliers-table-header">
+            <div class="table-header-content">
+                <div>
+                    <h3 class="table-title">
+                        <i class="bi bi-table"></i>
+                        Elenco Fornitori
+                    </h3>
+                    <p class="table-subtitle">Gestisci i fornitori registrati</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="suppliers-table-wrapper">
+            <table class="suppliers-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>P. IVA/CF</th>
+                        <th>Telefono Aziendale</th>
+                        <th>Email Aziendale</th>
+                        <th>PEC</th>
+                        <th class="text-end">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="s : ${suppliers}" class="fade-in">
+                        <td th:text="${s.name}" data-label="Nome">Nome</td>
+                        <td th:text="${s.vatNumber}" data-label="P. IVA/CF">PIVA</td>
+                        <td th:text="${s.companyPhone}" data-label="Telefono">123</td>
+						<td th:text="${s.companyEmail}" data-label="Email">mail</td>
+                        <td data-label="Azioni">
+                            <div class="action-buttons">
+                                <a th:href="@{|/fleet/suppliers/${s.id}/edit|}"
+                                   class="action-btn edit"
+                                   data-tooltip="Modifica">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{|/fleet/suppliers/${s.id}/delete|}"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Sei sicuro di eliminare questo fornitore?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="action-btn delete" data-tooltip="Elimina">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

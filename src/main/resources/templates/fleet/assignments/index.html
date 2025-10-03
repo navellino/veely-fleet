@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title>Assegnazioni – Veely</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/assignmentList.css}">
+    </th:block>
+</head>
+<body>
+<main class="container-fluid my-4 flex-fill">
+    
+    <!-- Header della pagina -->
+    <div class="page-header-section mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="header-content">
+                <h1 class="page-title mb-2">Gestione Assegnazioni</h1>
+                <p class="page-subtitle text-muted mb-0">
+                    Visualizza e gestisci le assegnazioni veicoli ai dipendenti
+                </p>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-primary btn-lg shadow-sm" th:href="@{/fleet/assignments/new}">
+                    <i class="bi bi-plus-lg me-2"></i> 
+                    Nuova Assegnazione
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards statistiche -->
+    <div class="row mb-4 g-3">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-content">
+                    <div class="stat-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 class="stat-number" th:text="${#lists.size(assignments)}">0</h3>
+                        <p class="stat-label">Totali</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-content">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 class="stat-number" 
+                            th:text="${#lists.size(assignments.?[status.name() == 'ASSIGNED'])}">0</h3>
+                        <p class="stat-label">Attive</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-content">
+                    <div class="stat-icon">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 class="stat-number" 
+                            th:text="${#lists.size(assignments.?[status.name() == 'ASSIGNED' and endDate != null and endDate.isBefore(T(java.time.LocalDate).now().plusDays(30))])}">0</h3>
+                        <p class="stat-label">In Scadenza</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card stat-card-info">
+                <div class="stat-content">
+                    <div class="stat-icon">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 class="stat-number" 
+                            th:text="${#lists.size(assignments.?[status.name() == 'RETURNED'])}">0</h3>
+                        <p class="stat-label">Restituite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione filtri -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-4 col-md-6">
+                    <label for="searchInput" class="form-label fw-semibold">
+                        <i class="bi bi-search me-1"></i>Ricerca
+                    </label>
+                    <input type="text" class="form-control form-control-lg" id="searchInput" 
+                           placeholder="Cerca per dipendente, veicolo o targa...">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label for="statusFilter" class="form-label fw-semibold">Stato</label>
+                    <select class="form-select form-select-lg" id="statusFilter">
+                        <option value="">Tutti gli stati</option>
+                        <option value="ASSIGNED">Assegnato</option>
+                        <option value="RETURNED">Restituito</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label for="projectFilter" class="form-label fw-semibold">Cantiere</label>
+                    <select class="form-select form-select-lg" id="projectFilter">
+                        <option value="">Tutti i cantieri</option>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <button class="btn btn-outline-secondary btn-lg" type="button" id="clearFilters">
+                        <i class="bi bi-x-circle me-1"></i>Azzera
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabella delle assegnazioni -->
+    <div class="card table-card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="card-title mb-1 fs-5 fw-bold">Lista Assegnazioni</h3>
+                    <p class="text-muted mb-0 small">
+                        <span id="resultCount" th:text="${#lists.size(assignments)}">0</span> assegnazioni
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-borderless align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="fw-semibold">Dipendente</th>
+                            <th class="fw-semibold">Veicolo</th>
+                            <th class="fw-semibold">Dal</th>
+                            <th class="fw-semibold">Al</th>
+                            <th class="fw-semibold">Cantiere</th>
+                            <th class="fw-semibold text-center">Stato</th>
+                            <th class="fw-semibold text-end">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="a : ${assignments}" 
+                            class="assignment-row" 
+                            th:data-status="${a.status.name()}"
+                            th:classappend="${a.endDate != null and a.endDate.isBefore(T(java.time.LocalDate).now().plusDays(30))} ? 'table-row-warning' : ''">
+                            
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="employee-avatar me-3">
+                                        <div class="avatar-circle bg-primary text-white">
+                                            <span th:text="${#strings.substring(a.employment.employee.firstName, 0, 1) + #strings.substring(a.employment.employee.lastName, 0, 1)}">XX</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark mb-1" 
+                                             th:text="${a.employment.employee.lastName + ' ' + a.employment.employee.firstName}">
+                                            Nome Cognome
+                                        </div>
+                                        <div class="text-muted small">
+                                            <i class="bi bi-briefcase me-1"></i>Dipendente
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="vehicle-info">
+                                    <div class="fw-semibold text-dark mb-1">
+                                        <span th:text="${a.vehicle.brand + ' ' + a.vehicle.model}">BRAND MODEL</span>
+                                    </div>
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        <span class="vehicle-plate badge bg-light text-dark fw-normal"
+                                              th:text="${a.vehicle.plate}">ABC123</span>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>
+                                    <span class="fw-semibold" th:text="${#temporals.format(a.startDate, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-x text-danger me-2"></i>
+                                    <span th:text="${#temporals.format(a.endDate, 'dd/MM/yyyy')}">31/12/2024</span>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div th:if="${a.accolloProject != null}">
+                                    <div class="fw-semibold text-dark" th:text="${a.accolloProject.name}">Nome Progetto</div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-building me-1"></i>Progetto attivo
+                                    </div>
+                                </div>
+                                <div th:unless="${a.accolloProject != null}" class="text-muted">
+                                    <i class="bi bi-dash-circle me-1"></i>Nessun cantiere
+                                </div>
+                            </td>
+                            
+                            <td class="text-center">
+                                <span class="status-badge" 
+                                      th:classappend="${a.status.name() == 'ASSIGNED'} ? 'status-assigned' : 'status-returned'"
+                                      th:text="${a.status.displayName}">
+                                    Stato
+                                </span>
+                            </td>
+                            
+                            <td class="text-end">
+                                <a th:href="@{|/fleet/assignments/${a.id}/edit|}" 
+                                   class="btn btn-outline-primary btn-sm" 
+                                   title="Modifica assegnazione">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card-footer bg-white border-0 py-3">
+            <div class="d-flex justify-content-center align-items-center">
+                <div class="text-muted small">
+                    Visualizzando <span class="result-count" th:text="${#lists.size(assignments)}">0</span> assegnazioni
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const projectFilter = document.getElementById('projectFilter');
+    
+    // Popola filtro cantieri
+    const projects = new Set();
+    document.querySelectorAll('.assignment-row').forEach(row => {
+        const projectCell = row.querySelector('td:nth-child(5)');
+        const projectName = projectCell.textContent.trim();
+        if (projectName && !projectName.includes('Nessun cantiere')) {
+            const cleanName = projectName.split('\n')[0].trim();
+            if (cleanName) projects.add(cleanName);
+        }
+    });
+    
+    projects.forEach(project => {
+        const option = document.createElement('option');
+        option.value = project;
+        option.textContent = project;
+        projectFilter.appendChild(option);
+    });
+    
+    // Funzione filtro
+    function filterAssignments() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const projectValue = projectFilter.value;
+        const rows = document.querySelectorAll('.assignment-row');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const employeeName = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            const vehicleInfo = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const status = row.dataset.status;
+            const projectText = row.querySelector('td:nth-child(5)').textContent;
+            
+            const matchesSearch = employeeName.includes(searchTerm) || vehicleInfo.includes(searchTerm);
+            const matchesStatus = !statusValue || status === statusValue;
+            const matchesProject = !projectValue || projectText.includes(projectValue);
+            
+            if (matchesSearch && matchesStatus && matchesProject) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('resultCount').textContent = visibleCount;
+        document.querySelector('.result-count').textContent = visibleCount;
+    }
+    
+    // Event listeners
+    searchInput.addEventListener('input', filterAssignments);
+    statusFilter.addEventListener('change', filterAssignments);
+    projectFilter.addEventListener('change', filterAssignments);
+    
+    // Azzera filtri
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        searchInput.value = '';
+        statusFilter.value = '';
+        projectFilter.value = '';
+        filterAssignments();
+    });
+    
+    // Animazioni hover
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-4px)');
+        card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
+    });
+});
+</script>
+</body>
+</html>

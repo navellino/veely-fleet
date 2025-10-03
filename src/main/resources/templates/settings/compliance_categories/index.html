@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Categorie Safety — Veely</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/compliance.css}">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+</th:block>
+<body>
+<main class="container my-5 flex-fill">
+    <!-- Page Header with modern styling -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h2 class="page-title">Categorie Safety</h2>
+                <p class="page-subtitle">Gestisci le categorie per la classificazione degli eventi di sicurezza</p>
+            </div>
+            <div class="header-actions">
+                <!-- Primary action button to create new category -->
+                <button id="addCategoryBtn" class="btn btn-primary btn-modern">
+                    <i class="bi bi-plus-lg me-2"></i>
+                    <span>Nuova Categoria</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content card -->
+    <div class="content-card">
+        <!-- Table section with loading state -->
+        <div class="table-section">
+            <div id="loadingState" class="loading-state d-none">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>Caricamento...</span>
+                </div>
+            </div>
+
+            <!-- Categories table -->
+            <div id="tableContainer" class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th class="col-name">
+                                    <div class="th-content">
+                                        <i class="bi bi-tag me-2"></i>
+                                        Nome Categoria
+                                    </div>
+                                </th>
+                                <th class="col-actions">
+                                    <div class="th-content text-end">
+                                        <i class="bi bi-gear me-2"></i>
+                                        Azioni
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody">
+                            <!-- Categories will be populated here via JavaScript or server-side -->
+                            <tr th:each="c : ${categories}" class="table-row" th:data-category-id="${c.id}">
+                                <td class="col-name">
+                                    <div class="category-info">
+                                        <div class="category-icon">
+                                            <i class="bi bi-shield-check"></i>
+                                        </div>
+                                        <div class="category-details">
+                                            <span class="category-name" th:text="${c.name}">Nome Categoria</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="col-actions">
+                                    <div class="action-buttons">
+                                        <!-- Edit button -->
+                                        <button class="btn btn-action btn-edit" 
+                                                th:data-category-id="${c.id}" 
+                                                th:data-category-name="${c.name}"
+                                                title="Modifica categoria">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <!-- Delete button -->
+                                        <button class="btn btn-action btn-delete" 
+                                                th:data-category-id="${c.id}" 
+                                                th:data-category-name="${c.name}"
+                                                title="Elimina categoria">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty state when no categories exist -->
+                <div id="emptyState" class="empty-state" th:if="${#lists.isEmpty(categories)}">
+                    <div class="empty-illustration">
+                        <i class="bi bi-shield-x"></i>
+                    </div>
+                    <h3 class="empty-title">Nessuna categoria presente</h3>
+                    <p class="empty-description">
+                        Inizia creando la tua prima categoria di sicurezza per organizzare gli eventi.
+                    </p>
+                    <button id="addFirstCategoryBtn" class="btn btn-primary btn-modern">
+                        <i class="bi bi-plus-lg me-2"></i>
+                        Crea Prima Categoria
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal for Create/Edit -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-modern">
+                <div class="modal-header">
+                    <div class="modal-header-content">
+                        <div class="modal-icon">
+                            <i class="bi bi-shield-plus"></i>
+                        </div>
+                        <div class="modal-title-section">
+                            <h5 class="modal-title" id="categoryModalLabel">Nuova Categoria</h5>
+                            <p class="modal-subtitle">Inserisci i dettagli della categoria di sicurezza</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-modern" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                
+                <form id="categoryForm" novalidate>
+                    <div class="modal-body">
+                        <!-- CSRF Token (will be populated by JavaScript) -->
+                        <input type="hidden" id="csrfToken" name="_csrf" th:value="${_csrf.token}"/>
+                        <input type="hidden" id="categoryId" name="id"/>
+                        
+                        <!-- Category Name Field -->
+                        <div class="form-group">
+                            <label for="categoryName" class="form-label required">
+                                <i class="bi bi-tag me-2"></i>
+                                Nome Categoria
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-modern" 
+                                   id="categoryName" 
+                                   name="name" 
+                                   placeholder="Es. Incidenti stradali, DPI, Formazione..."
+                                   required
+                                   maxlength="100">
+                            <div class="invalid-feedback" id="nameError"></div>
+                            <div class="form-help">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Scegli un nome descrittivo per identificare facilmente la categoria
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Annulla
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-modern" id="submitBtn">
+                                <span class="btn-content">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <span id="submitText">Crea Categoria</span>
+                                </span>
+                                <div class="btn-loading d-none">
+                                    <div class="btn-spinner"></div>
+                                    <span>Salvando...</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content modal-modern modal-danger">
+                <div class="modal-header border-0">
+                    <div class="modal-header-content">
+                        <div class="modal-icon danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="modal-title-section">
+                            <h5 class="modal-title" id="deleteModalLabel">Conferma Eliminazione</h5>
+                            <p class="modal-subtitle">Questa azione non può essere annullata</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-body text-center">
+                    <p class="delete-message">
+                        Sei sicuro di voler eliminare la categoria 
+                        <strong id="deleteCategoryName"></strong>?
+                    </p>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small>Tutti gli eventi associati a questa categoria potrebbero essere interessati.</small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0">
+                    <div class="modal-actions w-100">
+                        <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">
+                            Annulla
+                        </button>
+                        <button type="button" class="btn btn-danger flex-fill" id="confirmDeleteBtn">
+                            <span class="btn-content">
+                                <i class="bi bi-trash me-2"></i>
+                                Elimina
+                            </span>
+                            <div class="btn-loading d-none">
+                                <div class="btn-spinner"></div>
+                                <span>Eliminando...</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        <!-- Success Toast -->
+        <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <div class="toast-icon success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <strong class="me-auto">Successo</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="successMessage">
+                Operazione completata con successo
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <div class="toast-icon error">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <strong class="me-auto">Errore</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Si è verificato un errore durante l'operazione
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Include JavaScript file -->
+<script th:src="@{/js/safety.js}"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+/* ===== MANUTENZIONI STYLES ===== */
+.table-card .form-label {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.table-card .form-control,
+.table-card .form-select {
+    border-radius: var(--radius-md);
+    border-color: var(--gray-300);
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.table-card .form-control:focus,
+.table-card .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    border-color: var(--primary-500);
+}
+
+.vehicle-model {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+/* Badge colorati */
+.type-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.type-badge-success {
+    background: var(--success-50);
+    color: var(--success-600);
+}
+.type-badge-warning {
+    background: var(--warning-50);
+    color: var(--warning-600);
+}
+.type-badge-danger {
+    background: var(--danger-50);
+    color: var(--danger-600);
+}
+
+.empty-state i {
+    font-size: 2rem;
+    color: var(--gray-300);
+}
+
+/* Hover animazione riga */
+.hover-animate {
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.hover-animate:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: var(--gray-50);
+}
+
+/* Pulsanti ripple */
+.btn.ripple {
+    position: relative;
+    overflow: hidden;
+}
+.btn.ripple:after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* KPI Manutenzioni */
+.stats-grid .stat-card {
+    cursor: default; /* o pointer se vuoi cliccabili */
+}
+
+.stats-grid .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+/* Allinea verticalmente le azioni nella tabella manutenzioni */
+.cell-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.4rem; /* spazio tra i bottoni */
+}
+
+.cell-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.4rem; /* compatta leggermente i bottoni */
+}

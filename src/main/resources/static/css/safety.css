@@ -1,0 +1,388 @@
+  /* Page Header personalizzato */
+        .safety-page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .safety-page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .safety-page-subtitle {
+            opacity: 0.9;
+            margin: 0.5rem 0 0 0;
+            font-size: 0.95rem;
+        }
+
+        /* Filter section */
+        .safety-filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .safety-filter-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .safety-form-control {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .safety-form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        /* Table container - usa tutta la larghezza disponibile */
+        .safety-table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            width: 100%;
+        }
+
+        .safety-table-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+        }
+
+        .safety-table-header h5 {
+            color: white;
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Tabella ottimizzata per il layout esistente */
+        .safety-table {
+            margin: 0;
+            font-size: 0.875rem;
+            width: 100%;
+            table-layout: fixed; /* Previene problemi di layout */
+        }
+
+        .safety-table thead th {
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            color: #475569;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        /* Stili per il sorting delle colonne */
+        .safety-table thead th:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .safety-table thead th.sortable {
+            cursor: pointer;
+        }
+
+        .safety-table thead th.sortable:after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            opacity: 0.3;
+            font-weight: bold;
+        }
+
+        .safety-table thead th.sort-asc:after {
+            content: '↑';
+            opacity: 0.8;
+            color: #667eea;
+        }
+
+        .safety-table thead th.sort-desc:after {
+            content: '↓';
+            opacity: 0.8;
+            color: #667eea;
+        }
+
+        .safety-table thead th.sortable:hover:after {
+            opacity: 0.8;
+        }
+
+        /* Larghezze colonne ottimizzate */
+        .safety-table th:nth-child(1) { width: 12%; } /* Categoria */
+        .safety-table th:nth-child(2) { width: 20%; } /* Descrizione */
+        .safety-table th:nth-child(3) { width: 10%; } /* Data visita */
+        .safety-table th:nth-child(4) { width: 8%; }  /* Periodicità */
+        .safety-table th:nth-child(5) { width: 15%; } /* Dipendente */
+        .safety-table th:nth-child(6) { width: 12%; } /* Commessa */
+        .safety-table th:nth-child(7) { width: 12%; } /* Scadenza */
+        .safety-table th:nth-child(8) { width: 8%; }  /* Stato */
+        .safety-table th:nth-child(9) { width: 8%; }  /* Azioni */
+
+        .safety-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* Hover effect ripristinato senza causare scroll */
+        .safety-table tbody tr:hover {
+            background-color: #f8fafc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hover effect per le righe con animazione smooth */
+        .safety-table tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .safety-table tbody tr:hover td {
+            transform: translateX(2px);
+        }
+
+        .safety-table tbody td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-top: none;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        /* Status badges */
+        .safety-status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+
+        .safety-status-valid {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .safety-status-expired {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .safety-status-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        /* Action buttons */
+        .safety-action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+
+        .safety-btn-action {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+        }
+
+        .safety-btn-edit {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+        }
+
+        .safety-btn-edit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+
+        .safety-btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .safety-btn-delete:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            color: white;
+        }
+
+        /* Category tags */
+        .safety-category-tag {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* Employee info compatta */
+        .safety-employee-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .safety-employee-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+
+        .safety-employee-details {
+            min-width: 0; /* Permette il text-overflow */
+        }
+
+        .safety-employee-name {
+            font-weight: 500;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .safety-employee-role {
+            font-size: 0.65rem;
+            color: #64748b;
+        }
+
+        /* Empty state */
+        .safety-empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+
+        .safety-empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Priority indicators più sottili */
+        .safety-priority-high {
+            border-left: 3px solid #ef4444;
+        }
+        
+        .safety-priority-medium {
+            border-left: 3px solid #f59e0b;
+        }
+        
+        .safety-priority-low {
+            border-left: 3px solid #10b981;
+        }
+
+        /* Responsive per la tabella */
+        @media (max-width: 1200px) {
+            .safety-table {
+                font-size: 0.8rem;
+            }
+            
+            .safety-table thead th,
+            .safety-table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .safety-employee-info {
+                flex-direction: column;
+                gap: 0.25rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .safety-page-header {
+                padding: 1.5rem;
+            }
+            
+            .safety-filter-section {
+                padding: 1rem;
+            }
+            
+            .safety-table {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Assicura che il contenuto non vada oltre i limiti */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scroll personalizzato per la tabella se necessario */
+        .table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }

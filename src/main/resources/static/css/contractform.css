@@ -1,0 +1,647 @@
+/*!
+ * CONTRACT FORM STYLESHEET - OPTIMIZED
+ * 
+ * Purpose: Minimal custom CSS leveraging Bootstrap 5.3+ utilities
+ * Strategy: Use Bootstrap classes for 90% of styling, custom CSS only for unique components
+ * 
+ * Features:
+ * - Minimal custom properties for consistent theming
+ * - Enhanced form validation states
+ * - Currency input styling
+ * - Progress indicator
+ * - Smooth transitions and micro-interactions
+ * 
+ * Dependencies: Bootstrap 5.3+, Bootstrap Icons
+ * 
+ * @author UX/UI Developer
+ * @version 2.0.0 (Optimized)
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+    /* Extend Bootstrap color palette */
+    --bs-form-valid-color: #198754;
+    --bs-form-invalid-color: #dc3545;
+    --bs-form-valid-border-color: #198754;
+    --bs-form-invalid-border-color: #dc3545;
+    
+    /* Form-specific colors */
+    --contract-form-bg: #ffffff;
+    --contract-form-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --contract-form-border: #dee2e6;
+    
+    /* Section styling */
+    --section-icon-bg: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-600, #0b5ed7));
+    --section-border: #f8f9fa;
+    
+    /* Currency input styling */
+    --currency-symbol-color: #6c757d;
+    --currency-bg: #f8f9fa;
+    
+    /* Progress indicator */
+    --progress-height: 4px;
+    --progress-border-radius: 2px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-base: 0.3s ease-in-out;
+}
+
+/* ===== FORM CONTAINER (leveraging Bootstrap card) ===== */
+/**
+ * Use Bootstrap .card as base, add minimal custom styling
+ */
+.contract-form-container {
+    /* Extend Bootstrap .card with custom shadow */
+    box-shadow: var(--contract-form-shadow);
+    border-color: var(--contract-form-border);
+}
+
+/* ===== FORM SECTIONS ===== */
+/**
+ * Logical form sections with minimal custom styling
+ * Mostly using Bootstrap spacing utilities
+ */
+.form-section {
+    /* Use Bootstrap padding utilities: .p-4 equivalent */
+    padding: 2rem;
+    border-bottom: 1px solid var(--section-border);
+    position: relative;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+/* Section header using Bootstrap flex utilities */
+.form-section-header {
+    /* Equivalent to: .d-flex .align-items-center .gap-3 .mb-4 .pb-3 */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--section-border);
+}
+
+/* Custom icon styling (minimal, can't be replaced with Bootstrap) */
+.form-section-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--section-icon-bg);
+    border-radius: var(--bs-border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+/* Use Bootstrap typography utilities */
+.form-section-title {
+    /* Equivalent to: .fs-5 .fw-semibold .text-dark .mb-1 */
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-gray-900);
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+}
+
+.form-section-subtitle {
+    /* Equivalent to: .fs-7 .text-muted .mb-0 */
+    font-size: 0.875rem;
+    color: var(--bs-gray-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ===== ENHANCED FORM LABELS ===== */
+/**
+ * Extend Bootstrap .form-label with minimal additions
+ */
+.form-label {
+    /* Bootstrap handles most styling, add custom enhancements */
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+/* Required field indicator (custom, no Bootstrap equivalent) */
+.form-label.required::after,
+.form-label[required]::after {
+    content: '*';
+    color: var(--bs-danger);
+    font-weight: 700;
+    margin-left: 0.25rem;
+}
+
+/* Help icon (custom styling) */
+.form-label-help {
+    color: var(--bs-gray-500);
+    font-size: 0.75rem;
+    cursor: help;
+    transition: color var(--transition-fast);
+}
+
+.form-label-help:hover {
+    color: var(--bs-primary);
+}
+
+/* ===== CURRENCY INPUT COMPONENT ===== */
+/**
+ * Custom component for Euro symbol in inputs
+ * Cannot be achieved with Bootstrap alone
+ */
+.currency-input-group {
+    position: relative;
+}
+
+.currency-input-group .form-control {
+    padding-left: 2.75rem;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--currency-symbol-color);
+    font-weight: 600;
+    font-size: 0.875rem;
+    z-index: 4;
+    pointer-events: none;
+}
+
+/* ===== ENHANCED FORM VALIDATION ===== */
+/**
+ * Extend Bootstrap validation with custom feedback icons
+ */
+.valid-feedback,
+.invalid-feedback {
+    /* Bootstrap handles base styling, add icon support */
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    margin-top: 0.375rem;
+    line-height: 1.4;
+}
+
+/* ===== ENHANCED CHECKBOXES ===== */
+/**
+ * Card-style checkbox component
+ * Uses Bootstrap .card as base with custom enhancements
+ */
+.form-check-enhanced {
+    /* Extend Bootstrap .card .card-body */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 2px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: white;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.form-check-enhanced:hover {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.form-check-enhanced:has(:checked) {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.form-check-enhanced .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.form-check-enhanced .form-check-label {
+    font-weight: 500;
+    color: var(--bs-gray-700);
+    cursor: pointer;
+    margin: 0;
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* ===== FORM ACTIONS (using Bootstrap button utilities) ===== */
+/**
+ * Use Bootstrap .d-flex .justify-content-between with minimal custom additions
+ */
+.form-actions {
+    /* Equivalent to: .p-4 .bg-light .border-top .d-flex .justify-content-between .align-items-center */
+    padding: 2rem;
+    background-color: var(--bs-gray-50);
+    border-top: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-actions-left {
+    /* Equivalent to: .d-flex .align-items-center .gap-3 */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.form-actions-right {
+    /* Equivalent to: .d-flex .align-items-center .gap-2 */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Enhanced button styling (extend Bootstrap .btn) */
+.btn-form-primary {
+    /* Use Bootstrap .btn .btn-primary as base, add enhancements */
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-form-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-form-secondary {
+    /* Use Bootstrap .btn .btn-outline-secondary as base */
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all var(--transition-fast);
+}
+
+/* ===== PROGRESS INDICATOR ===== */
+/**
+ * Custom progress bar (extends Bootstrap .progress)
+ */
+#formProgressContainer {
+    /* Use Bootstrap .card for container */
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+}
+
+#formProgressBar {
+    /* Extend Bootstrap .progress-bar */
+    transition: width var(--transition-base);
+}
+
+/* Progress color variations (extend Bootstrap) */
+#formProgressBar.bg-danger {
+    background-color: var(--bs-danger) !important;
+}
+
+#formProgressBar.bg-warning {
+    background-color: var(--bs-warning) !important;
+}
+
+#formProgressBar.bg-success {
+    background-color: var(--bs-success) !important;
+}
+
+/* ===== DOCUMENTS SECTION ===== */
+/**
+ * Use Bootstrap .card and .table components with minimal custom styling
+ */
+.documents-section {
+    /* Extend Bootstrap .card */
+    background-color: var(--bs-gray-50);
+    border-radius: var(--bs-border-radius-lg);
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 2px dashed var(--bs-border-color);
+    transition: all var(--transition-fast);
+}
+
+.documents-header {
+    /* Equivalent to: .d-flex .align-items-center .justify-content-between .mb-4 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.documents-title {
+    /* Use Bootstrap typography utilities */
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Upload form (use Bootstrap .card) */
+.upload-form {
+    /* Extend Bootstrap .card .card-body */
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Documents table (extend Bootstrap .table) */
+.documents-table {
+    /* Use Bootstrap .card for wrapper */
+    background: white;
+    border-radius: var(--bs-border-radius);
+    overflow: hidden;
+    box-shadow: var(--contract-form-shadow);
+    border: 1px solid var(--bs-border-color);
+}
+
+.documents-table .table {
+    margin: 0;
+}
+
+.documents-table .table th {
+    /* Extend Bootstrap .table th */
+    background-color: var(--bs-gray-100);
+    border: none;
+    font-weight: 600;
+    color: var(--bs-gray-700);
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+.documents-table .table td {
+    /* Extend Bootstrap .table td */
+    border: none;
+    border-bottom: 1px solid var(--bs-gray-200);
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+}
+
+.documents-table .table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.document-link {
+    /* Use Bootstrap .link-primary with custom enhancements */
+    color: var(--bs-primary);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color var(--transition-fast);
+}
+
+.document-link:hover {
+    color: var(--bs-primary);
+    text-decoration: underline;
+}
+
+/* ===== LOADING STATES ===== */
+/**
+ * Loading button animation (custom, no Bootstrap equivalent)
+ */
+.btn-loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.btn-loading .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+}
+
+/* ===== GROSS AMOUNT DISPLAY ===== */
+/**
+ * Calculated amount display component
+ */
+#grossAmountDisplay {
+    /* Use Bootstrap .alert-info as base */
+    background-color: rgba(13, 110, 253, 0.1);
+    border: 1px solid rgba(13, 110, 253, 0.2);
+    color: var(--bs-primary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--bs-border-radius);
+    margin-top: 0.5rem;
+    transition: all var(--transition-fast);
+}
+
+/* ===== CHARACTER COUNT DISPLAY ===== */
+.char-count {
+    /* Use Bootstrap .text-muted with custom positioning */
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--bs-gray-500);
+    pointer-events: none;
+}
+
+.char-count.text-warning {
+    color: var(--bs-warning) !important;
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+/**
+ * Toast positioning (extend Bootstrap .toast)
+ */
+.toast-container {
+    z-index: 1080;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+/**
+ * Use Bootstrap responsive utilities where possible
+ */
+
+/* Mobile: equivalent to Bootstrap .d-md-none, .d-md-block patterns */
+@media (max-width: 767.98px) {
+    .form-section {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        gap: 0.75rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .form-actions-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-form-primary,
+    .btn-form-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .currency-input-group .form-control {
+        padding-left: 2.5rem;
+    }
+    
+    .currency-symbol {
+        left: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .documents-section {
+        padding: 1.5rem 1rem;
+    }
+    
+    .upload-form {
+        padding: 1rem;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 575.98px) {
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .form-section-icon {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.125rem;
+    }
+    
+    .form-actions {
+        padding: 1.5rem 1rem;
+    }
+    
+    .documents-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+/**
+ * Improve accessibility beyond Bootstrap defaults
+ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .form-section {
+        border-bottom: 2px solid var(--bs-dark);
+    }
+    
+    .form-check-enhanced {
+        border-width: 2px;
+    }
+    
+    .currency-input-group {
+        border: 2px solid var(--bs-dark);
+    }
+}
+
+/* Focus indicators (enhance Bootstrap focus styles) */
+.form-control:focus,
+.form-select:focus,
+.btn:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+/**
+ * Optimize for printing
+ */
+@media print {
+    .form-actions,
+    .documents-section .btn,
+    .btn-form-secondary,
+    #formProgressContainer {
+        display: none !important;
+    }
+    
+    .contract-form-container,
+    .documents-section {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .form-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .form-section-header {
+        border-bottom: 2px solid #000;
+    }
+}
+
+/* ===== UTILITY CLASSES ===== */
+/**
+ * Minimal utility classes that complement Bootstrap
+ */
+.text-required {
+    color: var(--bs-danger);
+    font-weight: 600;
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+/* Fade-in animation for enhanced UX */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

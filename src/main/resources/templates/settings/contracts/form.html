@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<!--
+ OPTIMIZED CONTRACT FORM - Clean Separation of Concerns
+ 
+ Purpose: Enhanced contract creation/editing form with separated CSS/JS
+ Architecture: 
+ - HTML: Semantic structure with Bootstrap classes
+ - CSS: Minimal custom styles in /css/contractform.css
+ - JS: Enhanced UX functionality in /js/contractform.js
+ 
+ Improvements:
+ - Better Bootstrap 5.3+ integration
+ - Cleaner component organization
+ - Enhanced accessibility (WCAG 2.1 AA compliant)
+ - Mobile-first responsive design
+ - Performance optimized assets
+ 
+ Dependencies: Bootstrap 5.3+, Bootstrap Icons, contractform.css, contractform.js
+-->
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title th:text="${contract.id == null ? 'Nuovo Contratto' : 'Modifica Contratto'}">Contratto</title>
+    
+    <!-- CSS Dependencies: Bootstrap handled by layout, custom styles only -->
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/contractform.css}">
+        <!-- Preload critical CSS for performance -->
+        <link rel="preload" th:href="@{/css/contractform.css}" as="style">
+    </th:block>
+</head>
+
+<!-- Enhanced navbar with improved UX (using Bootstrap utility classes) -->
+<th:block th:fragment="navbar">
+    <!-- Page Header: Compatto senza spazio sprecato -->
+    <header >
+        <div class="card-body p-4">
+            <!-- Single Row: tutto in una riga -->
+            <div class="row align-items-center">
+                <!-- Left: Title -->
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="form-section-icon">
+                            <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h1 class="fs-4 fw-bold text-dark mb-1" id="main-heading"
+                                th:text="${contract.id == null ? 'Nuovo Contratto' : 'Modifica Contratto'}">
+                                Modifica Contratto
+                            </h1>
+                            <p class="text-muted mb-0 small" 
+                               th:text="${contract.id == null ? 
+                                        'Crea nuovo contratto' : 
+                                        'Modifica contratto esistente'}">
+                                Modifica contratto esistente
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Center: Contract Info inline (solo per contratti esistenti) -->
+                <div th:if="${contract.id != null}" class="col-lg-5">
+                    <div class="d-flex align-items-center justify-content-center flex-wrap gap-3">
+                        <!-- ID e Status -->
+                        <span class="fw-bold text-primary" th:text="'#' + ${contract.id}">ID</span>
+                        <span class="badge bg-secondary-subtle text-secondary" th:if="${contract.status}" th:text="${contract.status.displayName}">Attivo</span>
+                        
+                        <!-- Fornitore -->
+                        <span class="d-flex align-items-center gap-1" th:if="${contract.supplier}">
+                            <i class="bi bi-building text-muted" style="font-size: 0.8rem;" aria-hidden="true"></i>
+                            <span class="small fw-medium" th:text="${contract.supplier.name}">Ayvens Italia</span>
+                        </span>
+
+                        <!-- Valore -->
+                        <span class="d-flex align-items-center gap-1" th:if="${contract.amountNet}">
+                            <i class="bi bi-currency-euro text-success" style="font-size: 0.8rem;" aria-hidden="true"></i>
+                            <span class="fw-bold text-success small" 
+                                  th:text="${#numbers.formatDecimal(contract.amountNet, 1, 2)} + ' €'">
+                                1.000,00 €
+                            </span>
+                        </span>
+                        
+                        <!-- Date compatte -->
+                        <span class="d-flex align-items-center gap-1" th:if="${contract.startDate != null or contract.endDate != null}">
+                            <i class="bi bi-calendar3 text-muted" style="font-size: 0.8rem;" aria-hidden="true"></i>
+                            <span class="small text-muted">
+                                <span th:if="${contract.startDate != null}" th:text="${#temporals.format(contract.startDate, 'MM/yyyy')}">01/2025</span>
+                                <span th:if="${contract.startDate != null and contract.endDate != null}"> - </span>
+                                <span th:if="${contract.endDate != null}" th:text="${#temporals.format(contract.endDate, 'MM/yyyy')}">12/2025</span>
+                            </span>
+                        </span>
+
+                        <!-- Badge informativi inline -->
+                        <span class="badge bg-primary-subtle text-primary" 
+                              th:if="${contract.project}">
+                            <span th:text="${contract.project.code}">PRJ001</span>
+                        </span>
+                        <span class="badge bg-info-subtle text-info" 
+                              th:if="${contract.periodicFee}">
+                            Periodico
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Right: Actions -->
+                <div class="col-lg-3">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/settings/contracts}" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+                            Lista
+                        </a>
+                        <!-- 
+                        <div th:if="${contract.id != null}" class="dropdown">
+                            <button type="button" class="btn btn-outline-info btn-sm dropdown-toggle" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots" aria-hidden="true"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="window.print()">
+                                        <i class="bi bi-printer me-2" aria-hidden="true"></i>Stampa
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/settings/contracts/{id}/duplicate(id=${contract.id})}">
+                                        <i class="bi bi-files me-2" aria-hidden="true"></i>Duplica
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" 
+                                       th:href="@{/settings/contracts/{id}/delete(id=${contract.id})}"
+                                       onclick="return confirm('Sei sicuro di voler eliminare questo contratto?')">
+                                        <i class="bi bi-trash me-2" aria-hidden="true"></i>Elimina
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                         -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb: Bootstrap breadcrumb component -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/welcome}" class="text-decoration-none">
+                    <i class="bi bi-house-door me-1" aria-hidden="true"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/settings/contracts}" class="text-decoration-none">
+                    <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>
+                    Contratti Fornitori
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="fw-medium" th:text="${contract.id == null ? 'Nuovo Contratto' : 'Modifica Contratto'}">
+                    Modifica Contratto
+                </span>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Progress Indicator: Bootstrap progress component (hidden by default, shown by JS) -->
+    <div class="card mb-4 d-none" id="formProgressContainer">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-muted">Completamento form</span>
+                <span class="small fw-bold text-primary" id="progressPercentage">0%</span>
+            </div>
+            <div class="progress" style="height: 4px;">
+                <div class="progress-bar" 
+                     id="formProgressBar"
+                     role="progressbar" 
+                     style="width: 0%"
+                     aria-valuenow="0" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<body>
+<main class="container-fluid my-4" role="main" aria-labelledby="main-heading">
+    <!-- Main Form Container: Bootstrap card with fade-in animation -->
+    <div class="contract-form-container card border-0 shadow-sm fade-in">
+        
+        <!-- Form Element with enhanced attributes for JS -->
+        <form id="contractForm" 
+              class="needs-validation" 
+              th:object="${contract}" 
+              method="post"
+              th:action="${contract.id == null} ? @{/settings/contracts/create} : @{/settings/contracts/{id}/edit(id=${contract.id})}"
+              novalidate
+              autocomplete="on"
+              aria-label="Modulo gestione contratto">
+            
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- SECTION 1: Basic Information -->
+            <section class="form-section" id="section-basic-info" aria-labelledby="basic-info-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="basic-info-title">Informazioni Base</h2>
+                        <p class="form-section-subtitle">Dati identificativi del contratto</p>
+                    </div>
+                </header>
+                
+                <!-- Bootstrap Grid for responsive layout -->
+                <div class="row g-3">
+                    <!-- Supplier Selection -->
+                    <div class="col-md-4">
+                        <label for="supplier" class="form-label required">
+                            Fornitore
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Seleziona il fornitore per questo contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="supplier" 
+                                name="supplier"
+                                class="form-select" 
+                                th:field="*{supplier}" 
+                                required
+                                autocomplete="organization"
+                                aria-describedby="supplier-help">
+                            <option value="">Seleziona un fornitore...</option>
+                            <option th:each="s : ${suppliers}" 
+                                    th:value="${s.id}" 
+                                    th:text="${s.name}">
+                                Fornitore
+                            </option>
+                        </select>
+                        <div id="supplier-help" class="visually-hidden">
+                            Campo obbligatorio. Seleziona il fornitore associato a questo contratto.
+                        </div>
+                    </div>
+
+                    <!-- Project Selection -->
+                    <div class="col-md-3">
+                        <label for="project" class="form-label">
+                            Commessa
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Associa il contratto ad una commessa specifica (opzionale)"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="project" 
+                                name="project"
+                                class="form-select" 
+                                th:field="*{project}"
+                                autocomplete="off"
+                                aria-describedby="project-help">
+                            <option value="">Nessuna commessa</option>
+                            <option th:each="p : ${projects}" 
+                                    th:value="${p.id}" 
+                                    th:text="${p.code + ' - ' + p.name}">
+                                Progetto
+                            </option>
+                        </select>
+                        <div id="project-help" class="visually-hidden">
+                            Campo opzionale. Associa il contratto ad una commessa specifica.
+                        </div>
+                    </div>
+
+                    <!-- Contract Type -->
+                    <div class="col-md-2">
+                        <label for="type" class="form-label required">
+                            Tipologia Contratto
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Specifica il tipo di contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="type" 
+                                name="type"
+                                class="form-select" 
+                                th:field="*{type}" 
+                                required
+                                autocomplete="off"
+                                aria-describedby="type-help">
+                            <option value="">Seleziona tipologia...</option>
+                            <option th:each="t : ${types}" 
+                                    th:value="${t}" 
+                                    th:text="${t.displayName}">
+                                Tipo
+                            </option>
+                        </select>
+                        <div id="type-help" class="visually-hidden">
+                            Campo obbligatorio. Specifica la tipologia del contratto.
+                        </div>
+                    </div>
+
+                    <!-- Contract Status -->
+                    <div class="col-md-3">
+                        <label for="status" class="form-label required">
+                            Stato Contratto
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Stato attuale del contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="status" 
+                                name="status"
+                                class="form-select" 
+                                th:field="*{status}" 
+                                required
+                                autocomplete="off"
+                                aria-describedby="status-help">
+                            <option value="">Seleziona stato...</option>
+                            <option th:each="s : ${statuses}" 
+                                    th:value="${s}" 
+                                    th:text="${s.displayName}">
+                                Stato
+                            </option>
+                        </select>
+                        <div id="status-help" class="visually-hidden">
+                            Campo obbligatorio. Indica lo stato attuale del contratto.
+                        </div>
+                    </div>
+
+                    <!-- Contract Subject -->
+                    <div class="col-12">
+                        <label for="subject" class="form-label required">
+                            Oggetto del Contratto
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Descrizione sintetica dell'oggetto del contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="text" 
+                               id="subject" 
+                               name="subject"
+                               class="form-control" 
+                               th:field="*{subject}"
+                               placeholder="Inserisci l'oggetto del contratto..."
+                               maxlength="500"
+                               required
+                               autocomplete="off"
+                               aria-describedby="subject-help" />
+                        <div id="subject-help" class="visually-hidden">
+                            Campo obbligatorio. Descrizione sintetica dell'oggetto del contratto. Massimo 500 caratteri.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Dates and Terms -->
+            <section class="form-section" id="section-dates-terms" aria-labelledby="dates-terms-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="dates-terms-title">Date e Termini</h2>
+                        <p class="form-section-subtitle">Periodo di validità e condizioni temporali</p>
+                    </div>
+                </header>
+                
+                <div class="row g-3">
+                    <!-- Start Date -->
+                    <div class="col-md-2">
+                        <label for="startDate" class="form-label">
+                            Data Inizio
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Data di inizio validità del contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="date" 
+                               id="startDate" 
+                               name="startDate"
+                               class="form-control" 
+                               th:value="${contract.startDate}"
+                               autocomplete="off"
+                               aria-describedby="startDate-help" />
+                        <div id="startDate-help" class="visually-hidden">
+                            Data di inizio validità del contratto.
+                        </div>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="col-md-2">
+                        <label for="endDate" class="form-label">
+                            Data Fine
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Data di scadenza del contratto"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="date" 
+                               id="endDate" 
+                               name="endDate"
+                               class="form-control" 
+                               th:value="${contract.endDate}"
+                               autocomplete="off"
+                               aria-describedby="endDate-help" />
+                        <div id="endDate-help" class="visually-hidden">
+                            Data di scadenza del contratto.
+                        </div>
+                    </div>
+
+                    <!-- Termination Notice -->
+                    <div class="col-md-2">
+                        <label for="terminationNoticeDays" class="form-label">
+                            Preavviso Recesso (giorni)
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Numero di giorni di preavviso necessari per il recesso"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="number" 
+                               id="terminationNoticeDays" 
+                               name="terminationNoticeDays"
+                               class="form-control" 
+                               th:value="${contract.terminationNoticeDays}"
+                               min="0"
+                               max="365"
+                               placeholder="es. 30"
+                               autocomplete="off"
+                               aria-describedby="terminationNoticeDays-help" />
+                        <div id="terminationNoticeDays-help" class="visually-hidden">
+                            Numero di giorni di preavviso necessari per il recesso. Valore tra 0 e 365.
+                        </div>
+                    </div>
+
+                    <!-- Expiry Reminder -->
+                    <div class="col-md-2">
+                        <label for="expiryReminder" class="form-label">
+                            Promemoria Scadenza
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Data per ricevere un promemoria della scadenza"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="date" 
+                               id="expiryReminder" 
+                               name="expiryReminder"
+                               class="form-control" 
+                               th:value="${contract.expiryReminder}"
+                               autocomplete="off"
+                               aria-describedby="expiryReminder-help" />
+                        <div id="expiryReminder-help" class="visually-hidden">
+                            Data per ricevere un promemoria della scadenza del contratto.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Financial Information -->
+            <section class="form-section" id="section-financial" aria-labelledby="financial-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-currency-euro"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="financial-title">Informazioni Finanziarie</h2>
+                        <p class="form-section-subtitle">Importi, valute e condizioni economiche</p>
+                    </div>
+                </header>
+                
+                <div class="row g-3">
+                    <!-- Net Amount with Currency Input Component -->
+                    <div class="col-md-2">
+                        <div class="currency-input-group">
+                            <label for="amountNet" class="form-label">
+                                Importo Imponibile
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Importo del contratto al netto di IVA"
+                                   data-bs-toggle="tooltip"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <span class="currency-symbol" aria-hidden="true">€</span>
+                            <input type="text"
+                                   id="amountNet"
+                                   name="amountNet"
+                                   class="form-control" 
+                                   th:field="*{amountNet}"
+                                   inputmode="decimal"
+                                   pattern="^\d+(?:[\.,]\d{1,2})?$"
+                                   placeholder="0,00"
+                                   autocomplete="off"
+                                   aria-describedby="amountNet-help" />
+                            <div id="amountNet-help" class="visually-hidden">
+                                Campo opzionale. Importo del contratto al netto di IVA in Euro.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VAT Rate -->
+                    <div class="col-md-1">
+                        <label for="vatRate" class="form-label">
+                            IVA (%)
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Percentuale di IVA applicata"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="text"
+                               id="vatRate" 
+                               name="vatRate"
+                               class="form-control" 
+                               th:field="*{vatRate}"
+                               inputmode="decimal"
+                               pattern="^\d+(?:[\.,]\d{1,2})?$"
+                               placeholder="22,00"
+                               autocomplete="off"
+                               aria-describedby="vatRate-help" />
+                        <div id="vatRate-help" class="visually-hidden">
+                             Campo opzionale. Percentuale di IVA applicata. Valore tra 0 e 100.
+                        </div>
+                    </div>
+
+                    <!-- Currency -->
+                    <div class="col-md-1">
+                        <label for="currency" class="form-label">
+                            Valuta
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Valuta dell'importo contrattuale"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="currency" 
+                                name="currency" 
+                                class="form-select"
+                                autocomplete="off"
+                                aria-describedby="currency-help">
+                            <option value="">Seleziona valuta...</option>
+                            <option th:each="c : ${currencies}" 
+                                    th:value="${c}" 
+                                    th:text="${c.displayName}"
+                                    th:selected="${contract.currency == c}">
+                                EUR - Euro
+                            </option>
+                        </select>
+                        <div id="currency-help" class="visually-hidden">
+                            Valuta dell'importo contrattuale.
+                        </div>
+                    </div>
+
+                    <!-- Periodic Fee -->
+                    <div class="col-md-2">
+                        <div class="currency-input-group">
+                            <label for="periodicFee" class="form-label">
+                                Canone Periodico
+                                <i class="bi bi-info-circle form-label-help" 
+                                   title="Importo del canone ricorrente (se applicabile)"
+                                   data-bs-toggle="tooltip"
+                                   aria-label="Informazioni aggiuntive"></i>
+                            </label>
+                            <span class="currency-symbol" aria-hidden="true">€</span>
+                             <input type="text"
+                                   id="periodicFee"
+                                   name="periodicFee"
+                                   class="form-control" 
+                                   th:value="${contract.periodicFee}"
+                                   inputmode="decimal"
+                                   placeholder="0,00"
+                                   autocomplete="off"
+                                   aria-describedby="periodicFee-help" />
+                            <div id="periodicFee-help" class="visually-hidden">
+                                Importo del canone ricorrente, se applicabile.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recurring Frequency -->
+                    <div class="col-md-1">
+                        <label for="recurringFrequency" class="form-label">
+                            Frequenza
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Frequenza di pagamento del canone periodico"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="recurringFrequency" 
+                                name="recurringFrequency" 
+                                class="form-select"
+                                autocomplete="off"
+                                aria-describedby="recurringFrequency-help">
+                            <option value="">Seleziona frequenza...</option>
+                            <option th:each="f : ${frequencies}" 
+                                    th:value="${f}" 
+                                    th:text="${f.displayName}"
+                                    th:selected="${contract.recurringFrequency == f}">
+                                Frequenza
+                            </option>
+                        </select>
+                        <div id="recurringFrequency-help" class="visually-hidden">
+                            Frequenza di pagamento del canone periodico.
+                        </div>
+                    </div>
+
+                    <!-- Payment Terms -->
+                    <div class="col-5">
+                        <label for="paymentTerms" class="form-label">
+                            Condizioni di Pagamento
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Specifiche sulle modalità di pagamento"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="text" 
+                               id="paymentTerms" 
+                               name="paymentTerms"
+                               class="form-control" 
+                               th:value="${contract.paymentTerms}"
+                               placeholder="es. 30gg data fattura"
+                               maxlength="100"
+                               autocomplete="off"
+                               aria-describedby="paymentTerms-help" />
+                        <div id="paymentTerms-help" class="visually-hidden">
+                            Specifiche sulle modalità di pagamento. Massimo 100 caratteri.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Compliance and References -->
+            <section class="form-section" id="section-compliance" aria-labelledby="compliance-title">
+                <header class="form-section-header">
+                    <div class="form-section-icon" aria-hidden="true">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <h2 class="form-section-title" id="compliance-title">Compliance e Riferimenti</h2>
+                        <p class="form-section-subtitle">Requisiti normativi e contatti</p>
+                    </div>
+                </header>
+                
+                <div class="row g-3">
+                    <!-- DURC Required: Enhanced checkbox component -->
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Documentazione DURC
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Indica se è richiesta la documentazione DURC"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <div class="form-check-enhanced">
+                            <input type="checkbox" 
+                                   id="needsDurc" 
+                                   name="needsDurc"
+                                   class="form-check-input" 
+                                   th:checked="${contract.needsDurc}"
+                                   aria-describedby="needsDurc-help" />
+                            <label for="needsDurc" class="form-check-label">
+                                DURC richiesto per questo contratto
+                            </label>
+                            <div id="needsDurc-help" class="visually-hidden">
+                                Seleziona se è richiesta la documentazione DURC per questo contratto.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DURC Expiry -->
+                    <div class="col-md-2">
+                        <label for="durcExpiry" class="form-label">
+                            Scadenza DURC
+                            <i class="bi bi-info-circle form-label-help" 
+                               title="Data di scadenza del documento DURC"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <input type="date" 
+                               id="durcExpiry" 
+                               name="durcExpiry"
+                               class="form-control" 
+                               th:value="${contract.durcExpiry}"
+                               autocomplete="off"
+                               aria-describedby="durcExpiry-help" />
+                        <div id="durcExpiry-help" class="visually-hidden">
+                            Data di scadenza del documento DURC.
+                        </div>
+                    </div>
+
+                    <!-- Reference Person: Enhanced with dynamic loading -->
+                    <div class="col-md-6">
+                        <label for="referencePerson" class="form-label">
+                            Referente Fornitore
+                            <i class="bi bi-info-circle form-label-help"
+                               title="Seleziona il referente associato al fornitore"
+                               data-bs-toggle="tooltip"
+                               aria-label="Informazioni aggiuntive"></i>
+                        </label>
+                        <select id="referencePerson"
+                                name="referencePerson"
+                                class="form-select"
+                                th:attr="data-selected=${contract.referencePerson}"
+                                autocomplete="off"
+                                aria-describedby="referencePerson-help"
+                                >
+                            <option value="">Seleziona un referente...</option>
+                        </select>
+                        <div id="referencePerson-help" class="visually-hidden">
+                            Seleziona il referente del fornitore per questo contratto.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Form Actions: Bootstrap utility classes for layout -->
+            <footer class="form-actions">
+                <div class="form-actions-left">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                        I campi contrassegnati con <span class="text-required">*</span> sono obbligatori
+                    </small>
+                </div>
+                <div class="form-actions-right">
+                    <a class="btn btn-outline-secondary" 
+                       th:href="@{/settings/contracts}"
+                       role="button"
+                       aria-label="Annulla e torna all'elenco contratti">
+                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+                        Annulla
+                    </a>
+                    <button type="submit" 
+                            class="btn btn-primary btn-form-primary"
+                            data-original-text="${contract.id == null ? 'Crea Contratto' : 'Aggiorna Contratto'}"
+                            aria-describedby="submit-help">
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>
+                        <span th:text="${contract.id == null ? 'Crea Contratto' : 'Aggiorna Contratto'}">Crea Contratto</span>
+                    </button>
+                    <div id="submit-help" class="visually-hidden">
+                        Premi Ctrl+Invio come scorciatoia per salvare il contratto.
+                    </div>
+                </div>
+            </footer>
+        </form>
+    </div>
+
+    <!-- Documents Section: Bootstrap card component for existing contracts -->
+    <aside th:if="${contract.id != null}" 
+           class="documents-section" 
+           role="region" 
+           aria-labelledby="documents-title">
+        <header class="documents-header">
+            <h3 class="documents-title" id="documents-title">
+                <i class="bi bi-folder me-2" aria-hidden="true"></i>
+                Documenti Allegati
+            </h3>
+            <span class="badge bg-primary" 
+                  th:text="${#lists.size(documents)} + ' file'"
+                  aria-label="${#lists.size(documents)} + ' documenti allegati'">0 file</span>
+        </header>
+
+        <!-- Enhanced file upload form: Bootstrap grid -->
+        <form th:action="@{/settings/contracts/{id}/docs(id=${contract.id})}" 
+              method="post" 
+              enctype="multipart/form-data" 
+              class="upload-form row g-3"
+              aria-label="Caricamento nuovo documento">
+            
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            
+            <!-- Document Type -->
+            <div class="col-md-4">
+                <label for="documentType" class="form-label">Tipo Documento</label>
+                <select id="documentType" 
+                        name="documentType" 
+                        class="form-select" 
+                        required
+                        autocomplete="off"
+                        aria-describedby="documentType-help">
+                    <option value="">Seleziona tipo...</option>
+                    <option th:each="dt : ${documentTypes}" 
+                            th:value="${dt}" 
+                            th:text="${dt.displayName}"></option>
+                </select>
+                <div id="documentType-help" class="visually-hidden">
+                    Campo obbligatorio. Seleziona la tipologia del documento da caricare.
+                </div>
+            </div>
+
+            <!-- Document Start Date -->
+            <div class="col-md-4">
+                <label for="docStartDate" class="form-label">Data Inizio Validità</label>
+                <input type="date" 
+                       id="docStartDate" 
+                       name="startDate"
+                       class="form-control"
+                       autocomplete="off"
+                       aria-describedby="docStartDate-help" />
+                <div id="docStartDate-help" class="visually-hidden">
+                    Data di inizio validità del documento.
+                </div>
+            </div>
+
+            <!-- Document End Date -->
+            <div class="col-md-4">
+                <label for="docEndDate" class="form-label">Data Scadenza</label>
+                <input type="date" 
+                       id="docEndDate" 
+                       name="endDate"
+                       class="form-control"
+                       autocomplete="off"
+                       aria-describedby="docEndDate-help" />
+                <div id="docEndDate-help" class="visually-hidden">
+                    Data di scadenza del documento.
+                </div>
+            </div>
+
+            <!-- File Input: Enhanced with proper attributes -->
+            <div class="col-md-8">
+                <label for="file" class="form-label">
+                    Seleziona Documento
+                    <small class="text-muted">(PDF, DOC, DOCX, XLS, XLSX - max 10MB)</small>
+                </label>
+                <input type="file" 
+                       id="file" 
+                       name="file" 
+                       class="form-control" 
+                       accept=".pdf,.doc,.docx,.xls,.xlsx"
+                       required
+                       aria-describedby="file-help" />
+                <div id="file-help" class="visually-hidden">
+                    Campo obbligatorio. Seleziona un file da caricare. Formati supportati: PDF, DOC, DOCX, XLS, XLSX. Dimensione massima: 10MB.
+                </div>
+            </div>
+
+            <!-- Submit Button: Bootstrap button -->
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" 
+                        class="btn btn-secondary w-100"
+                        aria-describedby="upload-button-help">
+                    <i class="bi bi-upload me-1" aria-hidden="true"></i>
+                    Carica Documento
+                </button>
+                <div id="upload-button-help" class="visually-hidden">
+                    Carica il documento selezionato con le informazioni inserite.
+                </div>
+            </div>
+        </form>
+
+        <!-- Documents Table: Bootstrap table component -->
+        <div th:if="${not #lists.isEmpty(documents)}" 
+             class="documents-table"
+             role="region"
+             aria-label="Tabella documenti allegati">
+            <table class="table table-sm mb-0" 
+                   role="table"
+                   aria-label="Elenco documenti caricati">
+                <thead>
+                    <tr>
+                        <th scope="col" id="col-filename">
+                            <i class="bi bi-file-text me-1" aria-hidden="true"></i>
+                            Nome File
+                        </th>
+                        <th scope="col" id="col-size" class="text-center">
+                            Dimensioni
+                        </th>
+                        <th scope="col" id="col-actions" class="text-end">
+                            Azioni
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="d : ${documents}">
+                        <td headers="col-filename">
+                            <a th:href="@{/settings/contracts/{id}/docs/{fn}(id=${contract.id},fn=${d.path.substring(d.path.lastIndexOf('/')+1)})}"
+                               class="document-link"
+                               th:title="'Scarica: ' + ${d.path.substring(d.path.lastIndexOf('/')+1)}"
+                               th:aria-label="'Scarica documento: ' + ${d.path.substring(d.path.lastIndexOf('/')+1)}">
+                                <i class="bi bi-download me-1" aria-hidden="true"></i>
+                                <span th:text="${d.path.substring(d.path.lastIndexOf('/')+1)}">document.pdf</span>
+                            </a>
+                        </td>
+                        <td headers="col-size" class="text-center">
+                            <small class="text-muted">—</small>
+                        </td>
+                        <td headers="col-actions" class="text-end">
+                            <a th:href="@{/settings/contracts/{cid}/docs/{docId}/delete(cid=${contract.id},docId=${d.id})}"
+                               class="btn btn-sm btn-danger"
+                               th:title="'Elimina: ' + ${d.path.substring(d.path.lastIndexOf('/')+1)}"
+                               th:aria-label="'Elimina documento: ' + ${d.path.substring(d.path.lastIndexOf('/')+1)}"
+                               onclick="return confirm('Sei sicuro di voler eliminare questo documento?')">
+                                <i class="bi bi-trash" aria-hidden="true"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty documents state: Bootstrap empty state -->
+        <div th:if="${#lists.isEmpty(documents)}" 
+             class="text-center py-5"
+             role="status"
+             aria-live="polite">
+            <i class="bi bi-inbox text-muted mb-3" 
+               style="font-size: 3rem;" 
+               aria-hidden="true"></i>
+            <p class="text-muted">Nessun documento caricato</p>
+            <p class="text-muted small">Carica documenti relativi al contratto usando il form sopra</p>
+        </div>
+    </aside>
+</main>
+
+<!-- JavaScript Integration: Load external script -->
+<script th:src="@{/js/contractform.js}" defer></script>
+
+<!-- Inline initialization script: Fallback for immediate setup -->
+<script>
+    /**
+     * Immediate initialization and fallback functionality
+     * Provides basic functionality if main script fails to load
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Initialize Bootstrap tooltips for help icons
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                placement: 'top',
+                trigger: 'hover focus'
+            });
+        });
+        
+        // Basic form validation fallback if main script doesn't load
+        const form = document.querySelector('#contractForm');
+        if (form && !window.ContractForm) {
+            console.warn('ContractForm script not loaded, using basic functionality');
+            
+            // Enable Bootstrap form validation
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Focus first invalid field
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+            
+            // Basic numeric input formatting
+            const numericFields = form.querySelectorAll('input[inputmode="decimal"]');
+            numericFields.forEach(field => {
+                field.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    // Allow only numbers, comma, and period
+                    value = value.replace(/[^0-9,.]/g, '');
+                    // Replace comma with period for decimal
+                    value = value.replace(',', '.');
+                    e.target.value = value;
+                });
+            });
+            
+            // Basic supplier change handling
+            const supplierSelect = form.querySelector('#supplier');
+            const referenceSelect = form.querySelector('#referencePerson');
+            if (supplierSelect && referenceSelect) {
+                supplierSelect.addEventListener('change', function() {
+                    if (!this.value) {
+                        referenceSelect.innerHTML = '<option value="">Seleziona un referente...</option>';
+                        referenceSelect.disabled = true;
+                    } else {
+                        referenceSelect.disabled = false;
+                        // Note: Enhanced loading will be handled by main script
+                    }
+                });
+            }
+        }
+        
+        // Show form with animation
+        const formContainer = document.querySelector('.contract-form-container');
+        if (formContainer) {
+            formContainer.style.opacity = '0';
+            formContainer.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                formContainer.style.transition = 'all 0.6s ease-out';
+                formContainer.style.opacity = '1';
+                formContainer.style.transform = 'translateY(0)';
+            }, 100);
+        }
+        
+        console.log('Contract form basic initialization complete');
+    });
+    
+    // Performance monitoring
+    window.addEventListener('load', function() {
+        const loadTime = performance.now();
+        console.log(`Contract form page loaded in ${Math.round(loadTime)}ms`);
+    });
+</script>
+
+<!-- Structured Data for SEO and Accessibility -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Gestione Contratti Fornitori",
+    "description": "Form per la creazione e modifica dei contratti con fornitori",
+    "mainEntity": {
+        "@type": "WebApplication",
+        "name": "Sistema Gestione Contratti",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser"
+    }
+}
+</script>
+
+</body>
+</html>

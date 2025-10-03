@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Polizze — Veely</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/settings.css}">
+        <link rel="stylesheet" th:href="@{/css/projects.css}">
+    </th:block>
+</head>
+
+<th:block th:fragment="navbar">
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 class="page-title">Polizze Assicurative</h1>
+                <p class="page-subtitle">Gestisci tutte le polizze registrate nel sistema</p>
+            </div>
+            <div class="breadcrumb-nav">
+                <a th:href="@{/settings}" class="breadcrumb-link">Impostazioni</a>
+                <i class="bi bi-chevron-right mx-2" aria-hidden="true"></i>
+                <span class="breadcrumb-current">Polizze</span>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<body>
+<main class="page-content">
+    <div class="container-fluid px-0">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h5 mb-1">Panoramica polizze</h2>
+                <p class="text-muted mb-0">Consulta lo stato e le scadenze delle polizze</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/settings/projects}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Torna alle commesse
+                </a>
+                <a th:href="@{/settings/policies/new}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Nuova polizza
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${success}">Operazione completata</span>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${policies.empty}" class="text-center text-muted py-5">
+                    <i class="bi bi-shield-slash mb-3" style="font-size:3rem;" aria-hidden="true"></i>
+                    <h4 class="fw-semibold">Nessuna polizza registrata</h4>
+                    <p class="mb-0">Crea una nuova polizza utilizzando il pulsante in alto a destra.</p>
+                </div>
+                <div th:if="${!policies.empty}" class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Commessa</th>
+                            <th scope="col">Numero</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Referente</th>
+                            <th scope="col">Decorrenza</th>
+                            <th scope="col">Scadenza</th>
+                            <th scope="col">Data ultimo pagamento</th>
+                            <th scope="col" class="text-end">Azioni</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="policy : ${policies}">
+                            <td>
+                                <div class="fw-semibold" th:text="${policy.project != null ? policy.project.name : '—'}">Commessa</div>
+                                <div class="small text-muted"
+                                     th:text="${policy.project != null ? policy.project.code : ''}"></div>
+                            </td>
+                            <td class="fw-semibold" th:text="${policy.policyNumber}">POL123</td>
+                            <td>
+                                <div th:text="${policy.policyType}">RC</div>
+                                <div class="small text-muted" th:if="${policy.supplier != null}" th:text="${policy.supplier.name}"></div>
+                            </td>
+                            <td>
+                                <div th:if="${policy.supplierReferent != null}">
+                                    <span class="fw-semibold" th:text="${policy.supplierReferent.name}"></span>
+                                    <div class="small text-muted" th:text="${policy.supplierReferent.email}"></div>
+                                    <div class="small text-muted" th:text="${policy.supplierReferent.phone}"></div>
+                                </div>
+                                <div th:if="${policy.supplierReferent == null}" class="text-muted small">—</div>
+                            </td>
+                            <td th:text="${policy.startDate != null ? #temporals.format(policy.startDate, 'dd/MM/yyyy') : '—'}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${policy.expiryDate == null ? ' text-bg-secondary' :
+                                            (policy.expiryDate.isBefore(T(java.time.LocalDate).now()) ? ' text-bg-danger' :
+                                            (policy.expiryDate.isBefore(T(java.time.LocalDate).now().plusDays(30)) ? ' text-bg-warning' : ' text-bg-success'))}">
+                                    <span th:text="${policy.expiryDate != null ? #temporals.format(policy.expiryDate, 'dd/MM/yyyy') : 'N.D.'}"></span>
+                                </span>
+                            </td>
+                            <td th:text="${policy.paymentDate != null ? #temporals.format(policy.paymentDate, 'dd/MM/yyyy') : '—'}"></td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm"
+                                   th:href="@{|/settings/policies/${policy.id}/edit|}">
+                                    <i class="bi bi-pencil me-1"></i>
+                                    Modifica
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

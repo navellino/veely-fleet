@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<!--
+    EMPLOYMENT LIST PAGE
+    
+    Enhanced employment relationships management page with modern UX/UI
+    All CSS moved to employmentList.css, all JS moved to employment.js
+    Maintains full Thymeleaf functionality while providing clean separation of concerns
+    
+    Features:
+    - Responsive design with mobile-first approach
+    - Advanced filtering and real-time search
+    - Enhanced table sorting with visual feedback
+    - Accessibility improvements (ARIA labels, keyboard navigation)
+    - Toast notifications and loading states
+    - Progressive enhancement for better UX
+    
+    @author Nicola Avellino
+    @version 2.0
+    @since 2025
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Elenco Rapporti di Lavoro — Veely</title>
+    <th:block th:fragment="cssblock">
+        <!-- Enhanced Employment List Styles -->
+        <link rel="stylesheet" th:href="@{/css/employmentList.css}">
+        
+        <!-- Additional styles for enhanced features -->
+        <style>
+            /* CSS for search input enhancements */
+            .search-input.searching {
+                border-color: var(--warning-400);
+                background: var(--warning-50);
+            }
+            
+            /* CSS for table row animations */
+            .table-row.fade-in {
+                animation: fadeInUp 0.6s ease-out both;
+            }
+            
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            /* CSS for sorting feedback */
+            .sortable.sorting {
+                background: var(--primary-100);
+                transform: scale(0.98);
+            }
+            
+            /* Skip link for accessibility */
+            .skip-link:focus {
+                left: 1rem !important;
+                top: 1rem;
+                z-index: 9999;
+            }
+            
+            .header-icon {
+			    width: 56px;
+			    height: 56px;
+			    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+			    border-radius: var(--radius-xl);
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			    color: white;
+			    font-size: 1.5rem;
+			    flex-shrink: 0;
+			    box-shadow: var(--shadow-md);
+			    transition: var(--transition-base);
+			}
+        </style>
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+
+
+        <div class="header-main">
+            <div class="header-content">
+            	<div class="header-icon" aria-hidden="true"><i class="bi bi-file-earmark-text"></i></div>
+                <h1 class="page-title">Rapporti di Lavoro</h1>
+                <p class="page-subtitle">Monitora e gestisci tutti i contratti e rapporti di lavoro della tua azienda</p>
+            </div>
+        </div>
+        <div class="header-stats" role="complementary" aria-label="Statistiche rapporti di lavoro">
+            <div class="stat-item">
+                <div class="stat-value" th:text="${employments.getTotalElements() ?: 0}" aria-label="Totale rapporti">0</div>
+                <div class="stat-label">Totale Rapporti</div>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+                <div class="stat-value text-success" th:text="${activeCount}" aria-label="Rapporti attivi">-</div>
+                <div class="stat-label">Attivi</div>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+                 <div class="stat-value text-warning" th:text="${expiredCount}" aria-label="Rapporti scaduti">-</div>
+                <div class="stat-label">Scaduti</div>
+            </div>
+        </div>
+
+</th:block>
+<body>
+
+    <!-- Modern Page Header -->
+    <!-- 
+    <header class="employments-page-header" role="banner">
+        <div class="header-main">
+            <div class="header-icon" aria-hidden="true">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="page-title">Rapporti di Lavoro</h1>
+                <p class="page-subtitle">Monitora e gestisci tutti i contratti e rapporti di lavoro della tua azienda</p>
+            </div>
+        </div>
+        <div class="header-stats" role="complementary" aria-label="Statistiche rapporti di lavoro">
+            <div class="stat-item">
+                <div class="stat-value" th:text="${employments.getTotalElements() ?: 0}" aria-label="Totale rapporti">0</div>
+                <div class="stat-label">Totale Rapporti</div>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+                <div class="stat-value text-success" th:text="${activeCount}" aria-label="Rapporti attivi">-</div>
+                <div class="stat-label">Attivi</div>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+                 <div class="stat-value text-warning" th:text="${expiredCount}" aria-label="Rapporti scaduti">-</div>
+                <div class="stat-label">Scaduti</div>
+            </div>
+        </div>
+    </header>
+	-->
+    <!-- Enhanced Filter Section -->
+    <section class="employments-filter-section" role="search" aria-label="Filtri di ricerca">
+        <div class="filter-card mt-2">
+            <div class="filter-header" id="filterToggle" role="button" tabindex="0" 
+                 aria-expanded="false" aria-controls="filterContent"
+                 aria-label="Espandi o comprimi filtri avanzati">
+                <div class="filter-title">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                    Filtri Avanzati
+                </div>
+                <button class="filter-toggle-btn" type="button" aria-hidden="true">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="filter-content" id="filterContent" style="display: none;" 
+                 aria-labelledby="filterToggle">
+                <form class="filter-form" method="get" th:action="@{/fleet/employments}" 
+                      role="search" aria-label="Form di ricerca rapporti di lavoro">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="filter-label" for="searchInput">
+                                <i class="bi bi-search" aria-hidden="true"></i>
+                                Ricerca Dipendente
+                            </label>
+                            <div class="search-input-container">
+                                <input type="text" 
+                                       name="keyword" 
+                                       class="form-control search-input" 
+                                       th:value="${param.keyword}"
+                                       placeholder="Cerca per nome dipendente..." 
+                                       id="searchInput"
+                                       aria-describedby="searchHelp"
+                                       autocomplete="off">
+                                <i class="bi bi-search search-icon" aria-hidden="true"></i>
+                                <div id="searchHelp" class="sr-only">
+                                    Digita per cercare tra i dipendenti. I risultati verranno aggiornati automaticamente.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label" for="statusFilter">
+                                <i class="bi bi-circle-fill" aria-hidden="true"></i>
+                                Stato Contratto
+                            </label>
+                            <select name="status" 
+                                    class="form-select filter-select" 
+                                    id="statusFilter"
+                                    aria-describedby="statusHelp">
+                                <option value="">Tutti gli stati</option>
+                                <option th:each="s : ${statuses}" 
+                                        th:value="${s}" 
+                                        th:text="${s.displayName}" 
+                                        th:selected="${param.status == s.name()}"></option>
+                            </select>
+                            <div id="statusHelp" class="sr-only">
+                                Filtra i rapporti per stato del contratto
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label" for="projectFilter">
+                                <i class="bi bi-diagram-3" aria-hidden="true"></i>
+                                Commessa
+                            </label>
+                            <select name="project"
+                                    class="form-select filter-select"
+                                    id="projectFilter"
+                                    aria-describedby="projectHelp">
+                                <option value="">Tutte le commesse</option>
+                                <option th:each="p : ${projects}"
+                                        th:value="${p.id}"
+                                        th:text="${p.name}"
+                                        th:selected="${param.project == p.id}"></option>
+                            </select>
+                            <div id="projectHelp" class="sr-only">
+                                Filtra i rapporti per commessa attuale
+                            </div>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <a href="/fleet/employments" 
+                               class="btn btn-outline-secondary"
+                               aria-label="Ripristina tutti i filtri">
+                                <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                                Reset
+                            </a>
+                            <button type="submit" 
+                                    class="btn btn-primary"
+                                    aria-label="Applica filtri selezionati">
+                                <i class="bi bi-check-lg" aria-hidden="true"></i>
+                                Applica
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions Bar -->
+    <section class="quick-actions-bar" role="toolbar" aria-label="Azioni rapide">
+        <div class="actions-left">
+            <div class="results-info" role="status" aria-live="polite">
+                <span class="results-count" 
+                      th:text="${employments.getTotalElements()} + ' rapporti trovati'"
+                      aria-label="Numero di rapporti trovati">0 rapporti trovati</span>
+            </div>
+        </div>
+        
+        <div class="actions-right">
+            <a href="/fleet/employments/export" 
+               class="btn btn-outline-primary"
+                th:href="@{/fleet/employments/export(keyword=${param.keyword}, status=${param.status}, project=${param.project})}"
+               aria-label="Esporta lista rapporti in formato PDF">
+                <i class="bi bi-download" aria-hidden="true"></i>
+                Esporta PDF
+            </a>
+            <!-- 
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" 
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Menu azioni aggiuntive">
+                    <i class="bi bi-three-dots" aria-hidden="true"></i>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a class="dropdown-item" href="#" role="menuitem">
+                        <i class="bi bi-printer" aria-hidden="true"></i>Stampa Lista</a></li>
+                    <li><a class="dropdown-item" href="#" role="menuitem">
+                        <i class="bi bi-calendar-check" aria-hidden="true"></i>Scadenze</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" role="menuitem">
+                        <i class="bi bi-gear" aria-hidden="true"></i>Impostazioni Vista</a></li>
+                </ul>
+            </div>
+            -->
+            <a class="btn btn-primary btn-add-employment" 
+               th:href="@{/fleet/employments/new}"
+               aria-label="Crea nuovo rapporto di lavoro">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                Nuovo Rapporto
+            </a>
+        </div>
+    </section>
+
+    <!-- Enhanced Data Table -->
+    <main class="modern-table-card" role="main">
+        <!-- Loading overlay for async operations -->
+        <div class="loading-overlay" aria-hidden="true">
+            <div class="loading-spinner" role="status" aria-label="Caricamento in corso"></div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table employments-table sortable" 
+                   id="employmentsTable"
+                   role="table"
+                   aria-label="Tabella rapporti di lavoro"
+                   aria-describedby="tableDescription"
+                   data-sort-col=""
+                   data-sort-dir="">
+                
+                <caption id="tableDescription" class="sr-only">
+                    Tabella contenente l'elenco dei rapporti di lavoro con informazioni su dipendente, 
+                    contratto, date e stato. Le colonne sono ordinabili cliccando sulle intestazioni.
+                </caption>
+                
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th class="sortable" 
+                            data-sort="employee" 
+                            role="columnheader"
+                            aria-sort="none"
+                            tabindex="0">
+                            <div class="th-content">
+                                <span>Dipendente</span>
+                                <i class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" 
+                            data-sort="contract" 
+                            role="columnheader"
+                            aria-sort="none"
+                            tabindex="0">
+                            <div class="th-content">
+                                <span>Contratto</span>
+                                <i class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" 
+                            data-sort="start-date" 
+                            role="columnheader"
+                            aria-sort="none"
+                            tabindex="0">
+                            <div class="th-content">
+                                <span>Data Inizio</span>
+                                <i class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" 
+                            data-sort="end-date" 
+                            role="columnheader"
+                            aria-sort="none"
+                            tabindex="0">
+                            <div class="th-content">
+                                <span>Data Fine</span>
+                                <i class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+                            </div>
+                        </th>
+                        <th class="sortable" 
+                            data-sort="status" 
+                            role="columnheader"
+                            aria-sort="none"
+                            tabindex="0">
+                            <div class="th-content">
+                                <span>Stato</span>
+                                <i class="bi bi-arrow-down-up sort-icon" aria-hidden="true"></i>
+                            </div>
+                        </th>
+                        <th role="columnheader">Commessa</th>
+                        <th class="actions-column" role="columnheader">
+                            <span class="sr-only">Azioni disponibili</span>
+                            Azioni
+                        </th>
+                    </tr>
+                </thead>
+                
+                <tbody role="rowgroup">
+                     <tr class="table-row"
+                        th:each="e : ${employments.content}"
+                        role="row"
+                        th:attr="data-employment-id=${e.id}, data-end-date=${e.endDate}">
+                        
+                        <!-- Employee Information -->
+                        <td role="gridcell">
+                            <div class="employee-cell">
+                                <div class="employee-avatar" aria-hidden="true">
+                                    <i class="bi bi-person-circle"></i>
+                                </div>
+                                <div class="employee-info">
+                                    <div class="employee-name" 
+                                         th:text="${e.employee.lastName + ' ' + e.employee.firstName}">Nome Cognome</div>
+                                    <div class="employee-matricola" 
+                                         th:if="${e.matricola}"
+                                         th:attr="aria-label='Matricola numero ' + ${e.matricola}">
+                                        Matricola: <span th:text="${e.matricola}">123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <!-- Contract Information -->
+                        <td role="gridcell">
+                            <div class="contract-cell">
+                                <div class="contract-type" 
+                                     th:text="${e.contractType != null ? e.contractType.displayName : '—'}">Tipo Contratto</div>
+                                  <th:block th:with="jobTitleText=${e.jobTitle != null ? e.jobTitle : ''},
+                                              jobRoleText=${e.jobRole != null ? e.jobRole : ''},
+                                              hasJobTitle=${!#strings.isEmpty(jobTitleText)},
+                                              hasJobRole=${!#strings.isEmpty(jobRoleText)},
+                                              hasLevel=${e.contractLevel != null and !#strings.isEmpty(e.contractLevel)},
+                                              levelText=${hasLevel ? (#strings.startsWith(#strings.toLowerCase(e.contractLevel), 'liv') ? e.contractLevel : 'Liv. ' + e.contractLevel) : ''}">
+                                    <div class="contract-details"
+                                         th:if="${(hasJobTitle != null ? hasJobTitle : false)
+                                                 or (hasJobRole != null ? hasJobRole : false)
+                                                 or (hasLevel != null ? hasLevel : false)}">
+                                        <span th:text="${
+                                                (hasJobTitle ? jobTitleText : '')
+                                                + (hasJobRole ? (hasJobTitle ? ' - ' : '') + jobRoleText : '')
+                                                + (hasLevel ? ((hasJobTitle or hasJobRole) ? ' - ' : '') + levelText : '')
+                                            }">Dettagli contratto</span>
+                                    </div>
+                                  </th:block>
+                            </div>
+                        </td>
+                        
+                        <!-- Start Date -->
+                        <td role="gridcell">
+                            <div class="date-cell">
+                                <div class="date-main" 
+                                     th:text="${#temporals.format(e.startDate, 'dd/MM/yyyy')}"
+                                     th:attr="aria-label='Data inizio ' + ${#temporals.format(e.startDate, 'dd MMMM yyyy', #locale)}">01/01/2023</div>
+                                <div class="date-details" 
+                                     th:text="${#temporals.format(e.startDate, 'EEEE', #locale)}"
+                                     aria-hidden="true">Lunedì</div>
+                            </div>
+                        </td>
+                        
+                        <!-- End Date -->
+                        <td role="gridcell">
+                            <div class="date-cell" th:if="${e.endDate != null}">
+                                <div class="date-main" 
+                                     th:text="${#temporals.format(e.endDate, 'dd/MM/yyyy')}"
+                                     th:attr="aria-label='Data fine ' + ${#temporals.format(e.endDate, 'dd MMMM yyyy', #locale)}">31/12/2023</div>
+                                <div class="date-details" 
+                                     th:text="${#temporals.format(e.endDate, 'EEEE', #locale)}"
+                                     aria-hidden="true">Domenica</div>
+                            </div>
+                            <div th:unless="${e.endDate != null}" class="date-cell">
+                                <div class="date-main" aria-label="Contratto a tempo indeterminato">Indeterminato</div>
+                                <div class="date-details" aria-hidden="true">#########</div>
+                            </div>
+                        </td>
+                        
+                        <!-- Employment Status -->
+                        <td role="gridcell">
+                           <span class="status-badge"
+                                  th:classappend="${e.status.name() == 'ACTIVE' ? 'status-active' : (e.status.name() == 'TERMINATED' ? 'status-terminated' : 'status-inactive')}"
+                                  th:text="${e.status.displayName}"
+                                  th:attr="aria-label='Stato contratto: ' + ${e.status.displayName}">Stato</span>
+                        </td>
+                        
+                       <!-- Current Project -->
+                        <td role="gridcell">
+                            <span th:text="${e.currentProjectName != null ? e.currentProjectName : '-----'}">—</span>
+                        </td>
+                        
+                        <!-- Action Buttons -->
+                        <td role="gridcell">
+                            <div class="table-actions" role="group" aria-label="Azioni per questo rapporto">
+                               <a th:href="@{/fleet/employments/{id}/edit(id=${e.id},
+                                                                      originPage=${employments.number},
+                                                                      originKeyword=${param.keyword},
+                                                                      originStatus=${param.status},
+                                                                      originProject=${param.project},
+                                                                      originSort=${param.sort},
+                                                                      originDir=${param.dir})}"
+                                   class="action-btn action-edit"
+                                   th:attr="aria-label='Modifica rapporto di ' + ${e.employee.firstName} + ' ' + ${e.employee.lastName}"
+                                   title="Modifica rapporto">
+                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                </a>
+                                <button type="button"
+                                        class="action-btn action-delete" 
+                                        th:attr="data-employment-id=${e.id},
+                                                data-employee-name=${e.employee.firstName + ' ' + e.employee.lastName},
+                                                aria-label='Elimina rapporto di ' + ${e.employee.firstName} + ' ' + ${e.employee.lastName}"
+                                        title="Elimina rapporto">
+                                    <i class="bi bi-trash" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Empty State -->
+                    <tr th:if="${employments.content.empty}" class="empty-row" role="row">
+                        <td colspan="7" role="gridcell">
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                                <h3>Nessun rapporto di lavoro trovato</h3>
+                                <p>Non ci sono rapporti che corrispondono ai criteri di ricerca selezionati.</p>
+                                <a href="/fleet/employments" 
+                                   class="btn btn-outline-primary"
+                                   aria-label="Ripristina filtri per visualizzare tutti i rapporti">
+                                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                                    Ripristina Filtri
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Enhanced Pagination -->
+    <nav th:if="${employments.totalPages > 1}" 
+         class="pagination-container" 
+         role="navigation" 
+         aria-label="Navigazione pagine">
+        <ul class="pagination" role="list">
+            <li class="page-item" th:classappend="${!employments.hasPrevious()}? 'disabled'" role="listitem">
+                <a class="page-link" 
+                   th:href="@{/fleet/employments(page=${employments.number-1}, keyword=${param.keyword}, status=${param.status}, project=${param.project})}"
+                   aria-label="Pagina precedente"
+                   th:attr="tabindex=${!employments.hasPrevious() ? '-1' : '0'}">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </a>
+            </li>
+            <li class="page-item" 
+                th:each="i : ${#numbers.sequence(0, employments.totalPages-1)}" 
+                th:classappend="${i == employments.number}? 'active'"
+                role="listitem">
+                <a class="page-link" 
+                   th:href="@{/fleet/employments(page=${i}, keyword=${param.keyword}, status=${param.status}, project=${param.project})}" 
+                   th:text="${i+1}"
+                   th:attr="aria-label='Pagina ' + ${i+1} + (${i == employments.number} ? ', pagina corrente' : ''),
+                           aria-current=${i == employments.number ? 'page' : 'false'}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${!employments.hasNext()}? 'disabled'" role="listitem">
+                <a class="page-link" 
+                   th:href="@{/fleet/employments(page=${employments.number+1}, keyword=${param.keyword}, status=${param.status}, project=${param.project})}"
+                   aria-label="Pagina successiva"
+                   th:attr="tabindex=${!employments.hasNext() ? '-1' : '0'}">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Enhanced Delete Confirmation Modal -->
+    <div class="modal fade" 
+         id="deleteModal" 
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="deleteModalTitle"
+         aria-describedby="deleteModalDescription">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalTitle">
+                        <i class="bi bi-exclamation-triangle text-danger" aria-hidden="true"></i>
+                        Conferma Eliminazione
+                    </h5>
+                    <button type="button" 
+                            class="btn-close" 
+                            data-bs-dismiss="modal"
+                            aria-label="Chiudi modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteModalDescription">
+                        Sei sicuro di voler eliminare il rapporto di lavoro per 
+                        <strong id="employmentToDelete" aria-live="polite">Nome Dipendente</strong>?
+                    </p>
+                    <p class="text-muted mb-0">
+                        Questa azione non può essere annullata e rimuoverà tutti i dati associati.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" 
+                            class="btn-secondary" 
+                            data-bs-dismiss="modal"
+                            aria-label="Annulla eliminazione">
+                        Annulla
+                    </button>
+                    <form id="deleteForm" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" 
+                                class="btn-danger"
+                                aria-label="Conferma eliminazione definitiva">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                            Elimina Definitivamente
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen reader only content for additional context -->
+    <div class="sr-only" aria-live="polite" id="announcements"></div>
+
+    <!-- JavaScript Dependencies -->
+    <script th:src="@{/js/sort-table.js}"></script>
+    <script th:src="@{/js/employment.js}"></script>
+    
+    <!-- Additional initialization script -->
+    <script>
+        // Page-specific initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Announce page load to screen readers
+            const announcer = document.getElementById('announcements');
+            if (announcer) {
+                announcer.textContent = 'Pagina rapporti di lavoro caricata. ' + 
+                    document.querySelector('.results-count').textContent;
+            }
+            
+            // Set focus to main content for accessibility
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.setAttribute('tabindex', '-1');
+                // Don't auto-focus to avoid disrupting screen readers
+            }
+            
+            // Initialize any page-specific features
+            console.log('📄 Employment list page initialized');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+  <title th:text="${correspondence?.id != null ? 'Modifica Corrispondenza — Veely' : 'Nuova Corrispondenza — Veely'}">
+    Corrispondenza — Veely
+  </title>
+
+  <th:block th:fragment="cssblock">
+    <link rel="stylesheet" th:href="@{/css/correspondence-form.css}">
+  </th:block>
+</head>
+<body>
+<main class="page-content">
+  <!-- Header with breadcrumb -->
+  <div class="page-header" data-aos="fade-up">
+    <div class="header-content">
+      <div class="header-main">
+        <nav aria-label="breadcrumb" class="correspondence-breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a th:href="@{/correspondence}">
+                <i class="bi bi-envelope-paper" aria-hidden="true"></i>
+                Corrispondenza
+              </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" 
+                th:text="${correspondence?.id != null ? 'Modifica' : 'Nuova'}">
+              Nuova
+            </li>
+          </ol>
+        </nav>
+        <h1 class="page-title" th:text="${correspondence?.id != null ? 'Modifica Corrispondenza' : 'Nuova Corrispondenza'}">
+          Nuova Corrispondenza
+        </h1>
+        <p class="page-subtitle">
+          <span th:if="${correspondence?.id == null}">Registra una nuova corrispondenza nel sistema di protocollo</span>
+          <span th:if="${correspondence?.id != null}">Aggiorna i dettagli della corrispondenza esistente</span>
+        </p>
+      </div>
+      <div class="header-actions">
+        <a th:href="@{/correspondence}" 
+           class="btn btn-outline-secondary btn-header-action"
+           data-aos="fade-up" data-aos-delay="100">
+          <i class="bi bi-arrow-left" aria-hidden="true"></i> 
+          <span>Torna all'elenco</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <div class="correspondence-form-container" data-aos="fade-up" data-aos-delay="150">
+     <form id="correspondenceForm" class="correspondence-form"
+          th:action="@{${correspondence?.id != null ? '/correspondence/' + correspondence.id + '/edit' : '/correspondence'}}"
+          method="post"
+          enctype="multipart/form-data"
+          novalidate>
+      
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <!-- Protocol Section -->
+      <section class="form-section protocol-section" data-aos="fade-up" data-aos-delay="200">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-hash" aria-hidden="true"></i>
+          </div>
+          <div class="section-content">
+            <h2 class="section-title">Dati Protocollo</h2>
+            <p class="section-subtitle">Informazioni di classificazione e numerazione</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="form-grid protocol-grid">
+            <!-- Tipo Corrispondenza -->
+            <div class="form-group">
+              <label for="tipo" class="form-label required">
+                <i class="bi bi-tag label-icon" aria-hidden="true"></i>
+                Tipo Corrispondenza
+              </label>
+              <div class="input-wrapper">
+                <select id="tipo" name="tipo" class="form-control form-select" 
+                        th:value="${correspondence?.tipo}" required 
+                        aria-describedby="tipo-help">
+                  <option value="" disabled th:unless="${correspondence?.tipo != null}" selected>
+                    Seleziona il tipo...
+                  </option>
+                  <option th:each="t : ${types}"
+                          th:value="${t}"
+                          th:text="${t.label}"
+                          th:selected="${t == correspondence?.tipo}">
+                  </option>
+                </select>
+                <div class="input-icon">
+                  <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div id="tipo-help" class="form-help">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                E = Entrata (ricevuta), U = Uscita (inviata)
+              </div>
+              <div class="form-error" id="tipo-error"></div>
+            </div>
+
+            <!-- Data -->
+            <div class="form-group">
+              <label for="data" class="form-label">
+                <i class="bi bi-calendar-event label-icon" aria-hidden="true"></i>
+                Data Corrispondenza
+              </label>
+              <div class="input-wrapper">
+                <input type="date" id="data" name="data" class="form-control" 
+                       th:value="${correspondence?.data}" aria-describedby="data-help"/>
+                <div class="input-icon">
+                  <i class="bi bi-calendar3" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div id="data-help" class="form-help">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                Se non specificata, verrà utilizzata la data odierna
+              </div>
+            </div>
+
+            <!-- Progressivo -->
+            <div class="form-group">
+              <label for="progressivo" class="form-label required">
+                <i class="bi bi-123 label-icon" aria-hidden="true"></i>
+                Numero Progressivo
+              </label>
+              <div class="input-wrapper">
+                <input type="number" id="progressivo" name="progressivo" class="form-control" 
+                       th:value="${correspondence?.progressivo}" min="1" required 
+                       aria-describedby="progressivo-help"/>
+                <div class="input-icon">
+                  <i class="bi bi-hash" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div id="progressivo-help" class="form-help">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                Numero univoco per l'anno corrente
+              </div>
+              <div class="form-error" id="progressivo-error"></div>
+            </div>
+          </div>
+
+          <!-- Protocol Preview -->
+          <div class="protocol-preview" id="protocolPreview" style="display: none;">
+            <div class="preview-content">
+              <i class="bi bi-eye preview-icon" aria-hidden="true"></i>
+              <div class="preview-text">
+                <span class="preview-label">Numero protocollo:</span>
+                <span class="preview-value" id="previewValue">---</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subjects Section -->
+      <section class="form-section subjects-section" data-aos="fade-up" data-aos-delay="250">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-people" aria-hidden="true"></i>
+          </div>
+          <div class="section-content">
+            <h2 class="section-title">Soggetti Coinvolti</h2>
+            <p class="section-subtitle">Mittente e destinatario della corrispondenza</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="form-grid subjects-grid">
+            <!-- Mittente -->
+            <div class="form-group">
+              <label for="sender" class="form-label required">
+                <i class="bi bi-person-up label-icon" aria-hidden="true"></i>
+                Mittente
+              </label>
+              <div class="input-wrapper">
+                <input type="text" id="sender" name="sender" class="form-control" 
+                       placeholder="Nome del mittente o azienda..."
+                       th:value="${correspondence?.sender}" required 
+                       aria-describedby="sender-help"/>
+                <div class="input-icon">
+                  <i class="bi bi-building" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div id="sender-help" class="form-help">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                Es: "Officina Auto Rossi S.r.l." o "Ing. Mario Bianchi"
+              </div>
+              <div class="form-error" id="sender-error"></div>
+            </div>
+
+            <!-- Destinatario -->
+            <div class="form-group">
+              <label for="recipient" class="form-label">
+                <i class="bi bi-person-down label-icon" aria-hidden="true"></i>
+                Destinatario
+              </label>
+              <div class="input-wrapper">
+                <input type="text" id="recipient" name="recipient" class="form-control" 
+                       placeholder="Nome del destinatario o ufficio..."
+                       th:value="${correspondence?.recipient}" aria-describedby="recipient-help"/>
+                <div class="input-icon">
+                  <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div id="recipient-help" class="form-help">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                Campo opzionale per corrispondenza in entrata
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content Section -->
+      <section class="form-section content-section" data-aos="fade-up" data-aos-delay="300">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-file-text" aria-hidden="true"></i>
+          </div>
+          <div class="section-content">
+            <h2 class="section-title">Contenuto</h2>
+            <p class="section-subtitle">Oggetto e note relative alla corrispondenza</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <!-- Descrizione -->
+          <div class="form-group">
+            <label for="descrizione" class="form-label required">
+              <i class="bi bi-textarea-t label-icon" aria-hidden="true"></i>
+              Oggetto / Descrizione
+            </label>
+            <div class="input-wrapper">
+              <input type="text" id="descrizione" name="descrizione" class="form-control" 
+                     placeholder="Breve descrizione dell'oggetto (max 160 caratteri)..."
+                     maxlength="160" th:value="${correspondence?.descrizione}" required 
+                     aria-describedby="descrizione-help"/>
+              <div class="character-counter">
+                <span id="charCount">0</span>/160
+              </div>
+            </div>
+            <div id="descrizione-help" class="form-help">
+              <i class="bi bi-lightbulb" aria-hidden="true"></i>
+              Es: "Fattura manutenzione straordinaria Fiat Panda ABC123"
+            </div>
+            <div class="form-error" id="descrizione-error"></div>
+          </div>
+
+          <!-- Note -->
+          <div class="form-group">
+            <label for="notes" class="form-label">
+              <i class="bi bi-journal-text label-icon" aria-hidden="true"></i>
+              Note Interne
+            </label>
+            <div class="input-wrapper">
+              <textarea id="notes" name="notes" class="form-control" rows="4"
+                        placeholder="Annotazioni per uso interno (non visibili all'esterno)..."
+                        aria-describedby="notes-help" th:text="${correspondence?.notes}"></textarea>
+              <div class="textarea-resize-handle">
+                <i class="bi bi-grip-horizontal" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div id="notes-help" class="form-help">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              Queste note sono per uso interno e non verranno condivise
+            </div>
+          </div>
+        </div>
+      </section>
+	</form>
+     <!-- Attachments Section -->
+    <section class="form-section attachments-section" data-aos="fade-up" data-aos-delay="350">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="bi bi-paperclip" aria-hidden="true"></i>
+        </div>
+        <div class="section-content">
+          <h2 class="section-title">Allegati</h2>
+          <p class="section-subtitle">File e documenti collegati alla corrispondenza</p>
+        </div>
+      </div>
+
+       <div class="section-body">
+        <div th:if="${correspondence?.id != null}">
+          <!-- Upload Form -->
+          <div class="upload-area">
+            <form class="upload-form" th:action="@{/correspondence/{id}/docs(id=${correspondence.id})}"
+                  method="post" enctype="multipart/form-data">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+       			 <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">File *</label>
+                  <input type="file" name="files" class="form-control" required multiple
+                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp" />
+            
+                </div>
+        	    <div class="col-md-2">
+                  <label class="form-label">Data emissione</label>
+                  <input type="date" name="issueDate" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Data scadenza</label>
+                  <input type="date" name="expiryDate" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Tipo documento *</label>
+                  <select name="type" class="form-select" required>
+                    <option value="">Seleziona tipo...</option>
+                    <option th:each="dt : ${docTypes}" th:value="${dt}" th:text="${dt.displayName}"></option>
+                  </select>
+                </div>
+                <div class="col-md-1">
+                  <label class="form-label">&nbsp;</label>
+                  <button type="submit" class="btn-upload w-100" title="Carica documento">
+                    <i class="bi bi-upload"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+             <!-- Documents Table -->
+          <div class="documents-table">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>File</th>
+                  <th>Data Emissione</th>
+                  <th>Data Scadenza</th>
+                  <th class="text-center">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="doc : ${documents}">
+                  <td>
+                    <span class="doc-type-badge" th:text="${doc.type.displayName}">Tipo</span>
+                  </td>
+                  <td>
+                    <div class="fw-medium" th:text="${doc.path.substring(doc.path.lastIndexOf('/') + 1)}">File</div>
+                    <small class="text-muted">Documento allegato</small>
+                  </td>
+                  <td th:text="${doc.issueDate != null ? #temporals.format(doc.issueDate,'dd/MM/yyyy') : '-'}">-</td>
+                  <td th:text="${doc.expiryDate != null ? #temporals.format(doc.expiryDate,'dd/MM/yyyy') : '-'}">-</td>
+                  <td class="text-center">
+                    <div class="doc-actions">
+                      <a th:href="@{|/correspondence/docs/${doc.id}|}"
+                         class="btn-doc-action btn-download" title="Download">
+                        <i class="bi bi-download"></i>
+                      </a>
+                      <a th:href="@{/correspondence/{id}/docs/{docId}/delete(id=${correspondence.id},docId=${doc.id})}"
+                         class="btn-doc-action btn-delete-doc"
+                         onclick="return confirm('Eliminare il documento?');"
+                         title="Elimina">
+                        <i class="bi bi-trash"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+
+			<tr th:if="${#lists.isEmpty(documents)}">
+                  <td colspan="5">
+                    <div class="empty-state-docs">
+                      <i class="bi bi-inbox"></i>
+                      <h5>Nessun documento caricato</h5>
+                      <p class="text-muted">Carica il primo documento utilizzando il form sopra.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+                  
+          </div>
+        </div>
+		<div th:if="${correspondence?.id == null}" class="text-muted">
+          Salva la corrispondenza prima di allegare documenti.
+        </div>
+      </div>
+    </section>
+
+      <!-- Form Actions -->
+    <div class="form-actions" data-aos="fade-up" data-aos-delay="400">
+      <div class="actions-container">
+        <div class="actions-secondary">
+          <a th:href="@{/correspondence}" class="btn btn-outline-secondary btn-cancel">
+            <i class="bi bi-x-circle" aria-hidden="true"></i>
+            Annulla
+          </a>
+        </div>
+        <div class="actions-primary">
+          <button type="submit" class="btn btn-primary btn-submit" id="submitBtn" form="correspondenceForm">
+            <span class="btn-content">
+              <i class="bi bi-check2-circle btn-icon" aria-hidden="true"></i>
+              <span class="btn-text" th:text="${correspondence?.id != null ? 'Aggiorna Corrispondenza' : 'Salva Corrispondenza'}">
+                Salva Corrispondenza
+              </span>
+            </span>
+            <span class="btn-loading" style="display: none;">
+              <i class="bi bi-arrow-clockwise spinning" aria-hidden="true"></i>
+              <span>Salvataggio...</span>
+            </span>
+          </button>
+        </div>
+      </div>
+	</div>
+  </div>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	AOS.init({
+	    once: true,
+	    duration: 600, 
+    easing: 'ease-out-cubic',
+    offset: 50
+  });
+
+  // Form elements
+  const form = document.querySelector('.correspondence-form');
+  const descrizioneInput = document.getElementById('descrizione');
+  const submitBtn = document.getElementById('submitBtn');
+
+  
+  // Character counter for description
+  const charCount = document.getElementById('charCount');
+  
+  if (descrizioneInput && charCount) {
+    const updateCharCount = () => {
+      const count = descrizioneInput.value.length;
+      charCount.textContent = count;
+      charCount.parentElement.classList.toggle('warning', count > 140);
+      charCount.parentElement.classList.toggle('danger', count >= 160);
+    };
+    
+    descrizioneInput.addEventListener('input', updateCharCount);
+    updateCharCount();
+  }
+
+  // Form validation
+  function validateForm() {
+    let isValid = true;
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+      const errorElement = document.getElementById(field.id + '-error');
+      if (!field.value.trim()) {
+        field.classList.add('error');
+        if (errorElement) {
+          errorElement.textContent = 'Questo campo è obbligatorio';
+          errorElement.style.display = 'block';
+        }
+        isValid = false;
+      } else {
+        field.classList.remove('error');
+        if (errorElement) {
+          errorElement.style.display = 'none';
+        }
+      }
+    });
+
+    return isValid;
+  }
+
+  // Form submission
+  if (form && submitBtn) {
+    form.addEventListener('submit', function(e) {
+      if (!validateForm()) {
+        e.preventDefault();
+        return;
+      }
+
+      // Show loading state
+      const btnContent = submitBtn.querySelector('.btn-content');
+      const btnLoading = submitBtn.querySelector('.btn-loading');
+      
+      btnContent.style.display = 'none';
+      btnLoading.style.display = 'flex';
+      submitBtn.disabled = true;
+    });
+  }
+
+ 
+});
+</script>
+</body>
+</html>

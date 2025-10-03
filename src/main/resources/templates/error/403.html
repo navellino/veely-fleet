@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+	th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title>Permesso negato – Veely</title>
+    <th:block th:fragment="cssblock">
+		<link rel="stylesheet" th:href="@{/css/employees-form.css}">
+		<script>
+		// Redirect automatico dopo 10 secondi
+		setTimeout(function() {	window.location.href = '/welcome';}, 10000);
+	</script>
+	</th:block>
+</head>
+<body class="vh-100 bg-light">
+
+<div class="container-fluid h-100">
+  <div class="row h-100 g-0">
+    
+    <!-- Colonna sinistra: messaggio di errore -->
+    <div class="col-lg-5 d-flex flex-column justify-content-center align-items-center p-5 bg-white shadow-sm">
+      <div class="w-100 text-center" style="max-width: 420px;">
+        
+        <div class="mb-4">
+           <img th:src="@{/images/veely-logo-white.png}" alt="Veely" style="max-height: 80px;">
+        </div>
+
+        <div class="mb-4">
+          <div class="display-1 text-warning mb-3">
+            <i class="fas fa-lock" style="font-size: 4rem;"></i>
+          </div>
+          <h1 class="fw-bold text-primary mb-3">403</h1>
+          <h2 class="fw-semibold mb-3">Accesso Negato</h2>
+        </div>
+
+        <p class="text-secondary mb-4" th:text="${message} ?: 'Spiacente, non hai i permessi necessari per accedere a questa risorsa.'">
+          Spiacente, non hai i permessi necessari per accedere a questa risorsa.
+        </p>
+
+        <div class="d-grid gap-2">
+          <a href="/welcome" class="btn btn-primary rounded-3 py-2 fw-semibold">
+            <i class="fas fa-home me-2"></i>Torna alla Dashboard
+          </a>
+          <button onclick="history.back()" class="btn btn-outline-secondary rounded-3 py-2">
+            <i class="fas fa-arrow-left me-2"></i>Torna Indietro
+          </button>
+        </div>
+
+        <div class="mt-4">
+          <p class="small text-muted">
+            Sarai reindirizzato automaticamente alla dashboard tra <span id="countdown" class="fw-semibold">10</span> secondi.
+          </p>
+        </div>
+
+      </div>
+    </div>
+    
+    <!-- Colonna destra: immagine di sfondo -->
+    <div class="col-lg-7 d-none d-lg-block position-relative">
+      <div class="h-100 d-flex align-items-center justify-content-center" 
+           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="text-center text-white p-5">
+          <i class="fas fa-shield-alt" style="font-size: 8rem; opacity: 0.3;"></i>
+        </div>
+      </div>
+      <!-- Overlay leggero -->
+      <div class="position-absolute top-0 start-0 w-100 h-100" 
+           style="background: rgba(0,0,0,0.1); pointer-events:none;">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Countdown per il redirect
+let seconds = 10;
+const countdownElement = document.getElementById('countdown');
+const timer = setInterval(function() {
+    seconds--;
+    if (countdownElement) {
+        countdownElement.textContent = seconds;
+    }
+    if (seconds <= 0) {
+        clearInterval(timer);
+    }
+}, 1000);
+</script>
+
+</body>
+</html>

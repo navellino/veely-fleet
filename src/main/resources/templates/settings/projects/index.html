@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Commesse — Veely</title>
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/project.css}">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+<div class="projects-header-top">
+            <div>
+                <h2 class="projects-title">
+                    <i class="bi bi-collection"></i>
+                    Gestione Commesse
+                </h2>
+                <p class="text-muted mb-0">Monitora e gestisci tutte le commesse aziendali</p>
+            </div>
+            <div class="projects-actions">
+                <a th:href="@{/settings/projects/new}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Nuova Commessa
+                </a>
+                <a th:href="@{/settings/policies}" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-shield-check me-1"></i> Polizze
+                </a>
+            </div>
+        </div>
+</th:block>
+<body>
+<main class="projects-page-container my-5 flex-fill">
+    <!-- Enhanced Page Header -->
+    <div class="projects-header">
+        <!-- Enhanced Filters Section -->
+        <div class="projects-filters">
+            <div class="filters-row">
+                <div class="filters-left">
+                    <div class="filter-group">
+                        <label class="filter-label">Filtra per Stato</label>
+                        <div class="status-filter">
+                            <button type="button" class="status-filter-btn active" data-filter="all">
+                                Tutte
+                            </button>
+                            <button type="button" class="status-filter-btn" data-filter="ATTIVA">
+                                Attive
+                            </button>
+                            <button type="button" class="status-filter-btn" data-filter="CHIUSA">
+                                Chiuse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="filters-stats">
+                    <div class="filter-stat">
+                        <span class="filter-stat-number" id="total-count">0</span>
+                        <span>Totali</span>
+                    </div>
+                    <div class="filter-stat">
+                        <span class="filter-stat-number" id="active-count">0</span>
+                        <span>Attive</span>
+                    </div>
+                    <div class="filter-stat">
+                        <span class="filter-stat-number" id="closed-count">0</span>
+                        <span>Chiuse</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Table Container -->
+    <div class="projects-table-container">
+        <div class="projects-table-header">
+            <div class="table-header-content">
+                <div>
+                    <h3 class="table-title">
+                        <i class="bi bi-table"></i>
+                        Elenco Commesse
+                    </h3>
+                    <p class="table-subtitle">Gestisci e monitora lo stato delle tue commesse</p>
+                </div>
+                <div class="table-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportTable()">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="projects-table-wrapper">
+            <table class="projects-table" id="projectsTable">
+                <thead>
+                    <tr>
+                        <th>Codice</th>
+                        <th>Nome Progetto</th>
+                        <th>Responsabile</th>
+                        <th>Stato</th>
+                        <th>Data Inizio</th>
+                        <th>Data Fine</th>
+                        <th class="text-center" data-tooltip="Codice Identificativo Gara">CIG</th>
+                        <th class="text-center" data-tooltip="Codice Unico Progetto">CUP</th>
+                        <th class="text-end">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="projectsTableBody">
+                    <tr th:each="p : ${projects}" class="fade-in" th:data-status="${p.status.name()}">
+                        <td>
+                            <span class="project-code" th:text="${p.code}">PRJ001</span>
+                        </td>
+                        <td>
+                            <div class="project-name" th:text="${p.name}">Nome Progetto</div>
+                        </td>
+                        <td>
+                            <div class="project-manager" th:if="${p.manager != null}">
+                                <div class="manager-avatar" th:text="${#strings.substring(p.manager.fullName, 0, 1)}">M</div>
+                                <div class="manager-info">
+                                    <div class="manager-name" th:text="${p.manager.fullName}">Nome Manager</div>
+                                    <div class="manager-role">Responsabile</div>
+                                </div>
+                            </div>
+                            <span th:if="${p.manager == null}" class="text-muted">Non assegnato</span>
+                        </td>
+                        <td>
+                            <span class="status-badge" 
+                                  th:classappend="${'status-badge-' + #strings.toLowerCase(p.status.name())}"
+                                  th:switch="${p.status.name()}">
+                                <span class="status-indicator"></span>
+                                <span th:case="'ATTIVA'" th:text="${p.status.name()}">Attiva</span>
+                                <span th:case="'CHIUSA'" th:text="${p.status.name()}">Chiusa</span>
+                                <span th:case="'SOSPESA'" th:text="${p.status.name()}">Sospesa</span>
+                                <span th:case="'ANNULLATA'" th:text="${p.status.name()}">Annullata</span>
+                                <span th:case="*" th:text="${p.status.name()}">Stato</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="date-cell" th:text="${p.startDate}">01/01/2024</span>
+                        </td>
+                        <td>
+                            <span class="date-cell" th:text="${p.endDate}">31/12/2024</span>
+                        </td>
+                        <td>
+                            <span class="code-cell" th:classappend="${p.cig == null or p.cig == '' ? 'empty' : ''}" 
+                                  th:text="${p.cig != null and p.cig != '' ? p.cig : 'Non specificato'}">CIG123456</span>
+                        </td>
+                        <td>
+                            <span class="code-cell" th:classappend="${p.cup == null or p.cup == '' ? 'empty' : ''}"
+                                  th:text="${p.cup != null and p.cup != '' ? p.cup : 'Non specificato'}">CUP123456</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{|/settings/projects/${p.id}/edit|}" 
+                                   class="action-btn edit" 
+                                   data-tooltip="Modifica progetto">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{|/settings/projects/${p.id}/delete|}" 
+                                      method="post" 
+                                      class="d-inline"
+                                      onsubmit="return confirmDelete(event, this)">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" 
+                                            class="action-btn delete" 
+                                            data-tooltip="Elimina progetto">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h4 class="empty-title">Nessuna commessa trovata</h4>
+                <p class="empty-description">
+                    Non ci sono commesse che corrispondono ai filtri selezionati.
+                </p>
+                <a th:href="@{/settings/projects/new}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Crea Prima Commessa
+                </a>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-row" id="loadingState" style="display: none;">
+                <div class="loading-spinner-table"></div>
+                <p class="text-muted">Caricamento commesse...</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Enhanced JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the projects page
+    initializeProjectsPage();
+});
+
+function initializeProjectsPage() {
+    // Initialize filter functionality
+    initializeFilters();
+    
+    // Initialize table enhancements
+    initializeTableEnhancements();
+    
+    // Update counters
+    updateProjectCounters();
+    
+    // Add animation delays to table rows
+    addTableAnimations();
+}
+
+function initializeFilters() {
+    const filterButtons = document.querySelectorAll('.status-filter-btn');
+    const tableRows = document.querySelectorAll('#projectsTableBody tr');
+    const emptyState = document.getElementById('emptyState');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active filter button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterValue = this.getAttribute('data-filter');
+            let visibleCount = 0;
+            
+            // Filter table rows
+            tableRows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                let shouldShow = false;
+                
+                if (filterValue === 'all') {
+                    shouldShow = true;
+                } else if (filterValue === 'ATTIVA' && rowStatus && rowStatus === 'ATTIVA') {
+                    shouldShow = true;
+                } else if (filterValue === 'CHIUSA' && rowStatus && rowStatus === 'CHIUSA') {
+                    shouldShow = true;
+                }
+                
+                if (shouldShow) {
+                    row.style.display = '';
+                    row.classList.add('fade-in');
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                    row.classList.remove('fade-in');
+                }
+            });
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                document.querySelector('.projects-table').style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                document.querySelector('.projects-table').style.display = 'table';
+            }
+            
+            // Update counters after filtering
+            updateProjectCounters();
+        });
+    });
+}
+
+function initializeTableEnhancements() {
+    // Add ripple effect to action buttons
+    const actionButtons = document.querySelectorAll('.action-btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', createRippleEffect);
+    });
+    
+    // Add hover effects to table rows
+    const tableRows = document.querySelectorAll('#projectsTableBody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(2px)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+}
+
+function updateProjectCounters() {
+    const allRows = document.querySelectorAll('#projectsTableBody tr');
+    const visibleRows = document.querySelectorAll('#projectsTableBody tr[style=""], #projectsTableBody tr:not([style])');
+    
+    let totalCount = allRows.length;
+    let activeCount = 0;
+    let closedCount = 0;
+    
+    // Count all projects by status
+    allRows.forEach(row => {
+        const status = row.getAttribute('data-status');
+        if (status && status === 'ATTIVA') {
+            activeCount++;
+        } else if (status && status === 'CHIUSA') {
+            closedCount++;
+        }
+    });
+    
+    // Update counter displays
+    const totalCountEl = document.getElementById('total-count');
+    const activeCountEl = document.getElementById('active-count');
+    const closedCountEl = document.getElementById('closed-count');
+    
+    if (totalCountEl) totalCountEl.textContent = totalCount;
+    if (activeCountEl) activeCountEl.textContent = activeCount;
+    if (closedCountEl) closedCountEl.textContent = closedCount;
+}
+
+function addTableAnimations() {
+    const tableRows = document.querySelectorAll('#projectsTableBody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+    });
+}
+
+function createRippleEffect(event) {
+    const button = event.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    ripple.classList.add('ripple');
+    
+    button.appendChild(ripple);
+    
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+function confirmDelete(event, form) {
+    event.preventDefault();
+    
+    // Enhanced confirmation dialog
+    const result = confirm('⚠️ Attenzione!\n\nSei sicuro di voler eliminare questa commessa?\n\nQuesta azione non può essere annullata.');
+    
+    if (result) {
+        // Add loading state to delete button
+        const deleteBtn = form.querySelector('.action-btn.delete');
+        const originalIcon = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+        deleteBtn.disabled = true;
+        
+        // Submit form after short delay for UX
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+    }
+    
+    return false;
+}
+
+function refreshTable() {
+    // Show loading state
+    const loadingState = document.getElementById('loadingState');
+    const tableWrapper = document.querySelector('.projects-table-wrapper');
+    
+    if (loadingState && tableWrapper) {
+        loadingState.style.display = 'block';
+        
+        // Simulate refresh delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+}
+
+function exportTable() {
+    // Simple CSV export functionality
+    const table = document.querySelector('.projects-table');
+    const rows = table.querySelectorAll('tr');
+    let csvContent = '';
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('th, td');
+        const rowData = [];
+        
+        cols.forEach((col, index) => {
+            // Skip actions column
+            if (index < cols.length - 1) {
+                let text = col.textContent.trim();
+                // Clean up text content
+                text = text.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ');
+                rowData.push('"' + text + '"');
+            }
+        });
+        
+        csvContent += rowData.join(',') + '\n';
+    });
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'commesse_' + new Date().toISOString().slice(0, 10) + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Keyboard navigation enhancement
+document.addEventListener('keydown', function(event) {
+    // Press 'N' to create new project
+    if (event.key === 'n' || event.key === 'N') {
+        if (!event.target.matches('input, textarea, select')) {
+            const newBtn = document.querySelector('a[href*="/new"]');
+            if (newBtn) {
+                newBtn.click();
+            }
+        }
+    }
+    
+    // Press '1', '2', '3' to switch filters
+    if (['1', '2', '3'].includes(event.key)) {
+        if (!event.target.matches('input, textarea, select')) {
+            const filterButtons = document.querySelectorAll('.status-filter-btn');
+            const index = parseInt(event.key) - 1;
+            if (filterButtons[index]) {
+                filterButtons[index].click();
+            }
+        }
+    }
+});
+
+// Add smooth scrolling to top when filter changes
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Initialize tooltips on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Enable Bootstrap tooltips if available
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"], [title], [data-tooltip]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+});
+</script>
+</body>
+</html>

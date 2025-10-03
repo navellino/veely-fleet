@@ -1,0 +1,1024 @@
+<!-- src/main/resources/templates/fleet/employees/form.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+	th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+<title th:text="'Profilo '+${employee.fullName}">Dipendente</title>
+	<th:block th:fragment="cssblock">
+		<link rel="stylesheet" th:href="@{/css/employees-form.css}">
+	</th:block>
+</head>
+<th:block th:fragment="navbar">
+</th:block>
+<body>
+	<!-- Modern Page Header -->
+	<div class="employee-form-header">
+		<div class="header-main">
+                  <div class="header-icon">
+                          <i class="bi bi-person-gear"></i>
+                  </div>
+                  <div class="header-content">
+                          <h1 class="page-title">Il mio profilo</h1>
+                          <p class="page-subtitle">Aggiorna le informazioni del tuo profilo</p>
+                  </div>
+          </div>
+		<!-- Progress Indicator -->
+		<div class="progress-container">
+			<div class="progress-bar-modern">
+				<div class="progress-step active">
+                         <div class="step-indicator">1</div>
+                         <div class="step-label">Anagrafica</div>
+                 </div>
+                 <div class="progress-line"></div>
+                 <div class="progress-step">
+                         <div class="step-indicator">2</div>
+                         <div class="step-label">Documenti</div>
+                 </div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Breadcrumb moderno -->
+	<div class="modern-breadcrumb">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item active" aria-current="page"><span>Profilo</span></li>
+              </ol>
+      </nav>
+     </div>
+
+	<div th:object="${employee}">
+		<!-- 🚨 ALERT ERRORI DI VALIDAZIONE -->
+		<div th:if="${#fields.hasAnyErrors()}"
+			class="validation-alert error-summary mb-4">
+			<div class="alert-header">
+				<i class="bi bi-exclamation-triangle"></i> <span class="alert-title">Attenzione!
+					Controlla i seguenti errori:</span>
+			</div>
+			<div class="alert-body">
+				<ul class="error-list">
+					<li th:each="err : ${#fields.allErrors()}" class="error-item">
+						<i class="bi bi-arrow-right"></i> <span th:text="${err}">Errore
+							di validazione</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<!-- Alert Successo -->
+		<div th:if="${successMessage}"
+			class="validation-alert success-alert mb-4">
+			<div class="alert-header">
+				<i class="bi bi-check-circle"></i> <span class="alert-title"
+					th:text="${successMessage}">Operazione completata</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modern Tabs -->
+	<div class="modern-tabs-container">
+		<div class="modern-tabs">
+			<button class="tab-btn active" id="tab-details" data-tab="details"
+				type="button">
+				<div class="tab-icon">
+					<i class="bi bi-person-vcard"></i>
+				</div>
+				<div class="tab-content">
+					<div class="tab-title">Dettagli Personali</div>
+					<div class="tab-subtitle">Anagrafica e contatti</div>
+				</div>
+			</button>
+			<button class="tab-btn" id="tab-docs" data-tab="docs" type="button">
+				<div class="tab-icon">
+					<i class="bi bi-folder2-open"></i>
+				</div>
+				<div class="tab-content">
+					<div class="tab-title">Documenti</div>
+					<div class="tab-subtitle">Upload e gestione</div>
+				</div>
+			</button>
+		</div>
+	</div>
+
+	<!-- Tab Content th:action="${employee.id == null} ? @{/fleet/employees/new} : @{/fleet/employees/{id}/edit(id=${employee.id})}"-->
+	<div class="tab-content-container">
+		<!-- Tab Dettagli -->
+		<div class="tab-pane active" id="pane-details">
+			<form id="employeeForm" class="modern-form" th:object="${employee}"
+                  th:action="@{/profile/edit}"
+                  method="post" enctype="multipart/form-data" novalidate>
+                  
+				<input type="hidden" th:name="${_csrf.parameterName}"
+					th:value="${_csrf.token}" />
+
+				<!-- Profile Section -->
+				<div class="form-section">
+					<div class="section-header">
+						<div class="section-icon">
+							<i class="bi bi-person-circle"></i>
+						</div>
+						<div class="section-title">
+							<h3>Profilo Personale</h3>
+							<p>Informazioni base e foto profilo</p>
+						</div>
+					</div>
+
+					<div class="section-content">
+						<div class="profile-layout">
+							<!-- Photo Upload Area -->
+							<div class="photo-section">
+								<div class="photo-container">
+									<div class="photo-frame">
+										<img th:if="${profilePhoto != null}"
+                                            th:src="@{/profile/docs/{fn}(fn=${profilePhoto.path.substring(profilePhoto.path.lastIndexOf('/')+1)})}"
+                                            class="profile-photo" alt="Foto profilo" />
+										<div th:if="${profilePhoto == null}" class="photo-placeholder">
+											<i class="bi bi-person-fill"></i>
+										</div>
+									</div>
+									<div class="photo-actions" th:if="${employee.id != null}">
+										<button type="button" class="btn-photo-upload">
+											<i class="bi bi-camera"></i> <span>Cambia foto</span>
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<!-- Basic Info -->
+							<div class="info-section">
+								<div class="form-grid">
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-person"></i>
+											Nome *
+										</label> <input class="form-control" th:field="*{firstName}" required />
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-person"></i>
+											Cognome *
+										</label> <input class="form-control" th:field="*{lastName}" required />
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-calendar3"></i>
+											Data di nascita *
+										</label> <input type="date" class="form-control"
+											th:field="*{birthDate}" required />
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-geo-alt"></i>
+											Luogo di nascita *
+										</label> <input class="form-control" th:field="*{birthPlace}" required />
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i
+											class="bi bi-gender-ambiguous"></i> Sesso
+										</label> <select class="form-control" th:field="*{gender}">
+											<option value="">Seleziona...</option>
+											<option th:each="g : ${genders}" th:value="${g}"
+												th:text="${g.displayName}"></option>
+										</select>
+										<div class="form-feedback"></div>
+									</div>
+
+									<!-- Campo Codice Fiscale con validazione -->
+									<div class="form-group">
+										<label class="form-label"> <i
+											class="bi bi-credit-card-2-front"></i> Codice Fiscale *
+										</label> <input class="form-control text-uppercase" maxlength="16"
+											th:field="*{fiscalCode}"
+											th:class="${#fields.hasErrors('fiscalCode')} ? 'form-control error' : 'form-control'"
+											required placeholder="ABCDEF12G34H567I" />
+
+										<!-- Feedback errore -->
+										<div class="form-feedback error"
+											th:if="${#fields.hasErrors('fiscalCode')}">
+											<i class="bi bi-exclamation-circle"></i> <span
+												th:errors="*{fiscalCode}">Errore codice fiscale</span>
+										</div>
+
+										<!-- Help text -->
+										<div class="form-feedback help"
+											th:unless="${#fields.hasErrors('fiscalCode')}">16
+											caratteri: 6 lettere + 2 cifre + 1 lettera + 2 cifre + 1
+											lettera + 3 cifre + 1 lettera</div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-heart"></i>
+											Stato civile
+										</label> <select class="form-control" th:field="*{maritalStatus}">
+											<option value="">Seleziona...</option>
+											<option th:each="st : ${maritalStatuses}" th:value="${st}"
+												th:text="${st.displayName}"></option>
+										</select>
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i
+											class="bi bi-mortarboard"></i> Titolo di studio
+										</label> <select class="form-control" th:field="*{educationLevel}">
+											<option value="">Seleziona...</option>
+											<option th:each="el : ${educationLevels}" th:value="${el}"
+												th:text="${el.displayName}"></option>
+										</select>
+										<div class="form-feedback"></div>
+									</div>
+
+									<div class="form-group">
+										<label class="form-label"> <i class="bi bi-bank"></i>
+											IBAN
+										</label> <input class="form-control text-uppercase" th:field="*{iban}" />
+										<div class="form-feedback"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Address Section -->
+				<div class="form-section">
+					<div class="section-header">
+						<div class="section-icon">
+							<i class="bi bi-house"></i>
+						</div>
+						<div class="section-title">
+							<h3>Indirizzo di Residenza</h3>
+							<p>Informazioni relative al domicilio</p>
+						</div>
+					</div>
+
+					<div class="section-content">
+						<location-selector country-binding="residenceAddress.countryCode"
+							name-region="residenceAddress.regionCode"
+							name-province="residenceAddress.provinceCode"
+							name-city="residenceAddress.cityCode"
+							name-postal="residenceAddress.postalCode"
+							name-street="residenceAddress.street"
+							th:data-selected-country="${employee.residenceAddress.countryCode}"
+							th:data-selected-region="${employee.residenceAddress.regionCode}"
+							th:data-selected-province="${employee.residenceAddress.provinceCode}"
+							th:data-selected-city="${employee.residenceAddress.cityCode}"
+							th:data-selected-postal="${employee.residenceAddress.postalCode}"
+							th:data-selected-street="${employee.residenceAddress.street}">
+						</location-selector>
+					</div>
+				</div>
+
+				<!-- Contact & Credentials Section -->
+				<div class="form-section">
+					<div class="section-header">
+						<div class="section-icon">
+							<i class="bi bi-telephone"></i>
+						</div>
+						<div class="section-title">
+							<h3>Contatti e Credenziali</h3>
+							<p>Informazioni di contatto e accesso</p>
+						</div>
+					</div>
+
+					<div class="section-content">
+						<div class="form-grid">
+							<!-- Campo Email con validazione -->
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-envelope"></i>
+									Email *
+								</label> <input type="email" class="form-control" th:field="*{email}"
+									th:class="${#fields.hasErrors('email')} ? 'form-control error' : 'form-control'"
+									required placeholder="nome@esempio.com" />
+
+								<!-- Feedback errore -->
+								<div class="form-feedback error"
+									th:if="${#fields.hasErrors('email')}">
+									<i class="bi bi-exclamation-circle"></i> <span
+										th:errors="*{email}">Errore email</span>
+								</div>
+
+								<!-- Help text -->
+								<div class="form-feedback help"
+									th:unless="${#fields.hasErrors('email')}">Indirizzo email
+									valido richiesto</div>
+							</div>
+
+							<!-- Campo Telefono -->
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-telephone"></i>
+									Telefono *
+								</label> <input class="form-control" th:field="*{phone}"
+									th:class="${#fields.hasErrors('phone')} ? 'form-control error' : 'form-control'"
+									required placeholder="es: 123 456 789 o +39 123 456 789" />
+
+								<!-- Feedback errore -->
+								<div class="form-feedback error"
+									th:if="${#fields.hasErrors('phone')}">
+									<i class="bi bi-exclamation-circle"></i> <span
+										th:errors="*{phone}">Errore telefono</span>
+								</div>
+
+								<!-- Help text quando non c'è errore -->
+								<div class="form-feedback help"
+									th:unless="${#fields.hasErrors('phone')}">Formati
+									accettati: 123456789, 123 456 789, +39 123 456 789</div>
+							</div>
+
+							<!-- Campo Mobile/Cellulare -->
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-phone"></i>
+									Cellulare
+								</label> <input class="form-control" th:field="*{mobile}"
+									th:class="${#fields.hasErrors('mobile')} ? 'form-control error' : 'form-control'"
+									placeholder="es: 312 345 6789 o +39 312 345 6789" />
+
+								<!-- Feedback errore -->
+								<div class="form-feedback error"
+									th:if="${#fields.hasErrors('mobile')}">
+									<i class="bi bi-exclamation-circle"></i> <span
+										th:errors="*{mobile}">Errore cellulare</span>
+								</div>
+							</div>
+
+
+							<!-- Campo PEC -->
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-envelope-at"></i>
+									PEC
+								</label> <input type="email" class="form-control" th:field="*{pec}"
+									th:class="${#fields.hasErrors('pec')} ? 'form-control error' : 'form-control'"
+									placeholder="nome@pec.esempio.it" />
+
+								<!-- Feedback errore -->
+								<div class="form-feedback error"
+									th:if="${#fields.hasErrors('pec')}">
+									<i class="bi bi-exclamation-circle"></i> <span
+										th:errors="*{pec}">Errore PEC</span>
+								</div>
+
+								<!-- Help text -->
+								<div class="form-feedback help"
+									th:unless="${#fields.hasErrors('pec')}">Posta Elettronica
+									Certificata (opzionale)</div>
+							</div>
+
+							<!-- Campo Ruolo -->
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-person-badge"></i>Ruoli</label>
+                                    <div class="checkbox-group">
+                                        <div th:each="r : ${employeeRoles}">
+                                            <label>
+	                                                <input type="checkbox" th:value="${r.id}" th:field="*{roles}" th:disabled="${!isAdmin}"/>
+	                                                <span th:text="${r.name}"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+								 <!-- Feedback errore -->
+		                        <div class="form-feedback error" th:if="${#fields.hasErrors('roles')}">
+		                            <i class="bi bi-exclamation-circle"></i>
+		                            <span th:errors="*{roles}">Errore ruolo</span>
+		                        </div>
+
+								<!-- Help text -->
+                        		<div class="form-feedback help" th:unless="${#fields.hasErrors('roles')}">Ruoli aziendali del dipendente</div>
+							</div>
+						</div>
+
+						<!-- Password Section -->
+						<div class="password-section">
+							<h4 class="subsection-title">
+								<i class="bi bi-key"></i> Credenziali di accesso
+							</h4>
+							<div class="form-grid">
+								<div class="form-group">
+									<label class="form-label"> <i class="bi bi-lock"></i>
+										Password <span th:if="${employee.id == null}"
+										class="text-danger">*</span>
+									</label>
+									<div class="password-input">
+										<input id="password" type="password" class="form-control"
+											th:field="*{password}"
+											th:class="${#fields.hasErrors('password')} ? 'form-control error' : 'form-control'"
+											th:placeholder="${employee.id != null} ? 'Lascia vuoto per non cambiare' : 'Inserisci password'"
+											th:required="${employee.id == null}" />
+										<button class="password-toggle" type="button"
+											onclick="togglePwd('password', this)">
+											<i class="bi bi-eye"></i>
+										</button>
+									</div>
+
+									<!-- Feedback errore -->
+									<div class="form-feedback error"
+										th:if="${#fields.hasErrors('password')}">
+										<i class="bi bi-exclamation-circle"></i> <span
+											th:errors="*{password}">Errore password</span>
+									</div>
+
+									<!-- Help text -->
+									<div class="form-feedback help"
+										th:unless="${#fields.hasErrors('password')}">
+										<span th:if="${employee.id == null}">Minimo 6 caratteri</span>
+										<span th:if="${employee.id != null}">Lascia vuoto per
+											mantenere la password corrente</span>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="form-label"> <i class="bi bi-lock-fill"></i>
+										Conferma password <span th:if="${employee.id == null}"
+										class="text-danger">*</span>
+									</label>
+									<div class="password-input">
+										<input id="confirmPassword" type="password"
+											class="form-control" placeholder="Ripeti la password"
+											th:required="${employee.id == null}" />
+										<button class="password-toggle" type="button"
+											onclick="togglePwd('confirmPassword', this)">
+											<i class="bi bi-eye"></i>
+										</button>
+									</div>
+									<div id="passwordMismatch" class="form-feedback error" style="display: none;">
+									<i class="bi bi-exclamation-circle"></i>
+									<span id="passwordMismatchMsg">Le password non coincidono.</span>
+                                                                       </div>
+                                                               </div>
+                                                       </div>
+                                               </div>
+                                       </div>
+                               </div>
+
+				<!-- Form Actions -->
+				<div class="form-actions">
+                      <div class="actions-left">
+                              <a th:href="@{/welcome}" class="btn-secondary">
+                                      <i class="bi bi-arrow-left"></i> <span>Dashboard</span>
+                              </a>
+                      </div>
+                      <div class="actions-right">
+                              <button id="submitBtn" type="submit" class="btn-primary">
+                                      <i class="bi bi-save"></i> <span>Salva Profilo</span>
+                              </button>
+                      </div>
+              </div>
+			</form>
+		</div>
+
+		<!-- Tab Documenti -->
+		<div class="tab-pane" id="pane-docs">
+			<div th:if="${employee.id} != null" class="documents-section">
+				<div class="section-header">
+					<div class="section-icon">
+						<i class="bi bi-folder2-open"></i>
+					</div>
+					<div class="section-title">
+						<h3>
+							Documenti di <span
+								th:text="${employee.firstName + ' ' + employee.lastName}">Nome
+								Cognome</span>
+						</h3>
+						<p>Carica e gestisci i documenti del dipendente</p>
+					</div>
+				</div>
+
+				<!-- Upload Form -->
+				<div class="upload-section">
+					<!-- 🆕 AGGIUNGI QUESTO: Alert per feedback -->
+					<div th:if="${success}"
+						class="alert alert-success alert-dismissible fade show"
+						role="alert">
+						<i class="bi bi-check-circle me-2"></i> <span th:text="${success}">Documento
+							caricato con successo!</span>
+						<button type="button" class="btn-close" data-bs-dismiss="alert"
+							aria-label="Close"></button>
+					</div>
+
+					<form class="upload-form"
+                        th:action="@{/profile/docs}"
+                        method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+						<div class="upload-grid">
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-file-earmark"></i>
+									File documento *
+								</label>
+								<div class="file-input-wrapper">
+									<input type="file" name="file" class="file-input" required
+                                       accept=".pdf,.jpg,.jpeg,.png,.webp" />
+                                       <div class="file-input-display">
+										<i class="bi bi-cloud-upload"></i> <span>Seleziona file
+											o trascina qui</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-tag"></i>
+									Tipo documento *
+								</label> <select name="type" class="form-control" required>
+									<option value="">Seleziona tipo...</option>
+									<option th:each="dt : ${docTypes}" th:value="${dt}"
+										th:text="${dt.displayName}"></option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label class="form-label"> <i
+									class="bi bi-calendar-plus"></i> Data emissione
+								</label> <input type="date" name="issueDate" class="form-control" />
+							</div>
+
+							<div class="form-group">
+								<label class="form-label"> <i class="bi bi-calendar-x"></i>
+									Data scadenza
+								</label> <input type="date" name="expiryDate" class="form-control" />
+							</div>
+
+							<div class="form-group upload-action">
+								<button type="submit" class="btn-upload">
+									<i class="bi bi-upload"></i> <span>Carica Documento</span>
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+
+				<!-- Documents Table -->
+				<div class="documents-table">
+					<div class="table-header">
+						<h4>Documenti caricati</h4>
+						<span class="documents-count"
+							th:text="${#lists.size(documents)} + ' documenti'">0
+							documenti</span>
+					</div>
+
+					<div class="table-responsive">
+						<table class="modern-table">
+							<thead>
+								<tr>
+									<th>
+										<div class="th-content">
+											<i class="bi bi-file-earmark"></i> <span>Documento</span>
+										</div>
+									</th>
+									<th>
+										<div class="th-content">
+											<i class="bi bi-calendar-plus"></i> <span>Emissione</span>
+										</div>
+									</th>
+									<th>
+										<div class="th-content">
+											<i class="bi bi-calendar-x"></i> <span>Scadenza</span>
+										</div>
+									</th>
+									<th>
+										<div class="th-content">
+											<i class="bi bi-gear"></i> <span>Azioni</span>
+										</div>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="doc : ${documents}" class="table-row">
+									<td>
+										<div class="document-cell">
+											<div class="document-icon">
+												<i class="bi bi-file-earmark-pdf"
+													th:if="${doc.path.toLowerCase().contains('.pdf')}"></i> <i
+													class="bi bi-file-earmark-image"
+													th:unless="${doc.path.toLowerCase().contains('.pdf')}"></i>
+											</div>
+											<div class="document-info">
+												<div class="document-type" th:text="${doc.type.displayName}">Tipo
+													documento</div>
+												<div class="document-filename"
+													th:text="${doc.path.substring(doc.path.lastIndexOf('/') + 1)}">filename.pdf</div>
+											</div>
+										</div>
+									</td>
+									<td><span class="date-text"
+										th:text="${doc.issueDate} ?: '-'">-</span></td>
+									<td><span class="date-text"
+										th:text="${doc.expiryDate} ?: '-'">-</span></td>
+									<td>
+										<div class="table-actions">
+											<a
+												th:href="@{/profile/docs/{fn}(fn=${doc.path.substring(doc.path.lastIndexOf('/')+1)})}"
+												class="action-btn action-download" title="Scarica documento">
+												<i class="bi bi-download"></i>
+											</a> <a
+												th:href="@{/profile/docs/{docId}/delete(docId=${doc.id})}"
+												class="action-btn action-delete"
+												onclick="return confirm('Eliminare il documento?');"
+												title="Elimina documento"> <i class="bi bi-trash"></i>
+											</a>
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(documents)}" class="empty-row">
+									<td colspan="4">
+										<div class="empty-state">
+											<i class="bi bi-folder2-open"></i> <span>Nessun
+												documento caricato</span>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Documents Actions -->
+				<div class="form-actions">
+                      <div class="actions-left">
+                              <a th:href="@{/profile}" class="btn-secondary">
+                                      <i class="bi bi-arrow-left"></i> <span>Torna al profilo</span>
+                              </a>
+                      </div>
+                      <div class="actions-right">
+                              <a th:href="@{/welcome}" class="btn-outline"> <i
+                                      class="bi bi-house-door"></i> <span>Dashboard</span>
+                              </a>
+                      </div>
+              </div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script type="module" th:src="@{/js/location-selector.js}"></script>
+	<script>
+	 // Modern JavaScript for enhanced functionality with validation
+	    document.addEventListener('DOMContentLoaded', function() {
+	        console.log('📝 Inizializzazione form dipendente...');
+	        initializeForm();
+	    });
+	
+	    function initializeForm() {
+	        // Tab functionality
+	        setupTabs();
+	        
+	        // Check URL parameter for active tab
+	        checkUrlTab();
+	        
+	        // Form validation MIGLIORATA
+	        setupValidation();
+	        
+	        // File upload enhancement
+	        setupFileUpload();
+	        
+	        // Validazione real-time dei campi
+	        setupFieldValidation();
+	        
+	        //Validazione telefono e mobile
+	        setupPhoneFormatting();
+	        
+	        console.log('✅ Form dipendente inizializzato');
+	    }
+	
+	    // NUOVO: Validazione real-time
+	    function setupFieldValidation() {
+	        // Validazione Codice Fiscale
+	        const fiscalCodeField = document.querySelector('input[name="fiscalCode"]');
+	        if (fiscalCodeField) {
+	            fiscalCodeField.addEventListener('input', function(e) {
+	                const value = e.target.value.toUpperCase();
+	                e.target.value = value;
+	                
+	                if (value.length > 0) {
+	                    const isValid = validateFiscalCode(value);
+	                    toggleFieldValidation(e.target, isValid, 
+	                        isValid ? 'Codice fiscale valido' : 'Formato codice fiscale non valido');
+	                } else {
+	                    clearFieldValidation(e.target);
+	                }
+	            });
+	        }
+	        
+	        // Validazione Email
+	        const emailField = document.querySelector('input[name="email"]');
+	        if (emailField) {
+	            emailField.addEventListener('blur', function(e) {
+	                const value = e.target.value;
+	                if (value.length > 0) {
+	                    const isValid = validateEmail(value);
+	                    toggleFieldValidation(e.target, isValid, 
+	                        isValid ? 'Email valida' : 'Formato email non valido');
+	                } else {
+	                    clearFieldValidation(e.target);
+	                }
+	            });
+	        }
+	        
+	        // Validazione Data di Nascita
+	        const birthDateField = document.querySelector('input[name="birthDate"]');
+	        if (birthDateField) {
+	            birthDateField.addEventListener('change', function(e) {
+	                const value = e.target.value;
+	                if (value) {
+	                    const birthDate = new Date(value);
+	                    const today = new Date();
+	                    const age = today.getFullYear() - birthDate.getFullYear();
+	                    
+	                    const isValid = age >= 16 && age <= 100;
+	                    const message = isValid ? 
+	                        `Età: ${age} anni` : 
+	                        age < 16 ? 'Età minima richiesta: 16 anni' : 'Età non valida';
+	                        
+	                    toggleFieldValidation(e.target, isValid, message);
+	                } else {
+	                    clearFieldValidation(e.target);
+	                }
+	            });
+	        }
+	        
+	        // Validazione Telefono
+	        const phoneField = document.querySelector('input[name="phone"]');
+	        if (phoneField) {
+	            phoneField.addEventListener('input', function(e) {
+	                const value = e.target.value;
+	                if (value.length > 0) {
+	                    const isValid = /^[+]?[0-9]{8,15}$/.test(value);
+	                    toggleFieldValidation(e.target, isValid, 
+	                        isValid ? 'Numero valido' : 'Formato telefono non valido');
+	                } else {
+	                    clearFieldValidation(e.target);
+	                }
+	            });
+	        }
+	    }
+	
+	    // Funzioni di supporto per validazione
+	    function validateFiscalCode(fiscalCode) {
+	        if (fiscalCode.length !== 16) return false;
+	        return /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/.test(fiscalCode);
+	    }
+	
+	    function validateEmail(email) {
+	        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+	    }
+	
+	    function toggleFieldValidation(field, isValid, message) {
+	        const feedback = field.closest('.form-group').querySelector('.form-feedback');
+	        
+	        field.classList.remove('error', 'success');
+	        field.classList.add(isValid ? 'success' : 'error');
+	        
+	        if (feedback) {
+	            feedback.textContent = message;
+	            feedback.className = `form-feedback ${isValid ? 'success' : 'error'}`;
+	            feedback.style.display = 'block';
+	        }
+	    }
+	
+	    function clearFieldValidation(field) {
+	        const feedback = field.closest('.form-group').querySelector('.form-feedback');
+	        field.classList.remove('error', 'success');
+	        if (feedback) {
+	            feedback.style.display = 'none';
+	        }
+	    }
+	
+	    // Resto delle tue funzioni esistenti...
+	    function checkUrlTab() {
+	        const urlParams = new URLSearchParams(window.location.search);
+	        const activeTab = urlParams.get('tab');
+	        
+	        if (activeTab) {
+	            const tabButton = document.querySelector(`[data-tab="${activeTab}"]`);
+	            const tabPane = document.querySelector(`#pane-${activeTab}`);
+	            
+	            if (tabButton && tabPane && !tabButton.disabled) {
+	                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+	                document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+	                
+	                tabButton.classList.add('active');
+	                tabPane.classList.add('active');
+	                
+	                console.log('📑 Tab attivato da URL:', activeTab);
+	            }
+	        }
+	    }
+	
+	    function setupTabs() {
+	        const tabButtons = document.querySelectorAll('.tab-btn');
+	        const tabPanes = document.querySelectorAll('.tab-pane');
+	
+	        tabButtons.forEach(btn => {
+	            btn.addEventListener('click', function() {
+	                if (this.disabled) return;
+	                
+	                const targetTab = this.dataset.tab;
+	                
+	                tabButtons.forEach(b => b.classList.remove('active'));
+	                this.classList.add('active');
+	                
+	                tabPanes.forEach(pane => {
+	                    pane.classList.remove('active');
+	                    if (pane.id === `pane-${targetTab}`) {
+	                        pane.classList.add('active');
+	                    }
+	                });
+	                
+	                console.log('📑 Tab cambiato a:', targetTab);
+	            });
+	        });
+	    }
+	
+	    function setupValidation() {
+            const pwd = document.getElementById('password');
+            const conf = document.getElementById('confirmPassword');
+            const submit = document.getElementById('submitBtn');
+            const mismatch = document.getElementById('passwordMismatch');
+            const mismatchMsg = document.getElementById('passwordMismatchMsg');
+
+            function validatePasswords() {
+                const pwdVal = pwd.value;
+                const confVal = conf.value;
+
+                if (!pwdVal && !confVal) {
+                    conf.classList.remove('error', 'success');
+                    mismatch.style.display = 'none';
+                    submit.disabled = false;
+                    return;
+                }
+
+                if (pwdVal.length < 6) {
+                    conf.classList.remove('success');
+                    conf.classList.add('error');
+                    mismatchMsg.textContent = 'La password deve essere di almeno 6 caratteri.';
+                    mismatch.style.display = 'block';
+                    submit.disabled = true;
+                    return;
+                }
+
+                if (pwdVal !== confVal) {
+                    conf.classList.remove('success');
+                    conf.classList.add('error');
+                    mismatchMsg.textContent = 'Le password non coincidono.';
+                    mismatch.style.display = 'block';
+                    submit.disabled = true;
+                    return;
+                }
+
+                conf.classList.remove('error');
+                conf.classList.add('success');
+                mismatch.style.display = 'none';
+                submit.disabled = false;
+            }
+
+            if (pwd && conf) {
+                pwd.addEventListener('input', validatePasswords);
+                conf.addEventListener('input', validatePasswords);
+            }
+        }
+	
+	    function setupFileUpload() {
+	        const fileInput = document.querySelector('.file-input');
+	        const fileDisplay = document.querySelector('.file-input-display');
+	
+	        if (fileInput && fileDisplay) {
+	            fileInput.addEventListener('change', function() {
+	                const file = this.files[0];
+	                if (file) {
+	                    fileDisplay.innerHTML = `
+	                        <i class="bi bi-file-earmark-check"></i>
+	                        <span>${file.name}</span>
+	                    `;
+	                    fileDisplay.classList.add('file-selected');
+	                } else {
+	                    fileDisplay.innerHTML = `
+	                        <i class="bi bi-cloud-upload"></i>
+	                        <span>Seleziona file o trascina qui</span>
+	                    `;
+	                    fileDisplay.classList.remove('file-selected');
+	                }
+	            });
+	
+	            // Drag and drop functionality
+	            const wrapper = fileInput.closest('.file-input-wrapper');
+	            
+	            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+	                wrapper.addEventListener(eventName, preventDefaults, false);
+	            });
+	
+	            function preventDefaults(e) {
+	                e.preventDefault();
+	                e.stopPropagation();
+	            }
+	
+	            ['dragenter', 'dragover'].forEach(eventName => {
+	                wrapper.addEventListener(eventName, highlight, false);
+	            });
+	
+	            ['dragleave', 'drop'].forEach(eventName => {
+	                wrapper.addEventListener(eventName, unhighlight, false);
+	            });
+	
+	            function highlight(e) {
+	                wrapper.classList.add('drag-over');
+	            }
+	
+	            function unhighlight(e) {
+	                wrapper.classList.remove('drag-over');
+	            }
+	
+	            wrapper.addEventListener('drop', handleDrop, false);
+	
+	            function handleDrop(e) {
+	                const dt = e.dataTransfer;
+	                const files = dt.files;
+	                fileInput.files = files;
+	                
+	                const event = new Event('change', { bubbles: true });
+	                fileInput.dispatchEvent(event);
+	            }
+	        }
+	    }
+	
+	    function togglePwd(id, btn) {
+	        const input = document.getElementById(id);
+	        const isPwd = input.type === 'password';
+	        input.type = isPwd ? 'text' : 'password';
+	        
+	        const icon = btn.querySelector('i');
+	        icon.classList.toggle('bi-eye');
+	        icon.classList.toggle('bi-eye-slash');
+	        
+	        console.log('👁️ Password visibility toggled for:', id);
+	    }
+	    
+	    function setupPhoneFormatting() {
+	        const phoneFields = document.querySelectorAll('input[name="phone"], input[name="mobile"]');
+	        
+	        phoneFields.forEach(field => {
+	            field.addEventListener('input', function(e) {
+	                // Rimuovi caratteri non validi eccetto numeri, spazi, +, -, ()
+	                let value = e.target.value.replace(/[^0-9\s\+\-\(\)]/g, '');
+	                
+	                // Auto-formattazione per numeri italiani
+	                if (value.startsWith('39') && value.length > 2) {
+	                    value = '+' + value;
+	                }
+	                
+	                e.target.value = value;
+	                
+	                // Validazione real-time
+	                if (value.length > 0) {
+	                    const isValid = /^[\s\+\-\(\)0-9]{8,20}$/.test(value);
+	                    toggleFieldValidation(e.target, isValid, 
+	                        isValid ? 'Numero valido' : 'Formato non valido');
+	                } else {
+	                    clearFieldValidation(e.target);
+	                }
+	            });
+	        });
+	    }
+	    </script>
+	<script>
+	  // tabs
+	  document.querySelectorAll('.tab-btn').forEach(btn=>{
+	    btn.addEventListener('click', ()=>{
+	      const target = btn.dataset.target; // es. "#tab-profile"
+	      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+	      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+	      btn.classList.add('active');
+	      document.querySelector(target)?.classList.add('active');
+	      // progress (facoltativo): attiva/completa gli step in base all’indice
+	    });
+	  });
+	
+	  // password toggle
+	  document.addEventListener('click', (e)=>{
+	    if(e.target.closest('.password-toggle')){
+	      const wrap = e.target.closest('.password-input');
+	      const input = wrap.querySelector('input[type="password"], input[type="text"]');
+	      input.type = (input.type === 'password') ? 'text' : 'password';
+	    }
+	  });
+	
+	  // drag & drop upload area
+	  const wrapper = document.querySelector('.file-input-wrapper');
+	  const fileInput = document.querySelector('.file-input');
+	  if(wrapper && fileInput){
+	    ['dragenter','dragover'].forEach(ev=>wrapper.addEventListener(ev, e=>{e.preventDefault(); wrapper.classList.add('drag-over');}));
+	    ['dragleave','drop'].forEach(ev=>wrapper.addEventListener(ev, e=>{e.preventDefault(); wrapper.classList.remove('drag-over');}));
+	    wrapper.addEventListener('drop', e=>{ fileInput.files = e.dataTransfer.files; wrapper.classList.add('file-selected'); });
+	    fileInput.addEventListener('change', ()=> wrapper.classList.add('file-selected'));
+	  }
+	
+	  // validazione visiva (esempio)
+	  function setFieldState(el, ok, msg){
+	    el.classList.remove('error','success');
+	    const fb = el.parentElement.querySelector('.form-feedback');
+	    if(ok){ el.classList.add('success'); if(fb){ fb.className='form-feedback success'; fb.innerHTML='<i class="bi bi-check-circle"></i>'+ (msg||'Ok'); } }
+	    else { el.classList.add('error'); if(fb){ fb.className='form-feedback error'; fb.innerHTML='<i class="bi bi-exclamation-circle"></i>'+ (msg||'Campo non valido'); } }
+	  }
+	</script>
+</body>
+</html>

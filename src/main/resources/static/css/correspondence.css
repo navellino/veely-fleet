@@ -1,0 +1,107 @@
+/* ===== CORRESPONDENCE: form & table ===== */
+
+.table-toolbar {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.modern-tabs .nav-link {
+  border: none;
+  color: var(--gray-600);
+  padding: .5rem .75rem;
+}
+.modern-tabs .nav-link.active {
+  color: var(--gray-900);
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.filter-row .form-control {
+  border-radius: var(--radius-md);
+}
+
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  text-decoration: none;
+}
+.file-link:hover { text-decoration: underline; }
+
+/* Colonna azioni compatta e no-wrap */
+.actions-col {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Allineamento e spaziatura bottoni */
+.cell-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .4rem;
+}
+.cell-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem .45rem;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .25rem;
+  color: var(--gray-500);
+}
+.empty-state i { font-size: 1.5rem; color: var(--gray-300); }
+
+/* Collapse spacing */
+#addCorrespondenceCollapse .table-header { border-bottom: 1px solid var(--gray-200); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+}
+/* Tabs modern */
+.modern-tabs {
+  border-bottom: 1px solid var(--gray-200);
+  gap: .25rem;
+}
+.modern-tabs .nav-link {
+  border: 0;
+  color: var(--gray-600);
+  padding: .5rem .9rem;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  position: relative;
+}
+.modern-tabs .nav-link.active {
+  color: var(--gray-900);
+  background: var(--gray-50);
+  font-weight: 600;
+}
+.modern-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary-500);
+  border-radius: 2px;
+}
+/* Filtri: respiro a destra e allineamento */
+.table-header.table-toolbar {
+  align-items: center;
+  gap: 1rem;
+}
+.filter-row {
+  margin-left: auto; /* spinge i filtri a destra senza incollarsi */
+}
+.filter-row .form-control,
+.filter-row .btn {
+  border-radius: var(--radius-md);
+}

@@ -1,0 +1,80 @@
+:root {
+    --primary: #4e73df;
+    --info: #36b9cc;
+    --warning: #f6c23e;
+    --danger: #e74a3b;
+    --light: #f8f9fc;
+    --dark: #212529; /* Un nero meno intenso per la sidebar */
+}
+
+body {
+    background-color: var(--light);
+    font-family: 'Nunito', sans-serif; /* Un font più moderno, importalo se vuoi */
+}
+
+/* --- Layout con Sidebar --- */
+#wrapper {
+    display: flex;
+}
+
+#sidebar-wrapper {
+    width: 250px;
+    min-height: 100vh;
+    transition: margin .25s ease-out;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: 1.2rem 1.25rem;
+    font-size: 1.2rem;
+}
+
+#sidebar-wrapper .list-group-item {
+    border: 0;
+    border-radius: 0;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+#sidebar-wrapper .list-group-item:hover,
+#sidebar-wrapper .list-group-item.active { /* Stile per la pagina attiva */
+    background-color: #495057 !important;
+    color: #fff;
+    border-left: 5px solid var(--primary);
+}
+
+#page-content-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+@media (min-width: 768px) {
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+    #wrapper #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* --- Stili Widget Dashboard --- */
+.card-widget {
+    border: 1px solid #e3e6f0;
+    border-radius: .35rem;
+}
+.border-left-primary { border-left: .25rem solid var(--primary) !important; }
+.border-left-info { border-left: .25rem solid var(--info) !important; }
+.border-left-warning { border-left: .25rem solid var(--warning) !important; }
+.border-left-danger { border-left: .25rem solid var(--danger) !important; }
+
+.text-xs { font-size: .8rem; }
+.text-gray-300 { color: #dddfeb !important; }
+.text-gray-800 { color: #5a5c69 !important; }

@@ -1,0 +1,507 @@
+@charset "UTF-8";
+/* ===== FUEL CARDS FORM STYLES ===== */
+
+/* Form Container */
+.fuel-card-form-container {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--gray-200);
+    padding: 2rem;
+    margin-top: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.fuel-card-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+}
+
+/* Form Header */
+.form-header {
+    background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+    margin: -2rem -2rem 2rem -2rem;
+    padding: 2rem;
+    border-radius: 1rem 1rem 0 0;
+    border-bottom: 2px solid var(--primary-200);
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-title i {
+    font-size: 1.5rem;
+    color: var(--primary-600);
+}
+
+.form-subtitle {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin: 0.5rem 0 0 0;
+    font-weight: 400;
+}
+
+/* Enhanced Breadcrumb */
+.fuel-card-breadcrumb {
+    background: var(--gray-50);
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+}
+
+.fuel-card-breadcrumb .breadcrumb {
+    margin: 0;
+    background: none;
+    padding: 0;
+}
+
+.fuel-card-breadcrumb .breadcrumb-item {
+    font-weight: 500;
+}
+
+.fuel-card-breadcrumb .breadcrumb-item a {
+    color: var(--primary-600);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.fuel-card-breadcrumb .breadcrumb-item a:hover {
+    color: var(--primary-700);
+    text-decoration: underline;
+}
+
+.fuel-card-breadcrumb .breadcrumb-item.active {
+    color: var(--gray-700);
+    font-weight: 600;
+}
+
+/* Form Groups */
+.form-group-enhanced {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-enhanced {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.form-label-enhanced i {
+    color: var(--primary-500);
+    font-size: 1rem;
+}
+
+.form-label-enhanced.required::after {
+    content: '*';
+    color: var(--danger-500);
+    margin-left: 0.25rem;
+    font-weight: 700;
+}
+
+/* Enhanced Form Controls */
+.form-control-enhanced {
+    border: 2px solid var(--gray-200);
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--gray-50);
+    font-weight: 500;
+}
+
+.form-control-enhanced:focus {
+    border-color: var(--primary-400);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.form-control-enhanced:hover:not(:focus) {
+    border-color: var(--gray-300);
+    background: white;
+}
+
+/* Special styling for card number */
+.card-number-input {
+    font-family: 'Monaco', 'Consolas', monospace;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+/* Special styling for currency input */
+.currency-input {
+    position: relative;
+}
+
+.currency-input::before {
+    content: '€';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+    font-weight: 600;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.currency-input .form-control-enhanced {
+    padding-left: 2.5rem;
+}
+
+/* Enhanced Select Styling */
+.form-select-enhanced {
+    border: 2px solid var(--gray-200);
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--gray-50);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.form-select-enhanced:focus {
+    border-color: var(--primary-400);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.form-select-enhanced:hover:not(:focus) {
+    border-color: var(--gray-300);
+    background: white;
+}
+
+/* Form Sections */
+.form-section {
+    background: var(--gray-50);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--gray-200);
+    position: relative;
+}
+
+.form-section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.form-section-title i {
+    color: var(--primary-500);
+}
+
+/* Enhanced Action Buttons */
+.form-actions {
+    background: var(--gray-50);
+    margin: 2rem -2rem -2rem -2rem;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--gray-200);
+    border-radius: 0 0 1rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn-primary-enhanced {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    border: none;
+    color: white;
+    padding: 0.875rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+}
+
+.btn-secondary-enhanced {
+    background: white;
+    border: 2px solid var(--gray-300);
+    color: var(--gray-700);
+    padding: 0.875rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary-enhanced:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-400);
+    color: var(--gray-800);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Validation States */
+.form-control-enhanced.is-invalid,
+.form-select-enhanced.is-invalid {
+    border-color: var(--danger-500);
+    background: var(--danger-50);
+}
+
+.form-control-enhanced.is-valid,
+.form-select-enhanced.is-valid {
+    border-color: var(--success-500);
+    background: var(--success-50);
+}
+
+.invalid-feedback {
+    color: var(--danger-600);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.invalid-feedback i {
+    font-size: 0.875rem;
+}
+
+.valid-feedback {
+    color: var(--success-600);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.valid-feedback i {
+    font-size: 0.875rem;
+}
+
+/* Help Text */
+.form-help {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.form-help i {
+    font-size: 0.875rem;
+    color: var(--info-500);
+}
+
+/* Loading State */
+.form-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.form-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fuel-card-form-container {
+        padding: 1.5rem;
+        margin: 0.5rem;
+        border-radius: 0.75rem;
+    }
+    
+    .form-header {
+        margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-actions {
+        margin: 1.5rem -1.5rem -1.5rem -1.5rem;
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+    }
+    
+    .btn-primary-enhanced,
+    .btn-secondary-enhanced {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
+    }
+    
+    .form-control-enhanced,
+    .form-select-enhanced {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .fuel-card-form-container {
+        padding: 1rem;
+        margin: 0.25rem;
+    }
+    
+    .form-header {
+        margin: -1rem -1rem 1rem -1rem;
+        padding: 1rem;
+    }
+    
+    .form-title {
+        font-size: 1.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .form-actions {
+        margin: 1rem -1rem -1rem -1rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Animation Classes */
+.fade-in-form {
+    animation: fadeInForm 0.6s ease-out;
+}
+
+@keyframes fadeInForm {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-up {
+    animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus Management */
+.form-control-enhanced:focus,
+.form-select-enhanced:focus,
+.btn-primary-enhanced:focus,
+.btn-secondary-enhanced:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .form-control-enhanced,
+    .form-select-enhanced {
+        border-width: 3px;
+    }
+    
+    .form-control-enhanced:focus,
+    .form-select-enhanced:focus {
+        box-shadow: 0 0 0 3px var(--primary-500);
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .form-control-enhanced,
+    .form-select-enhanced,
+    .btn-primary-enhanced,
+    .btn-secondary-enhanced {
+        transition: none;
+    }
+    
+    .fade-in-form,
+    .slide-up {
+        animation: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .form-actions,
+    .fuel-card-breadcrumb {
+        display: none !important;
+    }
+    
+    .fuel-card-form-container {
+        box-shadow: none !important;
+        border: 1px solid var(--gray-400) !important;
+    }
+    
+    .form-control-enhanced,
+    .form-select-enhanced {
+        border: 1px solid var(--gray-400) !important;
+        background: white !important;
+    }
+}

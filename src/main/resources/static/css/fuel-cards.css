@@ -1,0 +1,295 @@
+/* ===== FUEL CARDS PAGE STYLES ===== */
+
+/* Enhanced Header */
+.fuel-cards-header {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: white;
+    padding: 2rem;
+    margin: -1.5rem -1.5rem 2rem -1.5rem;
+    border-radius: 1.5rem 1.5rem 1.5rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.fuel-cards-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="70" cy="70" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+}
+
+.fuel-cards-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.fuel-cards-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Enhanced Add Card Button */
+.btn-add-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-card:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-decoration: none;
+}
+
+/* Enhanced Table Styles */
+.fuel-cards-table-container {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--gray-200);
+}
+
+.fuel-cards-table th {
+    background: var(--gray-800);
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 1rem 1.5rem;
+    border: none;
+}
+
+.fuel-cards-table td {
+    padding: 1.25rem 1.5rem;
+    border: none;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.fuel-cards-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.fuel-cards-table tbody tr:hover {
+    background: var(--primary-50);
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Card Number Styling */
+.card-number {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-weight: 600;
+    color: var(--gray-900);
+    background: var(--gray-100);
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--gray-200);
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+}
+
+/* Expiry Date with Status Indicators */
+.expiry-date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.date-value {
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.expiry-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.expiry-status.expired {
+    background: var(--danger-100);
+    color: var(--danger-700);
+}
+
+.expiry-status.warning {
+    background: var(--warning-100);
+    color: var(--warning-700);
+}
+
+.expiry-status.valid {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+/* Primary Info Styling */
+.primary-info {
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* Vehicle Plate Styling */
+.vehicle-plate {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-weight: 700;
+    color: var(--primary-700);
+    background: var(--primary-50);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--primary-200);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+}
+
+/* Empty State */
+.empty-state-fuel {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-description {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Enhanced Action Buttons */
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+}
+
+.btn-secondary {
+    background: var(--primary-50);
+    color: var(--primary-600);
+    border: 1px solid var(--primary-200);
+}
+
+.btn-secondary:hover {
+    background: var(--primary-100);
+    color: var(--primary-700);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fuel-cards-header {
+        margin: -1rem -1rem 1.5rem -1rem;
+        padding: 1.5rem;
+        border-radius: 0 0 1rem 1rem;
+    }
+    
+    .fuel-cards-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .fuel-cards-table th,
+    .fuel-cards-table td {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .card-number {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .vehicle-plate {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .fuel-cards-table {
+        font-size: 0.8rem;
+    }
+    
+    .empty-state-fuel {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-icon {
+        font-size: 2rem;
+    }
+}
+
+/* Focus States for Accessibility */
+.fuel-cards-table tbody tr:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: -2px;
+}
+
+.btn:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .fuel-cards-header,
+    .btn-add-card,
+    .fuel-cards-table th:last-child,
+    .fuel-cards-table td:last-child {
+        display: none !important;
+    }
+    
+    .fuel-cards-table-container {
+        box-shadow: none !important;
+        border: 1px solid var(--gray-400) !important;
+    }
+}

@@ -1,0 +1,597 @@
+/* ===== PROJECT FORM STYLES - SIMPLIFIED VERSION ===== */
+
+/* 
+ * This CSS file contains minimal custom styling for the project form page.
+ * Most styling is handled by Bootstrap 5.3.2 components to reduce complexity
+ * and improve maintainability.
+ */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+    /* Primary brand colors matching modern-ui.css */
+    --project-primary: #3b82f6;
+    --project-primary-600: #2563eb;
+    --project-primary-700: #1d4ed8;
+    --project-primary-light: #eff6ff;
+    
+    /* Status colors */
+    --project-success: #10b981;
+    --project-warning: #f59e0b;
+    --project-danger: #ef4444;
+    --project-info: #06b6d4;
+    
+    /* Neutral colors */
+    --project-gray-50: #f8f9fa;
+    --project-gray-100: #e9ecef;
+    --project-gray-500: #6c757d;
+    --project-gray-700: #495057;
+    --project-gray-900: #212529;
+    
+    /* Spacing and effects */
+    --project-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --project-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --project-border-radius: 0.5rem;
+    --project-transition: all 0.15s ease-in-out;
+}
+
+/* ===== FORM LAYOUT ENHANCEMENTS ===== */
+
+/**
+ * Container for the entire project form
+ * Uses Bootstrap container-fluid with custom max-width
+ */
+.project-form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/**
+ * Card styling improvements
+ * Enhances Bootstrap card component with subtle shadows and spacing
+ */
+.form-section.card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: var(--project-shadow);
+    margin-bottom: 1.5rem;
+    transition: var(--project-transition);
+}
+
+.form-section.card:hover {
+    box-shadow: var(--project-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/**
+ * Card header with gradient background
+ * Provides visual hierarchy and brand consistency
+ */
+.form-section .card-header {
+    background: linear-gradient(135deg, var(--project-gray-50), var(--project-gray-100));
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+.form-section .card-header h5 {
+    color: var(--project-gray-900);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.form-section .card-header .text-muted {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
+
+/* ===== FORM CONTROLS ENHANCEMENTS ===== */
+
+/**
+ * Enhanced form labels
+ * Provides better visual hierarchy and required field indication
+ */
+.form-label {
+    font-weight: 600;
+    color: var(--project-gray-700);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: var(--project-danger);
+}
+
+/**
+ * Form control focus states
+ * Consistent with brand colors and improved accessibility
+ */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--project-primary);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/**
+ * Input group enhancements
+ * Improves the visual connection between addon and input
+ */
+.input-group-text {
+    background-color: var(--project-gray-50);
+    border-color: var(--bs-border-color);
+    color: var(--project-gray-500);
+    font-weight: 500;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--project-primary);
+    background-color: var(--project-primary-light);
+    color: var(--project-primary-600);
+}
+
+/* ===== TABLE COMPONENTS ===== */
+
+/**
+ * Enhanced table styling for contacts and invoices
+ * Uses Bootstrap table classes with minimal custom styling
+ */
+.table-responsive .table th {
+    background-color: var(--project-gray-50);
+    color: var(--project-gray-700);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border-bottom: 2px solid var(--bs-border-color);
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+.table-responsive .table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.table-responsive .table tbody tr:hover {
+    background-color: var(--project-gray-50);
+}
+
+/**
+ * Empty state styling for tables
+ * Provides clear feedback when no data is present
+ */
+.empty-state-row td {
+    text-align: center;
+    padding: 2rem;
+    color: var(--project-gray-500);
+    font-style: italic;
+}
+
+.empty-state-row i {
+    font-size: 1.5rem;
+    color: var(--bs-secondary-color);
+    margin-right: 0.5rem;
+}
+
+/* ===== POLICY TABLE MULTI-LINE LAYOUT ===== */
+.policy-row-cell {
+    padding: 1.5rem;
+}
+
+.policy-row-wrapper {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.policy-row-group {
+    display: grid;
+    gap: 1rem;
+}
+
+.policy-row-group-primary {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.policy-row-group-secondary {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    align-items: end;
+}
+
+.policy-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.policy-field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--project-gray-500);
+}
+
+.policy-status-field .status-badge {
+    width: fit-content;
+    margin-top: 0.25rem;
+}
+
+.policy-attachments-field .policy-attachment-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.policy-attachments-field .alert-info-custom {
+    width: 100%;
+    text-align: center;
+}
+
+.policy-actions-field .policy-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+    .policy-row-cell {
+        padding: 1rem;
+    }
+
+    .policy-row-group-secondary {
+        align-items: stretch;
+    }
+
+    .policy-actions-field .policy-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .policy-attachments-field .attachment-btn {
+        width: 100%;
+    }
+}
+
+/* Status badges for policy validity */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-active {
+    background-color: var(--project-success);
+    color: #fff;
+}
+
+.status-warning {
+    background-color: var(--project-warning);
+    color: #000;
+}
+
+.status-terminated {
+    background-color: var(--project-danger);
+    color: #fff;
+}
+
+/* Alert info for unsaved rows */
+.alert-info-custom {
+    background: var(--project-info, #06b6d4); /* fallback to info color */
+    color: #fff;
+    border: 1px solid var(--project-info);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ===== BUTTON ENHANCEMENTS ===== */
+
+/**
+ * Custom button styles for specific form actions
+ * Extends Bootstrap button classes with brand-specific styling
+ */
+.btn-add-item {
+    background: linear-gradient(135deg, var(--project-success), #059669);
+    border: none;
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: var(--project-transition);
+}
+
+.btn-add-item:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(16, 185, 129, 0.25);
+}
+
+.btn-remove-item {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--project-border-radius);
+    transition: var(--project-transition);
+}
+
+.btn-remove-item:hover {
+    transform: translateY(-1px);
+}
+
+/* ===== UPLOAD FORM STYLING ===== */
+
+/**
+ * File upload area with drag-and-drop visual feedback
+ * Creates an inviting upload zone using Bootstrap utilities
+ */
+.upload-zone {
+    background-color: var(--project-gray-50);
+    border: 2px dashed var(--bs-border-color);
+    border-radius: var(--project-border-radius);
+    padding: 1.5rem;
+    transition: var(--project-transition);
+}
+
+.upload-zone:hover {
+    border-color: var(--project-primary);
+    background-color: var(--project-primary-light);
+}
+
+.upload-zone.dragover {
+    border-color: var(--project-primary);
+    background-color: var(--project-primary-light);
+    transform: scale(1.02);
+}
+
+/* ===== DOCUMENT MANAGEMENT ===== */
+
+/**
+ * Document type badges
+ * Uses Bootstrap badge component with custom colors
+ */
+.document-type-badge {
+    background-color: var(--project-primary-light);
+    color: var(--project-primary-600);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50rem;
+}
+
+/**
+ * Document filename display
+ * Monospace font for better readability of filenames
+ */
+.document-filename {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    background-color: var(--project-gray-50);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    color: var(--project-gray-700);
+}
+
+/* ===== PROGRESS BAR ENHANCEMENTS ===== */
+
+/**
+ * Enhanced progress bar for project completion tracking
+ * Custom styling on top of Bootstrap progress component
+ */
+.progress-enhanced {
+    height: 1.5rem;
+    background-color: var(--project-gray-100);
+    border-radius: var(--project-border-radius);
+    overflow: hidden;
+}
+
+.progress-enhanced .progress-bar {
+    background: linear-gradient(90deg, var(--project-primary), var(--project-primary-600));
+    transition: width 0.3s ease-in-out;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+}
+
+/* ===== FORM VALIDATION STATES ===== */
+
+/**
+ * Enhanced validation feedback
+ * Improves Bootstrap validation classes with better visual feedback
+ */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--project-danger);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--project-success);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.invalid-feedback {
+    color: var(--project-danger);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.valid-feedback {
+    color: var(--project-success);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* ===== ANIMATION CLASSES ===== */
+
+/**
+ * Subtle animations for enhanced user experience
+ * Lightweight animations that respect user preferences
+ */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-out-left {
+    animation: slideOutLeft 0.3s ease-in forwards;
+}
+
+@keyframes slideOutLeft {
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+
+/**
+ * Ripple effect for interactive elements
+ * Subtle feedback animation for button interactions
+ */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple-effect 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple-effect {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/**
+ * Mobile-first responsive adjustments
+ * Ensures optimal experience across all device sizes
+ */
+@media (max-width: 768px) {
+    .project-form-container {
+        padding: 0 0.75rem;
+    }
+    
+    .form-section .card-header {
+        padding: 1rem;
+    }
+    
+    .form-section .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive .table th,
+    .table-responsive .table td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-add-item {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive .table th,
+    .table-responsive .table td {
+        padding: 0.375rem 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    .document-filename {
+        font-size: 0.75rem;
+    }
+    
+    .btn-remove-item {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+
+/**
+ * Accessibility improvements
+ * Better focus states and reduced motion support
+ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/**
+ * High contrast mode support
+ * Ensures visibility in Windows high contrast mode
+ */
+@media (prefers-contrast: high) {
+    .form-section.card {
+        border: 2px solid;
+    }
+    
+    .btn-add-item,
+    .btn-remove-item {
+        border: 2px solid;
+    }
+}
+
+/**
+ * Focus indicators for keyboard navigation
+ * Clear focus states for all interactive elements
+ */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--project-primary);
+    outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+
+/**
+ * Print-friendly styles
+ * Optimizes form appearance when printed
+ */
+@media print {
+    .btn,
+    .upload-zone,
+    .card-header .text-muted {
+        display: none !important;
+    }
+    
+    .form-section.card {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+        break-inside: avoid;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+}

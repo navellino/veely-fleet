@@ -1,0 +1,83 @@
+<nav class="sidebar" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="sidebar-header">
+        <a th:href="@{/}" class="sidebar-brand">
+            <i class="bi bi-speedometer2"></i>
+            <span>Veely</span>
+        </a>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/welcome}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+
+        <li class="nav-heading">Gestione</li>
+
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/vehicles}">
+                <i class="bi bi-truck"></i>
+                <span>Veicoli</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/maintenances}">
+                <i class="bi bi-tools"></i>
+                <span>Manutenzioni</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/fuels}">
+                <i class="bi bi-fuel-pump-fill"></i>
+                <span>Rifornimenti</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/deadlines}">
+                <i class="bi bi-calendar-x"></i>
+                <span>Scadenze</span>
+            </a>
+        </li>
+		<li class="nav-item">
+            <a class="nav-link" th:href="@{/safety}">
+                <i class="bi bi-shield-check"></i>
+                <span>Safety</span>
+            </a>
+        </li>
+        <div sec:authorize="hasRole('ADMIN')">
+            <li class="nav-heading">Amministrazione</li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/users}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Utenti</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/settings}">
+                     <i class="bi bi-gear-fill"></i>
+                    <span>Impostazioni</span>
+                </a>
+            </li>
+        </div>
+    </ul>
+
+    <div class="sidebar-footer">
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle fs-4 me-2"></i>
+                <strong th:text="${#authentication.name}"></strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser">
+                <li><a class="dropdown-item" href="#">Profilo</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="dropdown-item">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

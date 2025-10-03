@@ -1,0 +1,661 @@
+/* ===== WELCOME PAGE ENHANCED CSS ===== */
+/* Stili migliorati per ottimizzare grafica e spazi */
+/* Mantiene tutta la logica backend intatta */
+
+/* ===== CSS CUSTOM PROPERTIES ENHANCED ===== */
+:root {
+    /* Brand Colors ottimizzati */
+    --veely-primary: #3b82f6;
+    --veely-primary-light: #dbeafe;
+    --veely-primary-dark: #1d4ed8;
+    --veely-primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+    
+    --veely-success: #10b981;
+    --veely-success-light: #ecfdf5;
+    --veely-success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    --veely-warning: #f59e0b;
+    --veely-warning-light: #fffbeb;
+    --veely-warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    
+    --veely-info: #06b6d4;
+    --veely-info-light: #ecfeff;
+    --veely-info-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    
+    --veely-danger: #ef4444;
+    --veely-danger-light: #fef2f2;
+    --veely-danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    
+    /* Spacing ottimizzato */
+    --header-padding: 2rem;
+    --card-padding: 1.5rem;
+    --section-gap: 2rem;
+    --chart-height: 300px;
+    --chart-height-small: 220px;
+    --stat-icon-size: 52px;
+    
+    /* Shadows migliorati */
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --stat-card-border-width: 4px;
+    
+    /* Border radius consistenti */
+    --border-radius-sm: 0.5rem;
+    --border-radius-md: 0.75rem;
+    --border-radius-lg: 1rem;
+    --border-radius-xl: 1.25rem;
+}
+
+/* ===== GLOBAL ENHANCEMENTS ===== */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ===== HEADER MIGLIORATO ===== */
+.header-main {
+    background: var(--veely-primary-gradient);
+    border-radius: 0 0 var(--border-radius-xl) var(--border-radius-xl);
+    margin-bottom: var(--section-gap);
+    padding: var(--header-padding);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.header-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.header-icon {
+    width: var(--stat-icon-size);
+    height: var(--stat-icon-size);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0.25rem 0 0 0;
+    font-weight: 400;
+}
+
+/* ===== STATS GRID MIGLIORATO ===== */
+#statsGrid {
+    margin-bottom: 0.25rem;
+}
+
+.stat-card {
+    border: 0;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    background: white;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    min-height: 120px; /* Altezza minima ridotta */
+}
+
+.stat-card .card-body {
+    padding: 1.25rem; /* Padding ridotto */
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--stat-card-border-width);
+    transition: all 0.3s ease;
+}
+
+.stat-card--primary::before {
+    background: var(--veely-primary-gradient);
+}
+
+.stat-card--success::before {
+    background: var(--veely-success-gradient);
+}
+
+.stat-card--warning::before {
+    background: var(--veely-warning-gradient);
+}
+
+.stat-card--info::before {
+    background: var(--veely-info-gradient);
+}
+
+.stat-card--danger::before {
+    background: var(--veely-danger-gradient);
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.stat-card:hover::before {
+    height: 6px;
+}
+
+.stat-card .card-body {
+    padding: var(--card-padding);
+}
+
+/* ===== STAT ICONS MIGLIORATI ===== */
+.stat-icon {
+    width: var(--stat-icon-size);
+    height: var(--stat-icon-size);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: white;
+    font-weight: 600;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent);
+    pointer-events: none;
+}
+
+.stat-icon--primary {
+    background: var(--veely-primary-gradient);
+}
+
+.stat-icon--success {
+    background: var(--veely-success-gradient);
+}
+
+.stat-icon--warning {
+    background: var(--veely-warning-gradient);
+}
+
+.stat-icon--info {
+    background: var(--veely-info-gradient);
+}
+
+.stat-icon--danger {
+    background: var(--veely-danger-gradient);
+}
+
+/* ===== STAT CONTENT MIGLIORATO ===== */
+.stat-label {
+    font-size: 0.75rem; /* Ridotto da 0.8rem */
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 0.5rem; /* Ridotto da 0.75rem */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+}
+
+.stat-value {
+    font-size: 1.875rem; /* Ridotto da 2.25rem */
+    font-weight: 800;
+    color: #111827;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.stat-sublabel {
+    font-size: 0.75rem; /* Ridotto da 0.8rem */
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* Compact vehicle stats */
+.stat-card .d-flex.justify-content-between .flex-fill {
+    padding: 0.25rem;
+}
+
+.stat-card .d-flex.justify-content-between .flex-fill .fw-bold {
+    font-size: 0.875rem;
+    margin-top: 0.125rem;
+}
+
+/* ===== ACTION BUTTON MIGLIORATO ===== */
+.stat-action-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(59, 130, 246, 0.08);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    color: var(--veely-primary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.stat-action-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--veely-primary-dark);
+    transform: scale(1.1);
+}
+
+/* ===== CHART MIGLIORATO ===== */
+.stat-chart {
+    height: 140px;
+    margin-top: 1rem;
+    position: relative;
+}
+
+.stat-chart canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ===== CHART CARDS MIGLIORATI ===== */
+.chart-card {
+    border: 0;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.chart-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.chart-card .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e5e7eb;
+    padding: var(--card-padding);
+}
+
+.chart-header-content h2.chart-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.chart-header-content .chart-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+    font-weight: 500;
+}
+
+.chart-container {
+    position: relative;
+    height: var(--chart-height);
+    width: 100%;
+    padding: 1rem;
+}
+
+.chart-container--small {
+    height: var(--chart-height-small);
+}
+
+.chart-container canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* ===== TABLE CARDS MIGLIORATI ===== */
+.table-card {
+    border: 0;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.table-card:hover {
+    box-shadow: var(--card-shadow-hover);
+}
+
+.table-card .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e5e7eb;
+    padding: var(--card-padding);
+}
+
+.table-header-content h2.table-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.table-card .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+}
+
+/* ===== TABLE STYLING MIGLIORATO ===== */
+.table {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    background: #f8fafc;
+    color: #374151;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem;
+    border: none;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table tbody td {
+    padding: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.table-row:hover {
+    background-color: rgba(59, 130, 246, 0.04);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+/* ===== BADGE MIGLIORATI ===== */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.bg-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+}
+
+/* ===== EMPTY STATE MIGLIORATO ===== */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+    color: #10b981;
+}
+
+.empty-state div {
+    font-weight: 500;
+}
+
+/* ===== VEHICLE INFO STYLING ===== */
+.vehicle-info {
+    min-width: 100px;
+}
+
+.vehicle-info .fw-bold {
+    color: #111827;
+    font-size: 0.9rem;
+}
+
+.vehicle-info .text-muted {
+    color: #6b7280 !important;
+    font-size: 0.8rem;
+}
+
+/* ===== BUTTONS MIGLIORATI ===== */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary {
+    border-color: var(--veely-primary);
+    color: var(--veely-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--veely-primary);
+    border-color: var(--veely-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background: var(--veely-primary-gradient);
+    border-color: var(--veely-primary);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== RESPONSIVE ENHANCEMENTS ===== */
+@media (max-width: 1200px) {
+    .chart-container {
+        height: 280px;
+    }
+    
+    .stat-card {
+        min-height: 130px;
+    }
+}
+
+@media (max-width: 992px) {
+    :root {
+        --header-padding: 1.5rem;
+        --section-gap: 1.5rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-container--small {
+        height: 200px;
+    }
+    
+    .stat-card {
+        min-height: 120px;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --header-padding: 1.25rem;
+        --section-gap: 1.25rem;
+        --card-padding: 1.25rem;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .page-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-size: 1.625rem;
+    }
+    
+    .chart-container {
+        height: 220px;
+        padding: 0.75rem;
+    }
+    
+    .chart-container--small {
+        height: 180px;
+    }
+    
+    .stat-action-btn {
+        display: none;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .stat-card {
+        min-height: 110px;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --header-padding: 1rem;
+        --card-padding: 1rem;
+    }
+    
+    .stat-card {
+        border-radius: var(--border-radius-md);
+    }
+    
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+        padding: 0.5rem;
+    }
+    
+    .chart-container--small {
+        height: 160px;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (prefers-contrast: high) {
+    .stat-card {
+        border: 2px solid #6b7280;
+    }
+    
+    .stat-card::before {
+        height: 6px;
+    }
+    
+    .chart-card,
+    .table-card {
+        border: 1px solid #d1d5db;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-card,
+    .chart-card,
+    .table-card,
+    .stat-action-btn,
+    .btn,
+    .table-row {
+        transition: none;
+    }
+    
+    .stat-card:hover,
+    .chart-card:hover {
+        transform: none;
+    }
+    
+    .stat-action-btn:hover {
+        transform: none;
+    }
+}
+
+/* ===== FOCUS STYLES ===== */
+.stat-card:focus-within {
+    outline: 2px solid var(--veely-primary);
+    outline-offset: 2px;
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .stat-action-btn,
+    .chart-card .btn,
+    .table-card .btn {
+        display: none !important;
+    }
+    
+    .stat-card,
+    .chart-card,
+    .table-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #d1d5db !important;
+    }
+    
+    .header-main {
+        background: #3b82f6 !important;
+        box-shadow: none !important;
+    }

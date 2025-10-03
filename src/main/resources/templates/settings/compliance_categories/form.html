@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Categoria Safety – Veely</title>
+    <th:block th:fragment="cssblock">
+    </th:block>
+</head>
+<th:block th:fragment="navbar">
+</th:block>
+
+<body>
+<main class="container my-5 flex-fill">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/settings}">Impostazioni</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/settings/safety-categories}">Categorie Safety</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${category.id == null ? 'Nuova' : 'Modifica'}"></li>
+        </ol>
+    </nav>
+    <form th:object="${category}"
+          th:action="${category.id == null} ? @{/settings/safety-categories/new} : @{/settings/safety-categories/{id}/edit(id=${category.id})}"
+          method="post" class="row g-3">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="col-md-6">
+            <label class="form-label">Nome</label>
+            <input class="form-control" th:field="*{name}" required />
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <a class="btn btn-outline-secondary me-auto" th:href="@{/settings/safety-categories}"><i class="bi bi-list-ul me-1"></i> Lista</a>
+            <button type="submit" class="btn btn-primary me-2" th:text="${category.id == null ? 'Crea' : 'Aggiorna'}"></button>
+            <a class="btn btn-outline-secondary" th:href="@{/settings/safety-categories}">Annulla</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

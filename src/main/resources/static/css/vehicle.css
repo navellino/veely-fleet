@@ -1,0 +1,137 @@
+@charset "UTF-8";
+ /* Stili minimali e funzionali */
+        .page-header {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .filter-bar {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-table {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table-modern {
+            margin: 0;
+        }
+        
+        .table-modern thead th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+            padding: 1rem;
+            font-size: 0.875rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .table-modern tbody td {
+            padding: 1rem;
+            border-top: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+        
+        .table-modern tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .vehicle-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .vehicle-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .vehicle-plate {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #212529;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d1f2eb;
+            color: #0c7b69;
+        }
+        
+        .status-maintenance {
+            background: #fef7e0;
+            color: #92400e;
+        }
+        
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.25rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .search-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .search-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-primary-clean {
+            background: #3b82f6;
+            border: 1px solid #3b82f6;
+            color: white;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+        
+        .btn-primary-clean:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        .scadenza-badge {
+            font-size: 0.7rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            margin-right: 0.25rem;
+        }

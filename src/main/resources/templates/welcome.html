@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Dashboard Veely</title>
+    <!-- Custom CSS for welcome page -->
+    <th:block th:fragment="cssblock">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/welcome.css}">
+    </th:block>
+</head>
+
+<!-- Custom navbar fragment for welcome page -->
+<th:block th:fragment="navbar">
+    <div class="header-main">
+        <div class="d-flex align-items-center">
+            <div class="header-icon me-3">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <div class="header-content">
+                <h1 class="page-title">Dashboard Veely</h1>
+                <p class="page-subtitle">Monitora e gestisci tutte le tue aziende</p>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<body>
+    <!-- Quick Stats Section - Layout migliorato -->
+    <div class="container-fluid px-0">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-2 mb-2" id="statsGrid">
+            
+            <!-- Note Spese Card -->
+            <div class="col" data-aos="fade-up" data-aos-delay="100">
+                <div class="card stat-card stat-card--warning h-100" role="button" tabindex="0" 
+                     aria-label="Note Spesa da Approvare">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="stat-icon stat-icon--warning">
+                                <i class="bi bi-wallet2" aria-hidden="true"></i>
+                            </div>
+                            <button class="stat-action-btn" type="button" aria-label="Azioni note spese">
+                                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-label">Note Spesa da Approvare</h3>
+                            <div class="stat-value" th:text="${pendingReports.size()}">1</div>
+                            <p class="stat-sublabel">Richiede approvazione</p>
+                        </div>
+                        <a th:href="@{/fleet/expense-reports}" class="stretched-link" aria-label="Vai alle note spese"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veicoli Card - Layout compatto -->
+            <div class="col" data-aos="fade-up" data-aos-delay="200">
+                <div class="card stat-card stat-card--primary h-100" role="button" tabindex="0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="stat-icon stat-icon--primary">
+                                <i class="bi bi-car-front-fill" aria-hidden="true"></i>
+                            </div>
+                            <button class="stat-action-btn" type="button" aria-label="Azioni veicoli">
+                                <i class="bi bi-gear" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-label">Veicoli in Flotta</h3>
+                            <div class="stat-value" th:text="${metrics.vehicles}">7</div>
+                            <div class="d-flex justify-content-between text-center mt-2">
+                                <div class="flex-fill">
+                                    <div class="stat-sublabel">Servizio</div>
+                                    <div class="fw-bold text-success small" th:text="${metrics.vehiclesInService}">3</div>
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="stat-sublabel">Assegnati</div>
+                                    <div class="fw-bold text-primary small" th:text="${metrics.vehiclesAssigned}">3</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a th:href="@{/vehicleList}" class="stretched-link" aria-label="Vai ai veicoli"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carburante Card -->
+            <div class="col" data-aos="fade-up" data-aos-delay="300">
+                <div class="card stat-card stat-card--info h-100" role="button" tabindex="0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="stat-icon stat-icon--info">
+                                <i class="bi bi-fuel-pump-fill" aria-hidden="true"></i>
+                            </div>
+                            <button class="stat-action-btn" type="button" aria-label="Azioni carburante">
+                                <i class="bi bi-graph-up" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-label">Carburante del Mese</h3>
+                            <div class="stat-value" th:text="${#numbers.formatCurrency(metrics.fuelMonth)}">€0,00</div>
+                            <p class="stat-sublabel">Costo mensile</p>
+                        </div>
+                        <a th:href="@{/fleet/refuels}" class="stretched-link" aria-label="Vai ai rifornimenti"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commesse Card - Conditional rendering ottimizzato -->
+            <div class="col" data-aos="fade-up" data-aos-delay="400" th:if="${metrics.activeProjects > 0}">
+                <div class="card stat-card stat-card--success h-100" role="button" tabindex="0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="stat-icon stat-icon--success">
+                                <i class="bi bi-briefcase-fill" aria-hidden="true"></i>
+                            </div>
+                            <button class="stat-action-btn" type="button" aria-label="Azioni commesse">
+                                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-label">Commesse Attive</h3>
+                            <div class="stat-value" th:text="${metrics.activeProjects}">3</div>
+                            <p class="stat-sublabel" th:text="'Valore: ' + ${#numbers.formatCurrency(metrics.activeProjectsValue)}">
+                                Valore: €125.000
+                            </p>
+                        </div>
+                        <a th:href="@{/settings/projects}" class="stretched-link" aria-label="Vai alle commesse"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contratti Card -->
+            <div class="col" data-aos="fade-up" data-aos-delay="500">
+                <div class="card stat-card stat-card--primary h-100" role="button" tabindex="0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="stat-icon stat-icon--primary">
+                                <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+                            </div>
+                            <button class="stat-action-btn" type="button" aria-label="Azioni contratti">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-label">Contratti Attivi</h3>
+                            <div class="stat-value" th:text="${metrics.activeContracts}">1</div>
+                            <p class="stat-sublabel">Tutti attivi</p>
+                        </div>
+                        <a th:href="@{/settings/contracts}" class="stretched-link" aria-label="Vai ai contratti"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content - Layout migliorato -->
+        <div class="row g-4">
+            <!-- Charts Section - Left Column -->
+            <div class="col-xl-8 col-lg-12">
+                <!-- First Row of Charts -->
+                <div class="row g-4 mb-4">
+                    <!-- Project Policies Table - Styling migliorato -->
+                    <div class="col-lg-6">
+                        <div class="card table-card h-100" data-aos="fade-up" data-aos-delay="600">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="table-header-content">
+                                        <h2 class="table-title">
+                                            <i class="bi bi-shield-exclamation me-2 text-warning"></i>
+                                            Polizze in Scadenza
+                                        </h2>
+                                         <span class="badge bg-secondary mt-1" th:text="${expiringPolicies.size()} + ' elementi'">0 elementi</span>
+                                    </div>
+                                    <a th:href="@{/settings/projects}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Gestisci
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" aria-label="Tabella polizze commesse in scadenza">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">
+                                                    <i class="bi bi-briefcase me-1"></i>Commessa
+                                                </th>
+                                                <th scope="col">
+                                                    <i class="bi bi-shield me-1"></i>Polizza
+                                                </th>
+                                                <th scope="col">
+                                                    <i class="bi bi-calendar me-1"></i>Scadenza
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="policy : ${expiringPolicies}" class="table-row">
+                                                <td>
+                                                    <div class="fw-semibold text-dark" th:text="${policy.project != null ? policy.project.name : 'Commessa'}">Commessa Alfa</div>
+                                                    <div class="text-muted small" th:text="${policy.project != null ? policy.project.code : ''}">PRJ-001</div>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-medium" th:text="${policy.policyType}">RCT</div>
+                                                    <div class="text-muted small" th:text="${policy.policyNumber}">POL-123</div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark" th:text="${policy.expiryDate != null ? #temporals.format(policy.expiryDate, 'dd/MM/yyyy') : '-'}">15/09/2025</span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(expiringPolicies)}" class="empty-row">
+                                                <td colspan="3">
+                                                    <div class="empty-state">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        <div>Nessuna polizza in scadenza</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+					
+					<!-- Safety Deadlines Table - Styling migliorato -->
+                    <div class="col-lg-6">
+                        <div class="card table-card h-100" data-aos="fade-up" data-aos-delay="900">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="table-header-content">
+                                        <h2 class="table-title">
+                                            <i class="bi bi-shield-check me-2 text-danger"></i>
+                                            Scadenze Safety
+                                        </h2>
+                                        <span class="badge bg-secondary mt-1" th:text="${upcomingSafety.size()} + ' elementi'">5 elementi</span>
+                                    </div>
+                                    <a th:href="@{/safety}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-1"></i>Vedi tutti
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" aria-label="Tabella scadenze safety">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">
+                                                    <i class="bi bi-bookmark me-1"></i>Categoria
+                                                </th>
+                                                <th scope="col">
+                                                    <i class="bi bi-person me-1"></i>Dipendente
+                                                </th>
+                                                <th scope="col">
+                                                    <i class="bi bi-calendar me-1"></i>Scadenza
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="s : ${upcomingSafety}" 
+                                                th:with="daysDiff=${s.dueDate != null ? T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), s.dueDate) : 999}"
+                                                th:classappend="${daysDiff <= 30} ? 'table-danger' : (${daysDiff <= 60} ? 'table-warning' : '')"
+                                                class="table-row">
+                                                <td>
+                                                    <div class="fw-semibold" th:text="${s.category.name}">Corso RLS</div>
+                                                </td>
+                                                <td>
+                                                    <div th:text="${s.employee != null ? s.employee.firstName + ' ' + s.employee.lastName : '-'}">
+                                                        Lorenzo Fabio Penna
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge"
+                                                          th:classappend="${daysDiff <= 30} ? 'bg-danger' : (${daysDiff <= 60} ? 'bg-warning text-dark' : 'bg-light text-dark')"
+                                                          th:text="${s.dueDate != null ? #temporals.format(s.dueDate, 'dd/MM/yyyy') : '-'}">
+                                                        08/11/2025
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(upcomingSafety)}" class="empty-row">
+                                                <td colspan="3">
+                                                    <div class="empty-state">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        <div>Nessuna scadenza safety</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Second Row of Charts -->
+                <div class="row g-4">
+                    <!-- Expense Reports Chart - Styling migliorato -->
+                    <div class="col-lg-6">
+                        <div class="card chart-card h-100" data-aos="fade-up" data-aos-delay="800">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="chart-header-content">
+                                        <h2 class="chart-title">
+                                            <i class="bi bi-wallet2 me-2 text-success"></i>
+                                            Storico Note Spese
+                                        </h2>
+                                        <p class="chart-subtitle">Totale mensile approvato</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="Esporta dati">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="Opzioni grafico">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="reportChart" aria-label="Grafico storico note spese"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fuel Chart - Styling migliorato -->
+                    <div class="col-lg-6">
+                        <div class="card chart-card h-100" data-aos="fade-up" data-aos-delay="700">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="chart-header-content">
+                                        <h2 class="chart-title">
+                                            <i class="bi bi-fuel-pump me-2 text-info"></i>
+                                            Storico Carburante
+                                        </h2>
+                                        <p class="chart-subtitle">Andamento mensile degli ultimi 6 mesi</p>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="Esporta dati">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="Opzioni grafico">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="fuelChart" aria-label="Grafico storico carburante"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Tables Section - Right Column -->
+            <div class="col-xl-4 col-lg-12">
+                <!-- Administrative Documents Table - Styling migliorato -->
+                <div class="card table-card mb-4" data-aos="fade-up" data-aos-delay="1000">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="table-header-content">
+                                <h2 class="table-title">
+                                    <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                                    Documenti in Scadenza
+                                </h2>
+                                <span class="badge bg-secondary mt-1" th:text="${upcomingAdminDocuments.size()} + ' elementi'">0 elementi</span>
+                            </div>
+                            <a th:href="@{/admin/administrative-documents}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-gear me-1"></i>Gestisci
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" aria-label="Tabella documenti amministrativi in scadenza">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            <i class="bi bi-file-text me-1"></i>Documento
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-person-badge me-1"></i>Responsabile
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-calendar-event me-1"></i>Scadenza
+                                        </th>
+                                        <th scope="col" class="text-center">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="doc : ${upcomingAdminDocuments}" 
+                                        th:with="daysDiff=${doc.expiryDate != null ? T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), doc.expiryDate) : 999}"
+                                        th:classappend="${daysDiff <= 30} ? 'table-danger' : (${daysDiff <= 60} ? 'table-warning' : '')"
+                                        class="table-row">
+                                        <td>
+                                            <div class="fw-semibold text-dark" th:text="${doc.type != null ? doc.type.name : 'Documento'}">DURC</div>
+                                            <div class="text-muted small" th:text="${doc.documentNumber}">INAL_49496274</div>
+                                        </td>
+                                        <td>
+                                            <div class="small fw-medium"
+                                                  th:text="${doc.responsible != null ? doc.responsible.firstName + ' ' + doc.responsible.lastName : '-'}">Nicola Avellino</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${daysDiff <= 30} ? 'bg-danger' : (${daysDiff <= 60} ? 'bg-warning text-dark' : 'bg-light text-dark')"
+                                                  th:text="${doc.expiryDate != null ? #temporals.format(doc.expiryDate, 'dd/MM/yyyy') : '-'}">11/10/2025</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{|/admin/administrative-documents/${doc.id}/edit|}"
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil-square me-1"></i>Apri
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(upcomingAdminDocuments)}" class="empty-row">
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <div>Nessun documento in scadenza</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Tasks Table - Styling migliorato -->
+                <div class="card table-card" data-aos="fade-up" data-aos-delay="1100">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="table-header-content">
+                                <h2 class="table-title">
+                                    <i class="bi bi-tools me-2 text-warning"></i>
+                                    Task Manutenzione
+                                </h2>
+                                <span class="badge bg-secondary mt-1" th:text="${upcomingTasks.size()} + ' elementi'">5 elementi</span>
+                            </div>
+                            <a th:href="@{/fleet/maintenance}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-list-task me-1"></i>Vedi tutti
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" aria-label="Tabella task manutenzione">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            <i class="bi bi-car-front me-1"></i>Veicolo
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-wrench me-1"></i>Tipo
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-calendar-check me-1"></i>Scadenza
+                                        </th>
+                                        <th scope="col">
+                                            <i class="bi bi-speedometer me-1"></i>Km
+                                        </th>
+                                        <th scope="col" class="text-center">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="t : ${upcomingTasks}"
+                                        th:with="daysDiff=${t.dueDate != null ? T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), t.dueDate) : 99999},
+                                                 kmDiff=${t.dueMileage != null && t.vehicle.currentMileage != null ? t.dueMileage - t.vehicle.currentMileage : 999999}"
+                                        th:classappend="${daysDiff <= 30 || kmDiff <= 5000} ? 'table-danger' : (${daysDiff <= 60 || kmDiff <= 10000} ? 'table-warning' : '')"
+                                        class="table-row">
+                                        <td>
+                                            <div class="vehicle-info">
+                                                <div class="fw-bold" th:text="${t.vehicle.plate}">GY951DG</div>
+                                                <div class="text-muted small" th:text="${t.vehicle.model}">COMPASS</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium" th:text="${t.type != null ? t.type.description : '-'}">
+                                                Cambio gomme invernali
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${daysDiff <= 30} ? 'bg-danger' : (${daysDiff <= 60} ? 'bg-warning text-dark' : 'bg-light text-dark')"
+                                                  th:text="${t.dueDate != null ? #temporals.format(t.dueDate, 'dd/MM/yyyy') : '-'}">
+                                                15/11/2025
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium" th:text="${t.dueMileage != null ? #numbers.formatInteger(t.dueMileage, 0, 'DEFAULT') : '-'}">
+                                                30000
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{/fleet/vehicles/{id}(id=${t.vehicle.id})}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-car-front me-1"></i>Veicolo
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(upcomingTasks)}" class="empty-row">
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <div>Nessun task imminente</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    
+    <!-- Thymeleaf data injection for JavaScript -->
+    <script th:inline="javascript">
+        // Inject backend data for JavaScript consumption
+        window.vehicleStatusLabels = /*[[${vehicleStatusLabels}]]*/ ['In servizio', 'Assegnato', 'In manutenzione', 'Fuori servizio'];
+        window.vehicleStatusValues = /*[[${vehicleStatusValues}]]*/ [3, 3, 1, 0];
+        window.fuelCosts = /*[[${fuelCosts}]]*/ [
+            {month: '2025-02', total: 75},
+            {month: '2025-03', total: 125},
+            {month: '2025-04', total: 100},
+            {month: '2025-05', total: 150},
+            {month: '2025-06', total: 300},
+            {month: '2025-07', total: 125},
+            {month: '2025-08', total: 95}
+        ];
+        window.reportBalances = /*[[${reportBalances}]]*/ [
+            {month: '2025-02', total: 150},
+            {month: '2025-03', total: 300},
+            {month: '2025-04', total: 250},
+            {month: '2025-05', total: 400},
+            {month: '2025-06', total: 350},
+            {month: '2025-07', total: 180},
+            {month: '2025-08', total: 275}
+        ];
+    </script>
+    
+    <!-- Custom Welcome Page JavaScript -->
+    <script th:src="@{/js/welcome.js}"></script>
+</body>
+</html>

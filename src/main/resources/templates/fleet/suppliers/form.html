@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title th:text="${supplier.id == null ? 'Nuovo Fornitore' : 'Modifica Fornitore'}">Fornitore</title>
+    <th:block th:fragment="cssblock">
+        <!-- Custom CSS for supplier form -->
+        <link rel="stylesheet" th:href="@{/css/supplier-form.css}">
+    </th:block>
+</head>
+
+<th:block th:fragment="navbar">
+    <div class="supplier-header-layout">
+        <div class="d-flex align-items-center">
+            <div class="header-icon">
+                <i class="bi bi-building-fill" aria-hidden="true"></i>
+            </div>
+            <div class="ms-3">
+                <h1 class="header-title mb-1" th:text="${supplier.id == null ? 'Nuovo Fornitore' : 'Modifica Fornitore'}">
+                    Modifica Fornitore
+                </h1>
+                <p class="header-subtitle mb-0" th:text="${supplier.id == null ? 'Aggiungi un nuovo fornitore al sistema' : 'Modifica le informazioni del fornitore'}">
+                    Modifica le informazioni del fornitore
+                </p>
+            </div>
+        </div>
+
+        <div class="header-right-content">
+            <nav aria-label="breadcrumb" class="d-flex justify-content-end">
+                <ol class="breadcrumb breadcrumb-clean">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/}">
+                            <i class="bi bi-house-door me-1" aria-hidden="true"></i>Home
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/fleet/suppliers}">
+                            <i class="bi bi-building me-1" aria-hidden="true"></i>Fornitori
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"
+                        th:text="${supplier.id == null ? 'Nuovo' : 'Modifica'}">Modifica</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center mt-2" style="gap: 0.5rem;">
+                <a th:href="@{/fleet/suppliers}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+                    Torna alla Lista
+                </a>
+
+                <div th:if="${supplier.id != null}" class="btn-group">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear me-1" aria-hidden="true"></i>
+                        Azioni
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="#documenti">
+                                <i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i>
+                                Visualizza Documenti
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/fleet/suppliers/{id}(id=${supplier.id})}">
+                                <i class="bi bi-eye me-2" aria-hidden="true"></i>
+                                Visualizza Dettagli
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger"
+                               th:href="@{/fleet/suppliers/{id}/delete(id=${supplier.id})}"
+                               onclick="return confirm('Eliminare questo fornitore?');">
+                                <i class="bi bi-trash me-2" aria-hidden="true"></i>
+                                Elimina Fornitore
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        onclick="document.querySelector('form[th\\:object=&quot;${supplier}&quot;]').submit();">
+                    <i class="bi bi-floppy me-1" aria-hidden="true"></i>
+                    Salva
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<body>
+<main class="container my-5 flex-fill">
+    <!-- Main Form Container -->
+    <div class="supplier-form">&nbsp;
+        <form th:object="${supplier}"
+              th:action="${supplier.id == null} ? @{/fleet/suppliers/new} : @{/fleet/suppliers/{id}/edit(id=${supplier.id})}"
+              method="post" 
+              novalidate>
+            
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- Company Information Section -->
+            <section class="form-section">
+                <div class="form-section-header">
+                    <div class="form-section-icon">
+                        <i class="bi bi-building" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="form-section-title">Informazioni Aziendali</h2>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Company Name (Required) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierName" class="form-label">
+                                Denominazione
+                                <span class="required-indicator" aria-label="Campo obbligatorio">*</span>
+                            </label>
+                            <input id="supplierName" 
+                                   class="form-control" 
+                                   th:field="*{name}" 
+                                   required 
+                                   maxlength="255"
+                                   placeholder="Inserisci la denominazione o ragione sociale"
+                                   autocomplete="organization" />
+                        </div>
+                    </div>
+
+                    <!-- VAT Number -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierVat" class="form-label">Partita IVA / CF</label>
+                            <input id="supplierVat" 
+                                   class="form-control" 
+                                   th:field="*{vatNumber}" 
+                                   maxlength="16"
+                                   placeholder="11 cifre P.IVA o 16 caratteri CF"
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <!-- Company Phone -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierPhone" class="form-label">Telefono aziendale</label>
+                            <input id="supplierPhone" 
+                                   class="form-control" 
+                                   th:field="*{companyPhone}" 
+                                   type="tel"
+                                   maxlength="20"
+                                   placeholder="+39 xxx xxx xxxx"
+                                   autocomplete="tel" />
+                        </div>
+                    </div>
+
+                    <!-- Company Email -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierEmail" class="form-label">Email aziendale</label>
+                            <input id="supplierEmail" 
+                                   class="form-control" 
+                                   th:field="*{companyEmail}" 
+                                   type="email"
+                                   maxlength="255"
+                                   placeholder="azienda@example.com"
+                                   autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <!-- PEC -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierPec" class="form-label">PEC</label>
+                            <input id="supplierPec" 
+                                   class="form-control" 
+                                   th:field="*{pec}" 
+                                   type="email"
+                                   maxlength="255"
+                                   placeholder="pec@pec.example.com"
+                                   autocomplete="email" />
+                        </div>
+                    </div>
+
+                    <!-- IBAN -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierIban" class="form-label">IBAN</label>
+                            <input id="supplierIban" 
+                                   class="form-control" 
+                                   th:field="*{iban}" 
+                                   maxlength="34"
+                                   placeholder="IT60 X054 2811 1010 0000 0123 456"
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <!-- SDI Code -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="supplierSdi" class="form-label">Codice SDI</label>
+                            <input id="supplierSdi" 
+                                   class="form-control" 
+                                   th:field="*{sdiCode}" 
+                                   maxlength="7"
+                                   placeholder="Es: M5UXCR1"
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Address Section -->
+            <section class="form-section">
+                <div class="form-section-header">
+                    <div class="form-section-icon">
+                        <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="form-section-title">Indirizzo</h2>
+                </div>
+
+                <div class="address-container">
+                    <location-selector
+                            country-binding="address.countryCode"
+                            name-region="address.regionCode"
+                            name-province="address.provinceCode"
+                            name-city="address.cityCode"
+                            name-postal="address.postalCode"
+                            name-street="address.street"
+                            th:data-selected-country="${supplier.address != null ? supplier.address.countryCode : null}"
+                            th:data-selected-region="${supplier.address != null ? supplier.address.regionCode : null}"
+                            th:data-selected-province="${supplier.address != null ? supplier.address.provinceCode : null}"
+                            th:data-selected-city="${supplier.address != null ? supplier.address.cityCode : null}"
+                            th:data-selected-postal="${supplier.address != null ? supplier.address.postalCode : null}"
+                            th:data-selected-street="${supplier.address != null ? supplier.address.street : null}">
+                    </location-selector>
+                </div>
+            </section>
+
+            <!-- Referents Section -->
+            <section class="form-section">
+                <div class="referents-section">
+                    <div class="referents-header">
+                        <div class="referents-title">
+                            <i class="bi bi-people me-2" aria-hidden="true"></i>
+                            Referenti
+                            <span class="referents-count">0</span>
+                        </div>
+                        <button type="button" class="add-referent-btn" id="addReferentBtn">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                            Aggiungi Referente
+                        </button>
+                    </div>
+                    
+                    <div class="referents-table-container">
+                        <table class="table referents-table" id="referentsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nome</th>
+                                    <th scope="col">Telefono</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col" class="text-center" style="width: 80px;">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Existing referents (from Thymeleaf) -->
+                                <tr th:each="ref, stat : *{referents}" class="referent-row">
+                                    <td>
+                                        <input class="form-control referent-input" 
+                                               th:field="*{referents[__${stat.index}__].name}" 
+                                               placeholder="Nome referente"
+                                               maxlength="100" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control referent-input" 
+                                               th:field="*{referents[__${stat.index}__].phone}" 
+                                               placeholder="+39 xxx xxx xxxx"
+                                               type="tel"
+                                               maxlength="20" />
+                                    </td>
+                                    <td>
+                                        <input class="form-control referent-input" 
+                                               th:field="*{referents[__${stat.index}__].email}" 
+                                               type="email" 
+                                               placeholder="email@example.com"
+                                               maxlength="255" />
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" 
+                                                class="remove-referent-btn btn-remove-referent" 
+                                                title="Rimuovi referente" 
+                                                aria-label="Rimuovi referente">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Empty state (shown when no referents) -->
+                                <tr th:if="${#lists.isEmpty(referents)}" class="empty-state-row">
+                                    <td colspan="4" class="empty-referents-state">
+                                        <i class="bi bi-person-plus-fill empty-referents-icon" aria-hidden="true"></i>
+                                        <p class="empty-referents-text">
+                                            Nessun referente presente. Clicca "Aggiungi Referente" per iniziare.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="btn-group">
+                    <button type="submit" class="form-save-btn">
+                        <i class="bi bi-check-lg" aria-hidden="true"></i>
+                        <span th:text="${supplier.id == null ? 'Crea Fornitore' : 'Aggiorna Fornitore'}"></span>
+                    </button>
+                    <a class="form-cancel-btn" th:href="@{/fleet/suppliers}">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        Annulla
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Documents Section (Only for existing suppliers) -->
+    <div th:if="${supplier.id != null}" class="supplier-form mt-4">
+        <section class="form-section">
+            <div class="documents-section">
+                <div class="documents-header">
+                    <div class="form-section-header">
+                        <div class="form-section-icon">
+                            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                        </div>
+                        <h2 class="form-section-title">Documenti</h2>
+                    </div>
+                </div>
+                
+                <!-- Document Upload Form -->
+                <div class="documents-upload-form">
+                    <form class="row g-3" 
+                          th:action="@{/fleet/suppliers/{id}/docs(id=${supplier.id})}" 
+                          method="post" 
+                          enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        
+                        <div class="col-md-4">
+                            <label for="documentFile" class="form-label">File</label>
+                            <input type="file" 
+                                   id="documentFile" 
+                                   name="file" 
+                                   class="form-control" 
+                                   required 
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="documentType" class="form-label">Tipo</label>
+                            <select id="documentType" name="type" class="form-select">
+                                <option th:each="dt : ${docTypes}" 
+                                        th:value="${dt}" 
+                                        th:text="${dt.displayName}"></option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="issueDate" class="form-label">Emissione</label>
+                            <input type="date" 
+                                   id="issueDate" 
+                                   name="issueDate" 
+                                   class="form-control" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label for="expiryDate" class="form-label">Scadenza</label>
+                            <input type="date" 
+                                   id="expiryDate" 
+                                   name="expiryDate" 
+                                   class="form-control" />
+                        </div>
+                        
+                        <div class="col-md-2 d-grid">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="upload-btn">
+                                <i class="bi bi-upload" aria-hidden="true"></i>
+                                Carica
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Documents Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">File</th>
+                                <th scope="col">Emesso</th>
+                                <th scope="col">Scadenza</th>
+                                <th scope="col" class="text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="doc : ${documents}">
+                                <td>
+                                    <span class="type-badge type-badge-success" 
+                                          th:text="${doc.type.displayName}"></span>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <i class="bi bi-file-earmark-text me-2 text-muted" aria-hidden="true"></i>
+                                        <span th:text="${doc.path.substring(doc.path.lastIndexOf('/')+1)}"></span>
+                                    </div>
+                                </td>
+                                <td class="date-text">
+                                    <span th:text="${doc.issueDate} ? ${#temporals.format(doc.issueDate, 'dd/MM/yyyy')} : '-'"></span>
+                                </td>
+                                <td class="date-text">
+                                    <span th:text="${doc.expiryDate} ? ${#temporals.format(doc.expiryDate, 'dd/MM/yyyy')} : '-'"></span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="cell-actions">
+                                        <a th:href="@{/fleet/suppliers/{id}/docs/{fn}(id=${supplier.id},fn=${doc.path.substring(doc.path.lastIndexOf('/')+1)})}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Download documento"
+                                           aria-label="Download documento">
+                                            <i class="bi bi-download" aria-hidden="true"></i>
+                                        </a>
+                                        <a th:href="@{/fleet/suppliers/{sId}/docs/{docId}/delete(sId=${supplier.id},docId=${doc.id})}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           title="Elimina documento"
+                                           aria-label="Elimina documento"
+                                           onclick="return confirm('Eliminare il documento?');">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Empty state for documents -->
+                            <tr th:if="${#lists.isEmpty(documents)}">
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-file-earmark-plus me-2" aria-hidden="true"></i>
+                                    Nessun documento presente.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Scripts -->
+<script type="module" th:src="@{/js/location-selector.js}"></script>
+<script th:src="@{/js/supplier-form.js}"></script>
+</body>
+</html>

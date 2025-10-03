@@ -1,0 +1,609 @@
+/* ==========================================================================
+   Rifornimenti - CSS Specifico
+   ========================================================================== */
+
+/* Variabili CSS */
+:root {
+    --refuel-primary: #0d6efd;
+    --refuel-success: #198754;
+    --refuel-danger: #dc3545;
+    --refuel-warning: #fd7e14;
+    --refuel-info: #0dcaf0;
+    --refuel-light: #f8f9fa;
+    --refuel-dark: #212529;
+    --refuel-border: #dee2e6;
+    --refuel-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --refuel-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --refuel-transition: all 0.2s ease-in-out;
+}
+
+/* ==========================================================================
+   Header Section
+   ========================================================================== */
+
+.text-primary {
+    color: var(--refuel-primary) !important;
+}
+
+/* Animazione per il pulsante principale */
+.btn-primary.btn-lg {
+    position: relative;
+    overflow: hidden;
+    transition: var(--refuel-transition);
+    box-shadow: var(--refuel-shadow);
+}
+
+.btn-primary.btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--refuel-shadow-lg);
+}
+
+.btn-primary.btn-lg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary.btn-lg:hover::before {
+    left: 100%;
+}
+
+/* ==========================================================================
+   Filter Card
+   ========================================================================== */
+
+.filter-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--refuel-shadow);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.filter-card .card-header {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3e7ff 100%);
+    border-bottom: 1px solid var(--refuel-border);
+}
+
+.filter-card .btn-link {
+    color: var(--refuel-dark);
+    font-size: 1.1rem;
+}
+
+.filter-card .btn-link:hover {
+    color: var(--refuel-primary);
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+
+/* Stili per i form controls nei filtri */
+.filter-card .form-label {
+    color: var(--refuel-dark);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.filter-card .form-label i {
+    color: var(--refuel-primary);
+}
+
+.filter-card .form-select,
+.filter-card .form-control {
+    border: 1px solid var(--refuel-border);
+    border-radius: 0.5rem;
+    transition: var(--refuel-transition);
+}
+
+.filter-card .form-select:focus,
+.filter-card .form-control:focus {
+    border-color: var(--refuel-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Pulsanti nei filtri */
+.filter-card .btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: var(--refuel-transition);
+}
+
+.filter-card .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--refuel-shadow);
+}
+
+/* ==========================================================================
+   Results Card
+   ========================================================================== */
+
+.results-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--refuel-shadow);
+    overflow: hidden;
+}
+
+.results-card .card-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-bottom: 1px solid var(--refuel-border);
+}
+
+.results-stats .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+}
+
+/* ==========================================================================
+   Table Styling
+   ========================================================================== */
+
+/* Bootstrap table-dark override per un look più moderno */
+.table-dark {
+    --bs-table-bg: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    --bs-table-color: #ffffff;
+    border-bottom: 2px solid var(--refuel-primary);
+}
+
+.table-dark th {
+    color: white !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    border: none;
+    position: relative;
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+}
+
+/* Sortable headers */
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    transition: var(--refuel-transition);
+    position: relative;
+}
+
+.sortable-header:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+.sort-icon {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    transition: var(--refuel-transition);
+}
+
+.sortable-header:hover .sort-icon {
+    opacity: 1;
+    color: var(--refuel-warning);
+}
+
+.sortable-header.sorted .sort-icon {
+    opacity: 1;
+    color: var(--refuel-warning);
+    transform: rotate(180deg);
+}
+
+/* Table rows - Stile moderno */
+.refuel-row {
+    transition: var(--refuel-transition);
+    border-left: 3px solid transparent !important;
+    background: white;
+}
+
+.refuel-row:hover {
+    background-color: rgba(13, 110, 253, 0.03) !important;
+    border-left-color: var(--refuel-primary) !important;
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.refuel-row:nth-child(even) {
+    background-color: rgba(248, 249, 250, 0.5);
+}
+
+.refuel-row:nth-child(even):hover {
+    background-color: rgba(13, 110, 253, 0.03) !important;
+}
+
+/* Stili specifici per le celle */
+.date-display {
+    font-weight: 700;
+    color: var(--refuel-dark);
+    font-size: 0.95rem;
+}
+
+.quantity-display,
+.amount-display {
+    font-family: 'Inter', 'SF Pro Display', -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.amount-display {
+    color: var(--refuel-success);
+    font-size: 1rem;
+}
+
+/* Badge styling moderno */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Button groups moderni */
+.btn-group .btn-sm {
+    padding: 0.4rem 0.7rem;
+    border-radius: 0;
+    transition: var(--refuel-transition);
+    border-width: 1px;
+    font-weight: 500;
+}
+
+.btn-group .btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+.btn-group .btn-sm:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.btn-group .btn-sm:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+/* Miglioramenti responsivi per la tabella */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--refuel-shadow);
+}
+
+/* Risultati stats badge */
+.results-stats .badge {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+
+.empty-state {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.empty-state-content {
+    padding: 2rem;
+}
+
+.empty-state-content i {
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+/* ==========================================================================
+   Modal Styling
+   ========================================================================== */
+
+.modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--refuel-shadow-lg);
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--refuel-border);
+    padding: 1rem 1.5rem;
+}
+
+/* Form nel modal */
+.modal .form-label {
+    color: var(--refuel-dark);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.modal .form-label.required::after {
+    content: ' *';
+    color: var(--refuel-danger);
+}
+
+.modal .form-label i {
+    color: var(--refuel-primary);
+    font-size: 0.9rem;
+}
+
+.modal .form-control,
+.modal .form-select {
+    border: 2px solid var(--refuel-border);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: var(--refuel-transition);
+    font-size: 0.95rem;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+    border-color: var(--refuel-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.modal .input-group-text {
+    background-color: var(--refuel-light);
+    border: 2px solid var(--refuel-border);
+    color: var(--refuel-dark);
+}
+
+/* ==========================================================================
+   Form Validation
+   ========================================================================== */
+
+.was-validated .form-control:valid {
+    border-color: var(--refuel-success);
+    background-image: none;
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--refuel-danger);
+    background-image: none;
+}
+
+.was-validated .form-select:valid {
+    border-color: var(--refuel-success);
+    background-image: none;
+}
+
+.was-validated .form-select:invalid {
+    border-color: var(--refuel-danger);
+    background-image: none;
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--refuel-danger);
+}
+
+.valid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--refuel-success);
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /* Header responsive */
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .btn-primary.btn-lg {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Filtri responsive */
+    .filter-card .d-flex.gap-2.flex-wrap {
+        flex-direction: column;
+    }
+    
+    .filter-card .ms-auto {
+        margin-left: 0 !important;
+        margin-top: 1rem;
+    }
+    
+    .filter-card .d-flex.gap-2:last-child {
+        justify-content: stretch;
+    }
+    
+    .filter-card .d-flex.gap-2:last-child .btn {
+        flex: 1;
+    }
+    
+    /* Tabella responsive */
+    .table-responsive {
+        border-radius: 0.5rem;
+    }
+    
+    .refuel-row:hover {
+        transform: none;
+    }
+    
+    /* Modal responsive */
+    .modal-dialog.modal-lg {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+    
+    .modal .row.g-4 {
+        --bs-gutter-x: 1rem;
+    }
+    
+    .modal .col-md-6 {
+        flex: 0 0 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Tabella molto piccola */
+    .table th,
+    .table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .vehicle-info .fw-medium {
+        font-size: 0.9rem;
+    }
+    
+    .vehicle-info .small {
+        font-size: 0.75rem;
+    }
+    
+    .quantity-display,
+    .amount-display {
+        font-size: 0.85rem;
+    }
+    
+    /* Badge più piccoli */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    /* Bottoni più piccoli */
+    .btn-group .btn-sm {
+        padding: 0.25rem 0.375rem;
+    }
+    
+    .btn-group .btn-sm i {
+        font-size: 0.8rem;
+    }
+}
+
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* Testi */
+.text-fuel-primary {
+    color: var(--refuel-primary) !important;
+}
+
+.text-fuel-success {
+    color: var(--refuel-success) !important;
+}
+
+.text-fuel-danger {
+    color: var(--refuel-danger) !important;
+}
+
+.text-fuel-warning {
+    color: var(--refuel-warning) !important;
+}
+
+/* Background */
+.bg-fuel-light {
+    background-color: var(--refuel-light) !important;
+}
+
+/* Bordi */
+.border-fuel-primary {
+    border-color: var(--refuel-primary) !important;
+}
+
+/* Shadow utilities */
+.shadow-fuel {
+    box-shadow: var(--refuel-shadow) !important;
+}
+
+.shadow-fuel-lg {
+    box-shadow: var(--refuel-shadow-lg) !important;
+}
+
+/* Transizioni */
+.transition-fuel {
+    transition: var(--refuel-transition) !important;
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .filter-card,
+    .btn,
+    .modal,
+    .d-none {
+        display: none !important;
+    }
+    
+    .results-card {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .table-header {
+        background: #f8f9fa !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    .refuel-row {
+        border-left: none !important;
+    }
+    
+    .badge {
+        border: 1px solid #000;
+        background: white !important;
+        color: #000 !important;
+    }
+    
+    .amount-display {
+        color: #000 !important;
+    }
+}
+
+/* ==========================================================================
+   Dark Mode Support (opzionale)
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --refuel-light: #343a40;
+        --refuel-dark: #f8f9fa;
+        --refuel-border: #495057;
+    }
+    
+    .filter-card .card-header {
+        background: linear-gradient(135deg, #2c3034 0%, #383d41 100%);
+    }
+    
+    .results-card .card-header {
+        background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    }
+    
+    .empty-state {
+        background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+    }
+}

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<!--
+    EXPENSE REPORTS PAGE - ENHANCED VERSION
+    
+    Modern expense reports management page with enhanced UX/UI
+    All CSS moved to expenseReports.css, all JS moved to expense-reports.js
+    Maintains full Thymeleaf functionality while providing clean separation of concerns
+    
+    Features:
+    - Responsive design with mobile-first approach
+    - Real-time filtering with smooth animations
+    - Enhanced table sorting with visual feedback
+    - Accessibility improvements (ARIA labels, keyboard navigation)
+    - Toast notifications and loading states
+    - Progressive enhancement for better UX
+    
+    @author Senior UX/UI Developer
+    @version 2.0
+    @since 2025
+-->
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Note Spese — Veely</title>
+    <th:block th:fragment="cssblock">
+        <!-- Enhanced Expense Reports Styles -->
+        <link rel="stylesheet" th:href="@{/css/expenseReports.css}">
+        
+        <!-- Additional styles for enhanced features -->
+        <style>
+			.table {
+			    width: 100% !important;
+			    table-layout: auto !important;
+			}
+			
+			.table th,
+			.table td {
+			    padding: 0.75rem !important;
+			    vertical-align: middle !important;
+			    border-top: 1px solid #dee2e6 !important;
+			}
+			
+			.table thead th {
+			    border-bottom: 2px solid #dee2e6 !important;
+			}
+			.header-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        </style>
+</head>
+<th:block th:fragment="navbar">
+	<!-- Enhanced Header Section -->
+        <div class="header-content">
+
+            <div class="header-icon" aria-hidden="true">
+                <i class="bi bi-wallet-fill"></i>
+            </div>
+            <div class="header-text">
+                <h3>Note Spese</h3>
+                <p>Gestisci spese e rimborsi dei dipendenti con facilità</p>
+            </div>
+            <div class="ms-auto">
+                <a th:href="@{/fleet/expense-reports/new}" 
+                   class="new-report-btn"
+                   aria-label="Crea nuova nota spese">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    Nuova Nota Spese
+                </a>
+            </div>
+        </div>
+</th:block>
+<body>
+<main class="container-fluid my-4 flex-fill" role="main">
+    
+    
+
+    <!-- Enhanced Filters Section -->
+    <section class="filters-section" role="search" aria-label="Filtri di ricerca note spese">
+        <div class="filters-header">
+            <div class="filters-title">
+                <i class="bi bi-funnel" aria-hidden="true"></i>
+                Filtri di ricerca
+            </div>
+        </div>
+        
+        <form class="filter-form" role="search" aria-label="Form di ricerca note spese">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="employeeFilter">Dipendente</label>
+                    <select class="form-select filter-input" 
+                            id="employeeFilter"
+                            aria-describedby="employeeHelp">
+                        <option value="">Tutti i dipendenti</option>
+                    </select>
+                    <div id="employeeHelp" class="sr-only">
+                        Filtra le note spese per dipendente specifico
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">Stato</label>
+                    <select class="form-select filter-input" 
+                            id="statusFilter"
+                            aria-describedby="statusHelp">
+                        <option value="">Qualsiasi stato</option>
+                        <option value="DRAFT">Bozza</option>
+                        <option value="SUBMITTED">Inviata</option>
+                        <option value="APPROVED">Approvata</option>
+                        <option value="REJECTED">Respinta</option>
+                    </select>
+                    <div id="statusHelp" class="sr-only">
+                        Filtra le note spese per stato di approvazione
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="startDateFilter">Data inizio</label>
+                    <input type="date" 
+                           class="form-control filter-input" 
+                           id="startDateFilter"
+                           aria-describedby="startDateHelp">
+                    <div id="startDateHelp" class="sr-only">
+                        Data di inizio del periodo di ricerca
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="endDateFilter">Data fine</label>
+                    <input type="date" 
+                           class="form-control filter-input" 
+                           id="endDateFilter"
+                           aria-describedby="endDateHelp">
+                    <div id="endDateHelp" class="sr-only">
+                        Data di fine del periodo di ricerca
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <button type="button" 
+                            class="btn btn-apply-filters"
+                            aria-label="Applica filtri di ricerca">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        Applica Filtri
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- Enhanced Results Header -->
+    <section class="results-header" role="status" aria-live="polite">
+        <i class="bi bi-list-ul" aria-hidden="true"></i>
+        <span>Elenco Note Spese</span>
+        <span class="results-count" id="resultsCount">
+            ( <span id="visibleCount" aria-label="Numero di note spese visualizzate">0</span> elementi )
+        </span>
+    </section>
+
+    <!-- Enhanced Table Container -->
+    <div class="table-container">
+        <!-- Loading overlay for async operations -->
+        <div class="loading-overlay" aria-hidden="true">
+            <div class="loading-spinner" role="status" aria-label="Caricamento in corso"></div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 sortable" 
+                   id="expenseTable"
+                   role="table"
+                   aria-label="Tabella note spese"
+                   aria-describedby="tableDescription">
+                
+                <caption id="tableDescription" class="sr-only">
+                    Tabella contenente l'elenco delle note spese con informazioni su numero, 
+                    dipendente, periodo, totale e stato. Le colonne sono ordinabili cliccando sulle intestazioni.
+                </caption>
+                
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th role="columnheader" 
+                            aria-sort="none"
+                            tabindex="0"
+                            aria-label="Ordina per numero nota spese">
+                            Numero
+                        </th>
+                        <th role="columnheader" 
+                            aria-sort="none"
+                            tabindex="0"
+                            aria-label="Ordina per dipendente">
+                            Dipendente
+                        </th>
+                        <th role="columnheader" 
+                            aria-sort="none"
+                            tabindex="0"
+                            aria-label="Ordina per periodo">
+                            Periodo
+                        </th>
+                        <th class="text-end" 
+                            role="columnheader" 
+                            aria-sort="none"
+                            tabindex="0"
+                            aria-label="Ordina per totale importo">
+                            Totale
+                        </th>
+                        <th class="text-center" 
+                            role="columnheader" 
+                            aria-sort="none"
+                            tabindex="0"
+                            aria-label="Ordina per stato">
+                            Stato
+                        </th>
+                        <th class="text-end" role="columnheader">
+                            <span class="sr-only">Azioni disponibili</span>
+                            Azioni
+                        </th>
+                    </tr>
+                </thead>
+                
+                <tbody id="expenseTableBody" role="rowgroup">
+                    <tr class="expense-row" 
+                        th:each="r : ${reports}" 
+                        role="row"
+                        th:attr="data-employee=${r.employee.lastName + ' ' + r.employee.firstName},
+                                 data-status=${r.expenseStatus.name()},
+                                 data-start-date=${r.startDate},
+                                 data-end-date=${r.endDate}">
+                        
+                        <!-- Report Number -->
+                        <td role="gridcell">
+                            <span class="report-number" 
+                                  th:text="${r.expenseReportNum}"
+                                  th:attr="aria-label='Numero nota spese ' + ${r.expenseReportNum}">001/2025/RR</span>
+                        </td>
+                        
+                        <!-- Employee Information -->
+                        <td role="gridcell">
+                            <span class="employee-info" 
+                                  th:text="${r.employee.lastName + ' ' + r.employee.firstName}"
+                                  th:attr="aria-label='Dipendente ' + ${r.employee.firstName + ' ' + r.employee.lastName}">Nome Dipendente</span>
+                        </td>
+                        
+                        <!-- Period Information -->
+                        <td role="gridcell">
+                            <span class="period-info" 
+                                  th:text="${#temporals.format(r.startDate, 'dd/MM/yy')} + ' - ' + ${#temporals.format(r.endDate, 'dd/MM/yy')}"
+                                  th:attr="aria-label='Periodo dal ' + ${#temporals.format(r.startDate, 'dd MMMM yyyy', #locale)} + ' al ' + ${#temporals.format(r.endDate, 'dd MMMM yyyy', #locale)}">01/01/25 - 31/01/25</span>
+                        </td>
+                        
+                        <!-- Amount Display -->
+                        <td class="text-end" role="gridcell">
+                            <span class="amount-display" 
+                                  th:text="${#numbers.formatCurrency(r.expenseReportTotal)}"
+                                  th:attr="aria-label='Totale importo ' + ${#numbers.formatCurrency(r.expenseReportTotal)}">€ 0,00</span>
+                        </td>
+                        
+                        <!-- Status Badge -->
+                        <td class="text-center" role="gridcell">
+                            <th:block th:switch="${r.expenseStatus.name()}">
+                                <span th:case="'DRAFT'" 
+                                      class="badge bg-secondary text-white"
+                                      th:attr="aria-label='Stato: Bozza'"
+                                      role="status">Bozza</span>
+                                <span th:case="'SUBMITTED'" 
+                                      class="badge bg-warning text-dark"
+                                      th:attr="aria-label='Stato: Inviata'"
+                                      role="status">Inviata</span>
+                                <span th:case="'APPROVED'" 
+                                      class="badge bg-success text-white"
+                                      th:attr="aria-label='Stato: Approvata'"
+                                      role="status">Approvata</span>
+                                <span th:case="'REJECTED'" 
+                                      class="badge bg-danger text-white"
+                                      th:attr="aria-label='Stato: Respinta'"
+                                      role="status">Respinta</span>
+                                <span th:case="*" 
+                                      class="badge bg-light text-dark" 
+                                      th:text="${r.expenseStatus.displayName}"
+                                      th:attr="aria-label='Stato: ' + ${r.expenseStatus.displayName}"
+                                      role="status">Sconosciuto</span>
+                            </th:block>
+                        </td>
+                        
+                        <!-- Action Buttons -->
+                        <td class="text-end" role="gridcell">
+                            <div class="d-flex gap-1 justify-content-end action-buttons" 
+                                 role="group" 
+                                 th:attr="aria-label='Azioni per nota spese ' + ${r.expenseReportNum}">
+                                <a th:href="@{|/fleet/expense-reports/${r.id}/edit|}" 
+                                   class="btn btn-outline-primary btn-sm" 
+                                   th:attr="aria-label='Modifica nota spese ' + ${r.expenseReportNum}"
+                                   title="Modifica">
+                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                </a>
+                                <a th:href="@{|/fleet/expense-reports/${r.id}/export|}" 
+                                   class="btn btn-outline-secondary btn-sm" 
+                                   th:attr="aria-label='Esporta PDF nota spese ' + ${r.expenseReportNum}"
+                                   title="Esporta PDF">
+                                    <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                                </a>
+                                <form th:action="@{|/fleet/expense-reports/${r.id}/delete|}" 
+                                      method="post" 
+                                      style="display: inline;"
+                                      th:attr="onsubmit='return confirm(\'Sei sicuro di voler eliminare la nota spese ' + ${r.expenseReportNum} + '?\');'">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" 
+                                            class="btn btn-outline-danger btn-sm" 
+                                            th:attr="aria-label='Elimina nota spese ' + ${r.expenseReportNum}"
+                                            title="Elimina">
+                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Enhanced No Results Message -->
+            <div class="no-results" id="noResults" style="display: none;" role="status" aria-live="polite">
+                <div class="no-results-icon" aria-hidden="true">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h4>Nessun risultato trovato</h4>
+                <p>Non ci sono note spese che corrispondono ai criteri di ricerca selezionati.</p>
+                <button type="button" 
+                        class="btn btn-outline-primary" 
+                        onclick="clearFilters()"
+                        aria-label="Cancella tutti i filtri per visualizzare tutte le note spese">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                    Cancella Filtri
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen reader only content for announcements -->
+    <div class="sr-only" aria-live="polite" id="announcements"></div>
+</main>
+
+<!-- JavaScript Dependencies -->
+<script th:src="@{/js/sort-table.js}"></script>
+<script th:src="@{/js/expense-reports.js}"></script>
+
+<!-- Page-specific initialization script -->
+<script>
+    // Clean page-specific initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Announce page load to screen readers
+        const announcer = document.getElementById('announcements');
+        if (announcer) {
+            announcer.textContent = 'Pagina note spese caricata. ' + 
+                document.querySelector('#visibleCount').textContent + ' note spese trovate.';
+        }
+        
+        // Set focus to main content for accessibility
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+            mainContent.setAttribute('tabindex', '-1');
+        }
+        
+        // Initialize any page-specific features
+        console.log('💰 Expense reports page initialized');
+    });
+</script>

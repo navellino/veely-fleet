@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::body})}">
+<head>
+    <title>Permessi Ruolo – Veely</title>
+</head>
+<body>
+<main class="container my-5 flex-fill">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold">Permessi Ruolo</h2>
+        <a th:href="@{/settings/role-permissions/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nuovo Permesso
+        </a>
+    </div>
+    <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th>Ruolo</th>
+                <th>Authority</th>
+                <th class="text-end">Azioni</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${permissions}">
+                <td th:text="${p.role.name}"></td>
+                <td th:text="${p.authority}"></td>
+                <td class="text-end">
+                    <a th:href="@{|/settings/role-permissions/${p.id}/edit|}" class="btn btn-sm btn-secondary me-1" title="Modifica">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form th:action="@{|/settings/role-permissions/${p.id}/delete|}" method="post" class="d-inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminare il permesso?');" title="Elimina">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

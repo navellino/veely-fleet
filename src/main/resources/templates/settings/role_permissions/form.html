@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::body})}">
+<head>
+    <title>Permesso Ruolo – Veely</title>
+</head>
+<body>
+<main class="container my-5 flex-fill">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/settings}">Impostazioni</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/settings/role-permissions}">Permessi Ruolo</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${permission.id == null ? 'Nuovo' : 'Modifica'}"></li>
+        </ol>
+    </nav>
+    <form th:object="${permission}"
+          th:action="${permission.id == null} ? @{/settings/role-permissions/new} : @{/settings/role-permissions/{id}/edit(id=${permission.id})}"
+          method="post" class="row g-3">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="col-12" th:if="${error}">
+            <div class="alert alert-danger" th:text="${error}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Ruolo</label>
+            <select class="form-select" th:field="*{role.id}" required>
+                <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Pagina</label>
+            <select class="form-select" name="page" required>
+                <option th:each="p : ${pages}" th:value="${p.name()}" th:text="${p.label}"
+                        th:selected="${p.name() == page}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label d-block">Livello</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="level" value="READ" th:checked="${level == 'READ'}" required>
+                <label class="form-check-label">Lettura</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="level" value="WRITE" th:checked="${level == 'WRITE'}" required>
+                <label class="form-check-label">Scrittura</label>
+            </div>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <a class="btn btn-outline-secondary me-auto" th:href="@{/settings/role-permissions}"><i class="bi bi-list-ul me-1"></i> Lista</a>
+            <button type="submit" class="btn btn-primary me-2" th:text="${permission.id == null ? 'Crea' : 'Aggiorna'}"></button>
+            <a class="btn btn-outline-secondary" th:href="@{/settings/role-permissions}">Annulla</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,546 @@
+/* ===== ENHANCED ADMIN DOCUMENTS TABLE STYLES ===== */
+
+/* 
+ * Modern admin documents table with Bootstrap integration
+ * Focus on document-specific features like expiry status, authority types
+ * Follows the same design patterns as contract.css but adapted for documents
+ * Minimal custom CSS - leveraging Bootstrap utilities
+ */
+
+/* ===== TABLE CONTAINER ===== */
+.admin-documents-table-container {
+    /* Bootstrap card styling with custom enhancements */
+    background: var(--bs-body-bg, white);
+    border-radius: var(--bs-border-radius-lg, 0.75rem);
+    box-shadow: var(--bs-box-shadow, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    overflow: hidden;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.admin-documents-table-container:hover {
+    box-shadow: var(--bs-box-shadow-lg, 0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+}
+
+/* ===== ENHANCED TABLE HEADER ===== */
+.admin-documents-table thead th {
+    background: linear-gradient(135deg, var(--bs-gray-900, #212529) 0%, var(--bs-gray-800, #343a40) 100%);
+    color: var(--bs-white, white);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.75rem;
+    border: none;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out;
+}
+
+.admin-documents-table thead th:hover {
+    background: linear-gradient(135deg, var(--bs-gray-800, #343a40) 0%, var(--bs-gray-700, #495057) 100%);
+}
+
+/* Sortable column indicators using Bootstrap icons */
+.admin-documents-table thead th.sortable::after {
+    content: '\F282'; /* bi-arrow-down-up */
+    font-family: 'bootstrap-icons';
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+    font-size: 0.75rem;
+    transition: opacity 0.15s ease;
+}
+
+.admin-documents-table thead th.sortable:hover::after {
+    opacity: 1;
+}
+
+.admin-documents-table thead th.sort-asc::after {
+    content: '\F143'; /* bi-arrow-up */
+    opacity: 1;
+    color: var(--bs-primary, #0d6efd);
+}
+
+.admin-documents-table thead th.sort-desc::after {
+    content: '\F128'; /* bi-arrow-down */
+    opacity: 1;
+    color: var(--bs-primary, #0d6efd);
+}
+
+/* ===== TABLE BODY ENHANCEMENTS ===== */
+.admin-documents-table tbody tr {
+    transition: all 0.15s ease;
+    border-bottom: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+}
+
+.admin-documents-table tbody tr:hover {
+    background-color: var(--bs-gray-50, #f8f9fa);
+    transform: translateX(2px);
+    box-shadow: inset 4px 0 0 var(--bs-primary, #0d6efd);
+}
+
+.admin-documents-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.admin-documents-table tbody td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+    border: none;
+    font-size: 0.875rem;
+}
+
+/* ===== DOCUMENT-SPECIFIC CONTENT STYLING ===== */
+
+/* Document type styling with icon support */
+.document-type {
+    font-weight: 600;
+    color: var(--bs-gray-900, #212529);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.document-type-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    font-size: 0.75rem;
+    color: white;
+}
+
+/* Document type specific colors */
+.document-type-icon.license {
+    background-color: var(--bs-success, #198754);
+}
+
+.document-type-icon.certificate {
+    background-color: var(--bs-info, #0dcaf0);
+}
+
+.document-type-icon.permit {
+    background-color: var(--bs-warning, #ffc107);
+}
+
+.document-type-icon.insurance {
+    background-color: var(--bs-primary, #0d6efd);
+}
+
+.document-type-icon.contract {
+    background-color: var(--bs-secondary, #6c757d);
+}
+
+.document-type-icon.other {
+    background-color: var(--bs-dark, #212529);
+}
+
+/* Document number with monospace font */
+.document-number {
+    font-family: var(--bs-font-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas');
+    background-color: var(--bs-gray-100, #f8f9fa);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    font-size: 0.8rem;
+    color: var(--bs-gray-700, #495057);
+    font-weight: 500;
+    border: 1px solid var(--bs-gray-200, #e9ecef);
+}
+
+/* Authority/Ente styling */
+.authority-name {
+    color: var(--bs-gray-700, #495057);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Responsible person styling */
+.responsible-person {
+    color: var(--bs-gray-600, #6c757d);
+    font-weight: 400;
+    font-size: 0.875rem;
+}
+
+/* ===== EXPIRY DATE STATUS STYLING ===== */
+.expiry-date {
+    font-weight: 500;
+    font-size: 0.875rem;
+    position: relative;
+}
+
+/* Expiry status indicators */
+.expiry-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.expiry-status.valid {
+    background-color: var(--bs-success-subtle, #d1e7dd);
+    color: var(--bs-success-emphasis, #0a3622);
+    border: 1px solid var(--bs-success-border-subtle, #a3cfbb);
+}
+
+.expiry-status.expiring-soon {
+    background-color: var(--bs-warning-subtle, #fff3cd);
+    color: var(--bs-warning-emphasis, #664d03);
+    border: 1px solid var(--bs-warning-border-subtle, #ffecb5);
+    animation: pulse-warning 2s infinite;
+}
+
+.expiry-status.expired {
+    background-color: var(--bs-danger-subtle, #f8d7da);
+    color: var(--bs-danger-emphasis, #58151c);
+    border: 1px solid var(--bs-danger-border-subtle, #f1aeb5);
+}
+
+.expiry-status.no-expiry {
+    background-color: var(--bs-secondary-subtle, #e2e3e5);
+    color: var(--bs-secondary-emphasis, #2e2f30);
+    border: 1px solid var(--bs-secondary-border-subtle, #c4c8cb);
+}
+
+/* Pulse animation for expiring documents */
+@keyframes pulse-warning {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Date display styling */
+.expiry-date-text {
+    color: var(--bs-gray-700, #495057);
+    font-family: var(--bs-font-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas');
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Enhanced action buttons using Bootstrap button classes as base */
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--bs-border-radius, 0.375rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.875rem;
+    position: relative;
+    text-decoration: none;
+}
+
+.action-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.action-btn.btn-edit {
+    background-color: var(--bs-primary, #0d6efd);
+    color: white;
+}
+
+.action-btn.btn-edit:hover {
+    background-color: var(--bs-primary-dark, #0b5ed7);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.action-btn.btn-delete {
+    background-color: var(--bs-danger, #dc3545);
+    color: white;
+}
+
+.action-btn.btn-delete:hover {
+    background-color: var(--bs-danger-dark, #bb2d3b);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ===== SEARCH AND FILTER CONTROLS ===== */
+.table-controls {
+    padding: 1rem;
+    background-color: var(--bs-gray-50, #f8f9fa);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.search-box {
+    max-width: 300px;
+}
+
+/* Filter badges for quick filtering */
+.filter-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    text-decoration: none;
+}
+
+.filter-badge.active {
+    background-color: var(--bs-primary, #0d6efd);
+    color: white;
+}
+
+.filter-badge:not(.active) {
+    background-color: var(--bs-gray-100, #f8f9fa);
+    color: var(--bs-gray-600, #6c757d);
+    border-color: var(--bs-gray-300, #dee2e6);
+}
+
+.filter-badge:not(.active):hover {
+    background-color: var(--bs-gray-200, #e9ecef);
+    color: var(--bs-gray-700, #495057);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-documents-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--bs-gray-500, #6c757d);
+}
+
+.empty-documents-state i {
+    font-size: 3rem;
+    color: var(--bs-gray-300, #dee2e6);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-documents-state h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-gray-700, #495057);
+    margin-bottom: 0.5rem;
+}
+
+.empty-documents-state p {
+    font-size: 0.875rem;
+    color: var(--bs-gray-500, #6c757d);
+    margin-bottom: 1.5rem;
+}
+
+/* ===== LOADING STATE ===== */
+.table-loading {
+    position: relative;
+    min-height: 200px;
+}
+
+.table-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--bs-border-color, #dee2e6);
+    border-top: 3px solid var(--bs-primary, #0d6efd);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .admin-documents-table-container {
+        border-radius: var(--bs-border-radius, 0.375rem);
+    }
+    
+    .admin-documents-table {
+        font-size: 0.8rem;
+    }
+    
+    .admin-documents-table thead th,
+    .admin-documents-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .document-type {
+        font-size: 0.8rem;
+    }
+    
+    .document-number {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .expiry-status {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    .action-buttons {
+        gap: 2px;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    .filter-badges {
+        justify-content: center;
+    }
+}
+
+/* Stack table on very small screens */
+@media (max-width: 576px) {
+    .admin-documents-table,
+    .admin-documents-table thead,
+    .admin-documents-table tbody,
+    .admin-documents-table th,
+    .admin-documents-table td,
+    .admin-documents-table tr {
+        display: block;
+    }
+    
+    .admin-documents-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .admin-documents-table tr {
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: var(--bs-border-radius, 0.375rem);
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--bs-body-bg, white);
+        box-shadow: var(--bs-box-shadow-sm, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
+    }
+    
+    .admin-documents-table td {
+        border: none;
+        position: relative;
+        padding: 0.5rem 0;
+        padding-left: 120px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .admin-documents-table td::before {
+        content: attr(data-label) ':';
+        position: absolute;
+        left: 0;
+        width: 110px;
+        font-weight: 600;
+        color: var(--bs-gray-700, #495057);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .action-buttons {
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .admin-documents-table-container {
+        box-shadow: none;
+        border: 1px solid var(--bs-gray-400, #ced4da);
+    }
+    
+    .action-buttons,
+    .table-controls,
+    .filter-badges {
+        display: none;
+    }
+    
+    .admin-documents-table tbody tr:hover {
+        background: transparent;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .expiry-status {
+        background: var(--bs-gray-100, #f8f9fa) !important;
+        color: var(--bs-gray-900, #212529) !important;
+        box-shadow: none;
+    }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+    .admin-documents-table tbody tr,
+    .expiry-status,
+    .action-btn,
+    .filter-badge {
+        transition: none;
+    }
+    
+    .table-loading::after {
+        animation: none;
+    }
+    
+    .expiry-status.expiring-soon {
+        animation: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .admin-documents-table-container {
+        border: 2px solid var(--bs-gray-600, #6c757d);
+    }
+    
+    .expiry-status,
+    .document-number {
+        border: 1px solid currentColor;
+    }
+}
+
+/* Focus visible for better keyboard navigation */
+.admin-documents-table thead th:focus-visible,
+.action-btn:focus-visible,
+.filter-badge:focus-visible {
+    outline: 2px solid var(--bs-primary, #0d6efd);
+    outline-offset: 2px;
+}

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layoutNavBar :: layout(~{::title}, ~{::body}, ~{::cssblock}, ~{::navbar})}">
+<head>
+    <title>Contratti Fornitori — Veely</title>
+    
+    <!-- Enhanced CSS with separated contract-specific styles -->
+    <th:block th:fragment="cssblock">
+        <link rel="stylesheet" th:href="@{/css/contract.css}">
+        <!-- AOS (Animate On Scroll) for enhanced animations -->
+        <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    </th:block>
+</head>
+
+<!-- Enhanced navbar fragment with breadcrumbs and search -->
+<th:block th:fragment="navbar">
+    <div class="nav-left d-flex align-items-center">
+        <!-- Mobile menu button (handled by layout) -->
+        <button class="mobile-menu-btn d-lg-none me-3" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+    
+    <div class="nav-main flex-grow-1">
+        <!-- Enhanced breadcrumb navigation -->
+        <nav aria-label="Breadcrumb navigation" class="mb-1">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/welcome}" class="text-decoration-none">
+                        <i class="bi bi-house-door me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <span class="text-muted">Amministrazione</span>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Contratti Fornitori
+                </li>
+            </ol>
+        </nav>
+        
+        <!-- Page title and description -->
+        <div class="page-title-section">
+            <h1 class="page-title mb-1">Contratti Fornitori</h1>
+            <p class="page-subtitle mb-0 text-muted">
+                Gestisci e monitora tutti i contratti stipulati con i fornitori
+            </p>
+        </div>
+    </div>
+    
+    <div class="nav-right">
+        <!-- Enhanced header actions -->
+        <div class="header-actions d-flex align-items-center gap-2">
+            <!-- Quick stats badge -->
+            <div class="d-none d-md-flex align-items-center me-3">
+                <span class="badge bg-light text-dark px-3 py-2">
+                    <i class="bi bi-file-text me-1"></i>
+                    <span th:text="${#lists.size(contracts)}">0</span> contratti
+                </span>
+            </div>
+            
+            <!-- Export dropdown -->
+            <div class="dropdown d-none d-sm-block">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                        aria-label="Esporta dati">
+                    <i class="bi bi-download me-1"></i>Esporta
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i>Stampa
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="#" data-export="csv">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Esporta CSV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Primary action button -->
+            <a th:href="@{/settings/contracts/new}" 
+               class="btn btn-primary btn-sm"
+               data-aos="fade-left"
+               data-aos-delay="200">
+                <i class="bi bi-plus-lg me-1"></i>
+                <span class="d-none d-sm-inline">Nuovo Contratto</span>
+                <span class="d-sm-none">Nuovo</span>
+            </a>
+        </div>
+    </div>
+</th:block>
+
+<body>
+    <main class="container-fluid px-3 px-lg-4 py-4">
+        <!-- Enhanced page header section -->
+        <div class="row mb-4" data-aos="fade-up">
+            <div class="col-12">
+                <!-- Status cards overview (optional, can be hidden on mobile) -->
+                <div class="row g-3 mb-4 d-none d-lg-flex">
+                 <div class="col-lg-3">
+                        <div class="card border-0 bg-info bg-opacity-10">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-info rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 48px; height: 48px;">
+                                            <i class="bi bi-pencil-square text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="small text-info fw-semibold text-uppercase">In Bozza</div>
+                                       <div class="h4 mb-0" th:text="${contractStats?.draftCount ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card border-0 bg-success bg-opacity-10">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 48px; height: 48px;">
+                                            <i class="bi bi-check-circle text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="small text-success fw-semibold text-uppercase">Attivi</div>
+                                        <div class="h4 mb-0" th:text="${contractStats?.activeCount ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card border-0 bg-warning bg-opacity-10">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 48px; height: 48px;">
+                                            <i class="bi bi-clock text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="small text-warning fw-semibold text-uppercase">In Scadenza</div>
+                                        <div class="h4 mb-0" th:text="${contractStats?.expiringCount ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card border-0 bg-danger bg-opacity-10">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 48px; height: 48px;">
+                                            <i class="bi bi-exclamation-triangle text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="small text-danger fw-semibold text-uppercase">Scaduti</div>
+                                        <div class="h4 mb-0" th:text="${contractStats?.expiredCount ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced table container with modern card design -->
+        <div class="row" data-aos="fade-up" data-aos-delay="100">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm contracts-table-container">
+                    <!-- Table header with title and controls (will be enhanced by JavaScript) -->
+                    <div class="card-header bg-white border-0 py-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="card-title mb-0 d-flex align-items-center">
+                                    <i class="bi bi-file-text-fill me-2 text-primary"></i>
+                                    Elenco Contratti
+                                </h5>
+                                <small class="text-muted">
+                                    Gestisci tutti i contratti attivi e archiviati
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <!-- View toggle buttons -->
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Visualizzazione tabella">
+                                    <input type="radio" class="btn-check" name="viewMode" id="tableView" autocomplete="off" checked>
+                                    <label class="btn btn-outline-secondary" for="tableView" title="Vista tabella">
+                                        <i class="bi bi-table"></i>
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="viewMode" id="cardView" autocomplete="off">
+                                    <label class="btn btn-outline-secondary" for="cardView" title="Vista card">
+                                        <i class="bi bi-grid-3x3-gap"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced table with better structure and accessibility -->
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle contracts-table mb-0" 
+                                   role="table" 
+                                   aria-label="Tabella contratti fornitori"
+                                   data-aos="fade-up"
+                                   data-aos-delay="200">
+                                
+                                <!-- Enhanced table header with better accessibility -->
+                                <thead class="table-dark">
+                                    <tr role="row">
+                                        <th scope="col" 
+                                            role="columnheader" 
+                                            tabindex="0"
+                                            aria-sort="none"
+                                            data-column="subject"
+                                            class="sortable">
+                                            <div class="d-flex align-items-center">
+                                                <span>Oggetto</span>
+                                                <i class="bi bi-arrow-down-up ms-2 opacity-50 sort-icon"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col" 
+                                            role="columnheader" 
+                                            tabindex="0"
+                                            aria-sort="none"
+                                            data-column="supplier"
+                                            class="sortable">
+                                            <div class="d-flex align-items-center">
+                                                <span>Fornitore</span>
+                                                <i class="bi bi-arrow-down-up ms-2 opacity-50 sort-icon"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col" 
+                                            role="columnheader" 
+                                            tabindex="0"
+                                            aria-sort="none"
+                                            data-column="project"
+                                            class="sortable d-none d-md-table-cell">
+                                            <div class="d-flex align-items-center">
+                                                <span>Commessa</span>
+                                                <i class="bi bi-arrow-down-up ms-2 opacity-50 sort-icon"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col" 
+                                            role="columnheader" 
+                                            tabindex="0"
+                                            aria-sort="none"
+                                            data-column="status"
+                                            class="sortable">
+                                            <div class="d-flex align-items-center">
+                                                <span>Stato</span>
+                                                <i class="bi bi-arrow-down-up ms-2 opacity-50 sort-icon"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col" 
+                                            role="columnheader" 
+                                            tabindex="0"
+                                            aria-sort="none"
+                                            data-column="amount"
+                                            class="sortable text-end d-none d-lg-table-cell">
+                                            <div class="d-flex align-items-center justify-content-end">
+                                                <span>Importo</span>
+                                                <i class="bi bi-arrow-down-up ms-2 opacity-50 sort-icon"></i>
+                                            </div>
+                                        </th>
+                                        <th scope="col" role="columnheader" class="text-end" style="width: 120px;">
+                                            <span>Azioni</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                
+                                <!-- Enhanced table body with better data structure -->
+                                <tbody role="rowgroup">
+                                    <!-- Contract rows with enhanced structure and accessibility -->
+                                    <tr th:each="contract, iterStat : ${contracts}" 
+                                        role="row" 
+                                        class="table-row contract-row"
+                                        th:data-contract-id="${contract.id}"
+                                        data-aos="fade-up"
+                                        th:data-aos-delay="${100 + iterStat.index * 50}">
+                                        
+                                        <!-- Contract Subject with enhanced display -->
+                                        <td role="gridcell" 
+                                            data-label="Oggetto"
+                                            class="contract-subject-cell">
+                                            <div class="d-flex flex-column">
+                                                <span class="contract-subject fw-semibold" 
+                                                      th:text="${contract.subject}" 
+                                                      th:title="${contract.subject}">
+                                                    Oggetto del contratto
+                                                </span>
+                                                <!-- Mobile-only additional info -->
+                                                <div class="d-md-none">
+                                                    <small class="text-muted">
+                                                        <span th:if="${contract.project != null}" 
+                                                              class="project-code-mobile me-2"
+                                                              th:text="${contract.project.code}">PROJ-001</span>
+                                                        <span class="contract-amount-mobile">
+                                                            <span th:text="${#numbers.formatDecimal(contract.amountNet, 0, 'POINT', 2, 'COMMA')}">0,00</span>
+                                                            <span th:text="${contract.currency != null ? contract.currency.name() : 'EUR'}">EUR</span>
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Supplier with enhanced display -->
+                                        <td role="gridcell" 
+                                            data-label="Fornitore">
+                                            <div class="supplier-info">
+                                                <span class="supplier-name fw-medium" 
+                                                      th:text="${contract.supplier != null ? contract.supplier.name : 'N/A'}"
+                                                      th:title="${contract.supplier != null ? contract.supplier.name : 'Nessun fornitore assegnato'}">
+                                                    Fornitore
+                                                </span>
+                                                <!-- Additional supplier info on larger screens 
+                                                <div class="d-none d-xl-block">
+                                                    <small class="text-muted" 
+                                                           th:if="${contract.supplier != null}"
+                                                           th:text="${contract.supplier != null && !#lists.isEmpty(contract.supplier.referents) ? contract.supplier.referents.get(0).name : ''}">
+                                                        Informazioni aggiuntive
+                                                    </small>
+                                                </div>
+                                                -->
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Project Code (hidden on mobile) -->
+                                        <td role="gridcell" 
+                                            data-label="Commessa"
+                                            class="d-none d-md-table-cell">
+                                            <span th:if="${contract.project != null}" 
+                                                  class="project-code"
+                                                  th:text="${contract.project.code}"
+                                                  th:title="${'Progetto: ' + contract.project.code}">
+                                                PROJ-001
+                                            </span>
+                                            <span th:if="${contract.project == null}" 
+                                                  class="text-muted">—</span>
+                                        </td>
+                                        
+                                        <!-- Enhanced Status Badge -->
+                                        <td role="gridcell" 
+                                            data-label="Stato">
+                                            <span class="status-badge"
+                                                  th:classappend="${'status-' + (contract.status != null ? contract.status.name().toLowerCase() : 'unknown')}"
+                                                  th:text="${contract.status != null ? contract.status.displayName : 'N/A'}"
+                                                  th:title="${'Stato contratto: ' + (contract.status != null ? contract.status.displayName : 'Non definito')}">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                                Attivo
+                                            </span>
+                                        </td>
+                                        
+                                        <!-- Amount (hidden on mobile/tablet) -->
+                                        <td role="gridcell" 
+                                            data-label="Importo"
+                                            class="text-end d-none d-lg-table-cell">
+                                            <div class="contract-amount-container">
+                                                <span class="contract-amount">
+                                                    <span th:text="${#numbers.formatDecimal(contract.amountNet, 0, 'POINT', 2, 'COMMA')}">0,00</span>
+                                                    <small class="currency-symbol ms-1" 
+                                                           th:text="${contract.currency != null ? contract.currency.name() : 'EUR'}">
+                                                        EUR
+                                                    </small>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Enhanced Action Buttons -->
+                                        <td role="gridcell" 
+                                            data-label="Azioni" 
+                                            class="text-end">
+                                            <div class="action-buttons">
+                                                <!-- View/Edit Button - Clean icon-only design -->
+                                                <a th:href="@{|/settings/contracts/${contract.id}/edit|}" 
+                                                   class="btn btn-sm btn-outline-primary action-btn"
+                                                   th:title="${'Modifica contratto: ' + contract.subject}"
+                                                   aria-label="Modifica contratto"
+                                                   data-bs-toggle="tooltip">
+                                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                                </a>
+                                                <!-- Delete Button with Enhanced Confirmation -->
+                                                <form th:action="@{|/settings/contracts/${contract.id}/delete|}" 
+                                                      method="post" 
+                                                      class="d-inline delete-form">
+                                                    <!-- CSRF token for security -->
+                                                    <input type="hidden" 
+                                                           th:name="${_csrf.parameterName}" 
+                                                           th:value="${_csrf.token}"/>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger action-btn btn-delete"
+                                                            th:title="${'Elimina contratto: ' + contract.subject}"
+                                                            aria-label="Elimina contratto"
+                                                            th:data-contract-subject="${contract.subject}"
+                                                            th:data-contract-id="${contract.id}"
+                                                            data-bs-toggle="tooltip">
+                                                        <i class="bi bi-trash3" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Enhanced Empty State -->
+                                    <tr th:if="${#lists.isEmpty(contracts)}" class="empty-row">
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="empty-contracts-state" data-aos="fade-up">
+                                                <div class="mb-4">
+                                                    <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
+                                                </div>
+                                                <h4 class="text-muted mb-3">Nessun contratto trovato</h4>
+                                                <p class="text-muted mb-4">
+                                                    Non ci sono contratti registrati nel sistema.<br>
+                                                    Inizia creando il tuo primo contratto.
+                                                </p>
+                                                <a th:href="@{/settings/contracts/new}" 
+                                                   class="btn btn-primary">
+                                                    <i class="bi bi-plus-lg me-2"></i>
+                                                    Crea il primo contratto
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Enhanced table footer with pagination and info -->
+                    <div class="card-footer bg-light border-0 py-3" th:if="${!#lists.isEmpty(contracts)}">
+                        <div class="row align-items-center">
+                            <div class="col-sm-6">
+                                <small class="text-muted">
+                                    Visualizzati <strong th:text="${#lists.size(contracts)}">0</strong> contratti
+                                </small>
+                            </div>
+                            <div class="col-sm-6 text-sm-end">
+                                <!-- Pagination placeholder (can be enhanced with Spring Data) -->
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Ultima modifica: <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">oggi</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced JavaScript Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script th:src="@{/js/contract.js}"></script>
+    
+    <!-- Enhanced initialization script -->
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 600,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 50
+            });
+        });
+    </script>
+
+    <!-- Enhanced Structured Data for SEO -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Veely - Contratti Fornitori",
+      "description": "Sistema di gestione contratti fornitori per flotte aziendali",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "Gestione contratti fornitori",
+        "Monitoraggio scadenze",
+        "Report e statistiche",
+        "Ricerca e filtri avanzati"
+      ],
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Dashboard",
+          "item": /*[[@{/welcome}]]*/ "/welcome"
+        }, {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Amministrazione",
+          "item": "#"
+        }, {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Contratti Fornitori",
+          "item": /*[[@{/settings/contracts}]]*/ "/settings/contracts"
+        }]
+      }
+    }
+    </script>
+</body>
+</html>

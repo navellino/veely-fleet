@@ -1,0 +1,382 @@
+/* ===== EXPENSE FORM STYLES ===== */
+/* This CSS file handles the styling for the expense report form */
+/* It leverages Bootstrap 5 classes as much as possible with minimal custom styles */
+
+/* ===== FORM ENHANCEMENTS ===== */
+
+/* Modern card styling that integrates with the existing modern-ui theme */
+.modern-card {
+    background: white;
+    border: 1px solid var(--gray-200, #e5e7eb);
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.modern-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.modern-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid var(--gray-200, #e5e7eb);
+    padding: 1.5rem;
+}
+
+.modern-card-header h5 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900, #111827);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modern-card-header h5 i {
+    color: var(--primary-600, #2563eb);
+    font-size: 1.25rem;
+}
+
+.modern-card-body {
+    padding: 1.5rem;
+}
+
+/* ===== DYNAMIC TABLE STYLES ===== */
+
+/* Enhanced table styling for the expense items */
+.items-table {
+    font-size: 0.875rem;
+}
+
+.items-table thead th {
+    background: var(--gray-50, #f9fafb);
+    border-bottom: 2px solid var(--gray-200, #e5e7eb);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--gray-700, #374151);
+    padding: 1rem 0.75rem;
+}
+
+.items-table tbody td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gray-100, #f3f4f6);
+}
+
+.items-table tbody tr:hover {
+    background-color: var(--gray-50, #f9fafb);
+}
+
+/* Form controls within table cells */
+.items-table .form-control,
+.items-table .form-select {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--gray-300, #d1d5db);
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.items-table .form-control:focus,
+.items-table .form-select:focus {
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* Row action buttons */
+.btn-add-row {
+    background: linear-gradient(135deg, var(--success-500, #10b981), var(--success-600, #059669));
+    border: none;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-add-row:hover {
+    background: linear-gradient(135deg, var(--success-600, #059669), var(--success-700, #047857));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+.btn-remove-row {
+    background: var(--danger-500, #ef4444);
+    border: none;
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-remove-row:hover {
+    background: var(--danger-600, #dc2626);
+    transform: scale(1.05);
+    color: white;
+}
+
+/* ===== ATTACHMENT MANAGEMENT ===== */
+
+/* Attachment button with count badge */
+.attachment-btn {
+    background: var(--gray-100, #f3f4f6);
+    border: 1px solid var(--gray-300, #d1d5db);
+    color: var(--gray-600, #4b5563);
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.15s ease-in-out;
+}
+
+.attachment-btn:hover {
+    background: var(--gray-200, #e5e7eb);
+    border-color: var(--gray-400, #9ca3af);
+    color: var(--gray-700, #374151);
+}
+
+.attachment-count {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: var(--primary-500, #3b82f6);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 600;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1rem;
+}
+
+/* Alert info for unsaved items */
+.alert-info-custom {
+    background: var(--info-50, #eff6ff);
+    color: var(--info-700, #1d4ed8);
+    border: 1px solid var(--info-200, #dbeafe);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* ===== SUMMARY CARD ===== */
+
+/* Enhanced summary card for totals */
+.summary-card {
+    border-left: 4px solid var(--primary-500, #3b82f6);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-100, #f3f4f6);
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--gray-900, #111827);
+}
+
+.summary-label {
+    color: var(--gray-700, #374151);
+    font-weight: 500;
+}
+
+.summary-value {
+    color: var(--gray-900, #111827);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== CUSTOM BUTTON STYLES ===== */
+
+/* Primary button with gradient */
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
+    border: 1px solid var(--primary-500, #3b82f6);
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-primary-custom:hover {
+    background: linear-gradient(135deg, var(--primary-600, #2563eb), var(--primary-700, #1d4ed8));
+    border-color: var(--primary-600, #2563eb);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary-custom {
+    background: var(--gray-100, #f3f4f6);
+    border: 1px solid var(--gray-300, #d1d5db);
+    color: var(--gray-700, #374151);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-secondary-custom:hover {
+    background: var(--gray-200, #e5e7eb);
+    border-color: var(--gray-400, #9ca3af);
+    color: var(--gray-800, #1f2937);
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, var(--success-500, #10b981), var(--success-600, #059669));
+    border: 1px solid var(--success-500, #10b981);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-success-custom:hover {
+    background: linear-gradient(135deg, var(--success-600, #059669), var(--success-700, #047857));
+    border-color: var(--success-600, #059669);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ===== FORM VALIDATION STATES ===== */
+
+/* Enhanced validation styling */
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--success-500, #10b981);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='m2.3 6.73.94-.94 1.18 1.18L7.3 4.08l-.94-.94L3.24 6.26 2.3 6.73z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--danger-500, #ef4444);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 5.8 2.4 2.4m0-2.4-2.4 2.4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile optimizations for the complex form */
+@media (max-width: 768px) {
+    .modern-card-header,
+    .modern-card-body {
+        padding: 1rem;
+    }
+    
+    /* Stack table columns on mobile for better readability */
+    .items-table {
+        font-size: 0.8rem;
+    }
+    
+    .items-table thead th,
+    .items-table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    /* Adjust button sizes for touch */
+    .btn-add-row,
+    .btn-primary-custom,
+    .btn-secondary-custom {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .attachment-btn {
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .summary-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .summary-row:last-child {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--gray-50, #f9fafb);
+        margin: 0 -1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Further mobile optimizations */
+    .modern-card {
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .items-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Compact form controls in table */
+    .items-table .form-control,
+    .items-table .form-select {
+        min-width: 120px;
+        font-size: 0.75rem;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+/* Ensure the form prints nicely for record keeping */
+@media print {
+    .btn-add-row,
+    .btn-remove-row,
+    .attachment-btn,
+    .modern-card-header .btn {
+        display: none !important;
+    }
+    
+    .modern-card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+    
+    .items-table {
+        font-size: 0.75rem;
+    }
+    
+    .summary-card {
+        border: 2px solid #000 !important;
+    }
+}

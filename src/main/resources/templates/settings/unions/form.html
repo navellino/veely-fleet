@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it"
+      th:replace="~{fragments/layout_new :: layout(~{::title}, ~{::body}, ~{::cssblock})}">
+<head>
+    <title>Sigla Sindacale — Veely</title>
+    <th:block th:fragment="cssblock">
+    	<link rel="stylesheet" th:href="@{/css/settings.css}">
+  	</th:block>
+</head>
+<body>
+<main class="page-content">
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 class="page-title">
+                    <i class="bi bi-people-fill me-3 text-primary"></i>
+                    <span th:text="${union.id} != null ? 'Modifica Sigla' : 'Nuova Sigla'"></span>
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <form th:object="${union}"
+          th:action="${union.id} != null ? @{|/settings/unions/${union.id}/edit|} : @{/settings/unions/new}"
+          method="post" class="fade-in">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="mb-3">
+            <label class="form-label">Sigla</label>
+            <input type="text" class="form-control" th:field="*{name}" required />
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Salva</button>
+            <a th:href="@{/settings/unions}" class="btn btn-secondary ms-2">Indietro</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
